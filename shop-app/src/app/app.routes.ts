@@ -9,7 +9,7 @@ import { SubscribeComponent } from './components/subscribe/subscribe.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
-  { path: 'products/:id', component: ProductsComponent },
+  { path: 'products/:slug', component: ProductsComponent },
   { path: 'cart', component: CartComponent },
   { path: 'subscribe', component: SubscribeComponent }
 ];

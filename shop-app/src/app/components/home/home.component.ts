@@ -28,6 +28,6 @@ export class HomeComponent implements OnInit{
   }
 
   selectCategory(cat: any) {
-    this.router.navigate(['/products', cat.id]);
+    this.router.navigate(['/products', cat.slug]);
   }
 }

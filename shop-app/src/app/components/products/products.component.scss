@@ -1,0 +1,213 @@
+.product-card {
+  height: 100%;
+  transition: transform 0.2s;
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 calc(20% - 16px); // allows 5 in a row with gap
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  }
+
+  .product-img {
+    object-fit: cover;
+    height: 150px;
+    width: 100%;
+    // border-top-left-radius: 16px;
+    // border-top-right-radius: 16px;
+  }
+
+  .card-body {
+    padding: 12px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .btn {
+    font-size: 0.85rem;
+  }
+}
+
+.buy-now {
+  border: 1px solid #28a745;
+  background-color: #fff;
+  border-radius: 6px;
+  color: #28a745;
+  font-size: 0.75rem;
+  font-weight: bold;
+  padding: 0.375rem 0.5rem;
+
+  &:hover {
+    background-color: #28a745;
+    color: #fff;
+  }
+}
+
+.quantity-box {
+  display: flex;
+  align-items: center;
+  border: 1px solid #28a745;
+  background-color: #28a745;
+  border-radius: 6px;
+  overflow: hidden;
+  height: 2rem;
+  width: fit-content;
+  max-width: 100%;
+
+  .qty-btn {
+    background: none;
+    color: #fff;
+    border: none;
+    padding: 0 0.75rem;
+    font-size: 1rem;
+    font-weight: bold;
+    height: 100%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      background-color: #218838;
+    }
+  }
+
+  .qty-input {
+    border: none;
+    width: 2.5rem;
+    text-align: center;
+    background-color: transparent;
+    color: #fff;
+    height: 100%;
+
+    &:focus {
+      outline: none;
+    }
+
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+  }
+}
+
+// Button wrappers
+.add-btn-wrapper {
+  flex: 0 0 40%;
+}
+
+.subscribe-btn-wrapper {
+  flex: 0 0 55%;
+}
+
+.subscribe-btn {
+  background-color: #c23c3c;
+  font-size: 0.85rem;
+  padding: 0.375rem 0.5rem;
+  width: 100%;
+  white-space: nowrap;
+}
+
+// Responsive grid for product list
+.product-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+// Media Queries
+@media (max-width: 1200px) {
+  .product-card {
+    flex: 1 1 calc(25% - 16px); // 4 in a row
+  }
+}
+
+@media (max-width: 992px) {
+  .product-card {
+    flex: 1 1 calc(33.333% - 16px); // 3 in a row
+  }
+}
+
+@media (max-width: 768px) {
+  .product-card {
+    flex: 1 1 calc(50% - 16px); // 2 in a row
+  }
+
+  .add-btn-wrapper,
+  .subscribe-btn-wrapper {
+    flex: 1 1 100%;
+    margin-top: 0.25rem;
+  }
+
+  .quantity-box {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 576px) {
+  .product-card {
+    flex: 1 1 100%; // 1 in a row
+  }
+
+  .subscribe-btn,
+  .buy-now {
+    width: 100%;
+  }
+}
+
+
+.quantity-box-sub {
+  display: flex;
+  align-items: center;
+  border: 1px solid #10832b;
+  background-color: #10832b;
+  border-radius: 6px;
+  overflow: hidden;
+  height: 2rem;
+  width: fit-content;
+
+  .qty-btn {
+    background: none;
+    color: #fff;
+    border: none;
+    padding: 0 0.75rem;
+    font-size: 1rem;
+    font-weight: bold;
+    height: 100%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      background-color: #10832b;
+    }
+  }
+
+  .qty-input {
+    border: none;
+    width: 2.5rem;
+    text-align: center;
+    background-color: transparent;
+    color: #fff;
+    height: 100%;
+
+    &:focus {
+      outline: none;
+    }
+
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+  }
+}
