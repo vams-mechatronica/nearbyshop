@@ -17,11 +17,10 @@ import { CommonModule } from '@angular/common';
 
 export class HeaderComponent {
   searchQuery: string = '';
-
   constructor(private router: Router) {}
 
   loginSignup() {
-    this.router.navigate(['/login']);
+    this.router.navigate(['/auth'], { queryParams: { redirectTo: this.router.url } });
   }
 
   onSearch() {

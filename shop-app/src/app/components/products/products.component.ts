@@ -21,6 +21,36 @@ export class ProductsComponent implements OnInit {
   subscriptionPlan = 'daily';
   startDate: string = '';
 
+  categories = [
+    { id: 1, name: 'Beauty & Salon', count: 3 },
+    { id: 2, name: 'Restaurants', count: 1 },
+    { id: 3, name: 'Spa & Massage', count: 34 }
+  ];
+
+  locationsGroupedByCity = [
+    {
+      city: 'New Delhi',
+      locations: [
+        { id: 101, name: 'Connaught Place', count: 4 },
+        { id: 102, name: 'AeroCity', count: 2 },
+        { id: 103, name: 'Defence Colony', count: 2 },
+        { id: 104, name: 'Lajpat Nagar 2', count: 2 },
+        { id: 105, name: 'Lajpat Nagar 4', count: 2 }
+      ]
+    },
+    {
+      city: 'New Delhi',
+      locations: [
+        { id: 201, name: 'Mahipalpur', count: 2 },
+        { id: 202, name: 'Acharya Niketan', count: 1 },
+        { id: 203, name: 'Samalka', count: 1 }
+      ]
+    }
+  ];
+
+  locationSearch = '';
+
+
   constructor(
     private cartService: CartService,
     private productService: ProductsService,
@@ -31,7 +61,7 @@ export class ProductsComponent implements OnInit {
   ngOnInit(): void {
     const categorySlug = this.route.snapshot.paramMap.get('slug');
     if (categorySlug) {
-      this.categoryName = categorySlug; 
+      this.categoryName = categorySlug;
       this.productService.getProductsByCategorySlug(categorySlug).subscribe((res: any) => {
         this.products = res.results;
       });
@@ -81,5 +111,25 @@ export class ProductsComponent implements OnInit {
       backdrop: 'static',
     });
   }
+
+  selectedCategories: string[] = [];
+
+  filterProducts() {
+    // Call your filtering logic or API here
+    console.log('Selected categories:', this.selectedCategories);
+  }
+  onCategoryChange(event: Event): void {
+    const checkbox = event.target as HTMLInputElement;
+    const categoryId = checkbox.value;
+
+    if (checkbox.checked) {
+      this.selectedCategories.push(categoryId);
+    } else {
+      this.selectedCategories = this.selectedCategories.filter(id => id !== categoryId);
+    }
+
+    this.filterProducts();
+  }
+
 
 }

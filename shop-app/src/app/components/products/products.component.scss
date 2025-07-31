@@ -15,10 +15,9 @@
   .product-img {
     object-fit: cover;
     height: 150px;
-    width: 100%;
-    // border-top-left-radius: 16px;
-    // border-top-right-radius: 16px;
+    border-radius: 6px;
   }
+
 
   .card-body {
     padding: 12px;
