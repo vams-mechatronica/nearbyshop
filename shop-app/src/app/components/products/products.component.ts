@@ -77,7 +77,7 @@ export class ProductsComponent implements OnInit {
     this.cartService.addToCart(product);
   }
 
-  subscribe(product: any) {
+  subscribeProduct(product: any) {
     this.selectedProduct = product;
     this.modal.open('subscribeModal');
   }

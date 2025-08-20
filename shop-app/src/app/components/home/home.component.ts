@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { CategoryService } from '../../services/category.service';
@@ -24,6 +24,15 @@ export class HomeComponent implements OnInit{
     this.categoryService.getCategories().subscribe((res: any) => {
       this.categories = res.results;
     });
+  }
+  @ViewChild('carousel') carousel!: ElementRef;
+
+  scrollLeft() {
+    this.carousel.nativeElement.scrollBy({ left: -200, behavior: 'smooth' });
+  }
+
+  scrollRight() {
+    this.carousel.nativeElement.scrollBy({ left: 200, behavior: 'smooth' });
   }
 
   selectCategory(cat: any) {

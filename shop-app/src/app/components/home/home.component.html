@@ -1,16 +1,22 @@
 <div class="container mt-4">
-  
   <h4>Categories</h4>
-  <div class="row g-2 justify-content-start">
-    <div class="col-auto" *ngFor="let cat of categories">
-      <div class="category-card" (click)="selectCategory(cat)">
-        <img [src]="cat.image" alt="{{ cat.name }}" />
-        <div class="label">
-          {{ cat.name }}
-        </div>
-      </div>
+
+  <div class="carousel-container">
+  <button class="carousel-arrow left" (click)="scrollLeft()">
+    <span>&#10094;</span>
+  </button>
+
+  <div class="carousel-wrapper" #carousel>
+    <div class="category-card" *ngFor="let cat of categories" (click)="selectCategory(cat)">
+      <img [src]="cat.image" alt="{{ cat.name }}">
+      <div class="label">{{ cat.name }}</div>
     </div>
   </div>
+
+  <button class="carousel-arrow right" (click)="scrollRight()">
+    <span>&#10095;</span>
+  </button>
+</div>
 
 
   <h4 class="mt-4">Recent Visits</h4>

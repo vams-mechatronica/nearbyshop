@@ -31,13 +31,15 @@
     </div>
     <div class="col-md-9">
       <div *ngIf="products.length > 0; else noProducts">
-        <!-- <div class="col-6 col-sm-4 col-md-3 col-lg-2-4 mb-4" *ngFor="let product of products"> -->
         <div class="col-6 col-sm-4 col-lg-2-4 mb-4" *ngFor="let product of products">
-          <div class="card product-card shadow-sm rounded border-0">
+          <div class="card product-card shadow-sm rounded border-0 h-100">
+
+            <!-- Image / Carousel -->
             <div id="carousel-{{ product.id }}" class="carousel slide" data-bs-ride="carousel">
               <div class="carousel-inner rounded-top">
                 <div *ngIf="!product.images.length" class="carousel-item active">
-                  <img [src]="product.image" class="d-block w-100 product-img" alt="{{ product.name }}" />
+                  <img [src]="product.image" class="d-block w-100 product-img" style="object-fit: cover; height: 150px;"
+                    alt="{{ product.name }}" />
                 </div>
                 <div *ngFor="let img of product.images; let i = index" class="carousel-item" [class.active]="i === 0">
                   <img [src]="img" class="d-block w-100 product-img img-thumbnail border"
@@ -46,27 +48,50 @@
               </div>
             </div>
 
+            <!-- Card Body -->
             <div class="card-body d-flex flex-column justify-content-between">
+              <!-- Product Name -->
               <h6 class="card-title fw-bold text-truncate">{{ product.name }}</h6>
-              <p class="card-text text-muted mb-1">₹{{ product.price }}</p>
 
+              <!-- Description -->
+              <p class="card-text small text-muted mb-1 text-truncate" title="{{ product.description }}">
+                {{ product.description || 'No description available' }}
+              </p>
+
+              <!-- Unit -->
+              <p class="card-text small mb-2">
+                <span class="badge bg-light text-dark">Unit: {{ product.unit || 'N/A' }}</span>
+              </p>
+
+              <!-- Price -->
+              <div>
+                <p class="card-text fw-bold mb-1">₹{{ product.price }}</p>
+                <p *ngIf="product.originalPrice && product.originalPrice > product.price"
+                  class="text-decoration-line-through text-muted small mb-1">
+                  ₹{{ product.originalPrice }}
+                </p>
+              </div>
+
+              <!-- Actions -->
               <div class="d-flex align-items-center justify-content-between gap-2 mt-2">
                 <!-- ADD Button -->
-                <div *ngIf="!product.qty" class="add-btn-wrapper">
+                <div *ngIf="!product.qty" class="add-btn-wrapper w-50">
                   <button class="btn btn-sm buy-now w-100" (click)="addToCart(product)">ADD</button>
                 </div>
 
                 <!-- Quantity Box -->
-                <div *ngIf="product.qty" class="quantity-box d-flex align-items-center">
+                <div *ngIf="product.qty" class="quantity-box d-flex align-items-center w-50">
                   <button class="qty-btn" (click)="decreaseQty(product)">−</button>
-                  <input type="number" [(ngModel)]="product.qty" class="qty-input" min="1" />
+                  <input type="number" [(ngModel)]="product.qty" class="qty-input text-center" min="1" />
                   <button class="qty-btn" (click)="increaseQty(product)">+</button>
                 </div>
 
                 <!-- Subscribe Button -->
-                <div class="subscribe-btn-wrapper">
+                <div class="subscribe-btn-wrapper w-50">
                   <button class="btn btn-sm w-100 text-white subscribe-btn"
-                    (click)="openSubscribeModal(product, subscribeModal)">Subscribe</button>
+                    (click)="openSubscribeModal(product, subscribeModal)">
+                    Subscribe
+                  </button>
                 </div>
               </div>
             </div>
@@ -74,6 +99,12 @@
         </div>
       </div>
     </div>
+
+    <!-- No Products Template -->
+    <ng-template #noProducts>
+      <p class="text-center text-muted">No products available.</p>
+    </ng-template>
+
   </div>
 
   <!-- No Products Template -->
