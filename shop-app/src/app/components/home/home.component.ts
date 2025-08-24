@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { CategoryService } from '../../services/category.service';
 
@@ -9,7 +9,7 @@ import { CategoryService } from '../../services/category.service';
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
-  imports: [CommonModule],
+  imports: [CommonModule,RouterLink, RouterLinkActive],
 })
 export class HomeComponent implements OnInit{
   categories: any[] = [];

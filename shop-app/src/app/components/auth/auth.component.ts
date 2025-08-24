@@ -1,14 +1,15 @@
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { Component, EventEmitter, Output, OnInit } from '@angular/core';
-import { RouterModule, ActivatedRoute, Router } from '@angular/router';
+import { RouterModule, ActivatedRoute, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
 
 @Component({
   selector: 'app-auth',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule,RouterLink, RouterLinkActive],
   templateUrl: './auth.component.html',
   styleUrl: './auth.component.scss'
 })
@@ -21,7 +22,8 @@ export class AuthComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    public activeModal: NgbActiveModal
   ) { }
 
   ngOnInit(): void {
@@ -55,30 +57,23 @@ export class AuthComponent implements OnInit {
         const { access, refresh } = res?.token || {};
 
         if (access && refresh) {
-          // Store tokens in session storage
           sessionStorage.setItem('access_token', access);
           sessionStorage.setItem('refresh_token', refresh);
-
-          // Optional: store user info like phone
           sessionStorage.setItem('phone', this.phone);
+        }
 
-          // Navigate to the redirected page
-          this.router.navigateByUrl(this.redirectTo);
-        } else if (res?.token) {
-          // In case only one token is returned (fallback)
-          sessionStorage.setItem('token', res.token);
-          sessionStorage.setItem('phone', this.phone);
+        // ✅ Close the modal after login
+        this.activeModal.close('logged-in');
 
+        // ✅ Redirect only if redirectTo is provided
+        if (this.redirectTo) {
           this.router.navigateByUrl(this.redirectTo);
-        } else {
-          // Log error if no tokens are returned
-          console.error('No tokens received in response.');
         }
       },
       error: (err) => {
         console.error('OTP verification failed:', err);
         alert('Invalid OTP or verification failed. Please try again.');
-      }
+      },
     });
   }
 

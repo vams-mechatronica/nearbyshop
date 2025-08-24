@@ -2,12 +2,13 @@ import { Component } from '@angular/core';
 import { CartService } from '../../services/cart.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
   standalone:true,
   selector: 'app-cart',
   templateUrl: './cart.component.html',
-  imports: [CommonModule,FormsModule]
+  imports: [CommonModule,FormsModule,RouterLink, RouterLinkActive]
 })
 export class CartComponent {
   cartItems: any[] = [];

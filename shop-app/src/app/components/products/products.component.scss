@@ -120,7 +120,7 @@
 
   .qty-input {
     border: none;
-    width: 2.5rem;
+    width: 4.5rem;
     text-align: center;
     background-color: transparent;
     color: #fff;
@@ -148,16 +148,68 @@
 }
 
 // Responsive breakpoints
-@media (max-width: 1200px) {
+@media (max-width: 1500px) {
   .product-card {
     flex: 1 1 calc(25% - 20px); // 4 in a row
   }
 }
 
-@media (max-width: 992px) {
+@media (max-width: 1200px) {
   .product-card {
     flex: 1 1 calc(33.333% - 20px); // 3 in a row
   }
+
+  // Quantity input
+.quantity-box,
+.quantity-box-sub {
+  display: flex;
+  align-items: center;
+  border: 1px solid #10832b;
+  background-color: #10832b;
+  border-radius: 6px;
+  overflow: hidden;
+  height: 2rem;
+  width: fit-content;
+  max-width: 60%;
+
+  .qty-btn {
+    background: none;
+    color: #fff;
+    border: none;
+    padding: 0 0.75rem;
+    font-size: 0.75rem;
+    font-weight: bold;
+    height: 100%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+  }
+
+  .qty-input {
+    border: none;
+    width: 2rem;
+    text-align: center;
+    background-color: transparent;
+    color: #fff;
+    font-weight: 500;
+    height: 100%;
+
+    &:focus {
+      outline: none;
+    }
+
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+  }
+}
 }
 
 @media (max-width: 768px) {
@@ -172,7 +224,7 @@
   }
 
   .quantity-box {
-    width: 100%;
+    width: 70%;
     justify-content: space-between;
   }
 }

@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { UserInfoComponent } from '../user-info/user-info.component';
-import { Router } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { AuthComponent } from '../auth/auth.component';
 
 
 
@@ -12,15 +13,19 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
-  imports: [CommonModule,FormsModule],
+  imports: [CommonModule,FormsModule,RouterLink, RouterLinkActive],
 })
 
 export class HeaderComponent {
   searchQuery: string = '';
-  constructor(private router: Router) {}
+  constructor(private router: Router, private modalService: NgbModal) {}
 
   loginSignup() {
-    this.router.navigate(['/auth'], { queryParams: { redirectTo: this.router.url } });
+    this.modalService.open(AuthComponent, {
+      centered: true,
+      size: 'sm',
+    });
+    // this.router.navigate(['/auth'], { queryParams: { redirectTo: this.router.url } });
   }
 
   onSearch() {
