@@ -10,5 +10,10 @@ export const API_ENDPOINTS = {
   // Auth
   GET_LOGIN_OTP: `${API_BASE_URL}/api/v1/login/request-otp`,
   VERIFY_OTP: `${API_BASE_URL}/api/v1/login/verify-otp`,
+
+  // Cart
+
+  GET_CART : API_BASE_URL + '/api/v1/cart/',
+  ADD_TO_CART: API_BASE_URL + '/api/v1/cart/add/',
 };
  

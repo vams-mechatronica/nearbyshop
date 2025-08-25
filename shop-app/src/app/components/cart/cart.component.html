@@ -1,18 +1,49 @@
-<div class="container mt-4">
-  <h4>Your Cart</h4>
-  <table class="table">
-    <tr *ngFor="let item of cartItems">
-      <td>{{ item.name }}</td>
-      <td>{{ item.qty }}</td>
-      <td>₹{{ item.qty * item.price }}</td>
-    </tr>
-  </table>
+<div class="container mt-5">
+  <div class="card shadow-sm border-0 rounded-3">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+      <h4 class="mb-0">🛒 Your Cart</h4>
+      <span class="badge bg-light text-dark fs-6">{{ cartItems.length }} items</span>
+    </div>
 
-  <h4>Authenticate</h4>
-  <input type="text" class="form-control" placeholder="Mobile Number" [(ngModel)]="user.mobile">
-  <button class="btn btn-primary mt-2" (click)="sendOTP()">Send OTP</button>
+    <div class="card-body p-0">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th scope="col">Product</th>
+            <th scope="col" class="text-center">Quantity</th>
+            <th scope="col" class="text-end">Price</th>
+            <th scope="col" class="text-end">Subtotal</th>
+            <th scope="col" class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of cartItems">
+            <td>{{ item.name }}</td>
+            <td class="text-center">
+              <input 
+                type="number" 
+                [(ngModel)]="item.qty" 
+                class="form-control form-control-sm text-center w-50 mx-auto"
+                min="1"
+              />
+            </td>
+            <td class="text-end">₹{{ item.price }}</td>
+            <td class="text-end fw-semibold">₹{{ item.qty * item.price }}</td>
+            <td class="text-center">
+              <button class="btn btn-sm btn-outline-danger" (click)="removeItem(item)">
+                <i class="bi bi-trash"></i> Remove
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-  <input type="text" class="form-control mt-2" placeholder="Enter OTP" [(ngModel)]="user.otp">
-  <input type="text" class="form-control mt-2" placeholder="Enter Address" [(ngModel)]="user.address">
-  <button class="btn btn-success mt-3" (click)="placeOrder()">Place Order</button>
+    <div class="card-footer bg-light d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">Total: ₹{{ getTotal() }}</h5>
+      <button class="btn btn-success btn-lg">
+        <i class="bi bi-bag-check"></i> Checkout
+      </button>
+    </div>
+  </div>
 </div>
