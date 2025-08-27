@@ -5,13 +5,14 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProductsService } from '../../services/products.service';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   standalone: true,
   selector: 'app-products',
   templateUrl: './products.component.html',
   styleUrl: './products.component.scss',
-  imports: [CommonModule, FormsModule,RouterLink, RouterLinkActive]
+  imports: [CommonModule, FormsModule, RouterLink, RouterLinkActive]
 })
 export class ProductsComponent implements OnInit {
   products: any[] = [];
@@ -74,7 +75,15 @@ export class ProductsComponent implements OnInit {
 
   addToCart(product: any) {
     product.qty = 1;
-    this.cartService.addToCart(product);
+    this.cartService.addToCart(product).subscribe({
+      next: (res: any) => {
+        console.log('Added to cart successfully:', res);
+      },
+      error: (err:  HttpErrorResponse) => {
+        console.error('Failed to add to cart:', err);
+      }
+    });
+
   }
 
   subscribeProduct(product: any) {
@@ -89,13 +98,24 @@ export class ProductsComponent implements OnInit {
 
   increaseQty(product: any): void {
     product.qty += 1;
+    this.cartService.updateCartItem(product.id, product.qty).subscribe(cart => {
+    console.log('Updated cart:', cart);
+});
+
   }
 
   decreaseQty(product: any): void {
     if (product.qty > 1) {
       product.qty -= 1;
+      this.cartService.updateCartItem(product.id, product.qty).subscribe(cart => {
+        console.log('Updated cart:', cart);
+      });
+
     } else {
       product.qty = 0; // Reset to allow Buy Now button again
+      this.cartService.deleteCartItem(product.id).subscribe(cart => {
+        console.log('Cart after delete:', cart);
+      });
     }
   }
 

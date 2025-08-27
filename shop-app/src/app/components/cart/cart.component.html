@@ -18,17 +18,17 @@
         </thead>
         <tbody>
           <tr *ngFor="let item of cartItems">
-            <td>{{ item.name }}</td>
+            <td>{{ item.product.name }}</td>
             <td class="text-center">
               <input 
                 type="number" 
-                [(ngModel)]="item.qty" 
+                [(ngModel)]="item.quantity" 
                 class="form-control form-control-sm text-center w-50 mx-auto"
                 min="1"
               />
             </td>
-            <td class="text-end">₹{{ item.price }}</td>
-            <td class="text-end fw-semibold">₹{{ item.qty * item.price }}</td>
+            <td class="text-end">₹{{ item.product.price }}</td>
+            <td class="text-end fw-semibold">₹{{ item.price }}</td>
             <td class="text-center">
               <button class="btn btn-sm btn-outline-danger" (click)="removeItem(item)">
                 <i class="bi bi-trash"></i> Remove

@@ -54,6 +54,7 @@ export class AuthComponent implements OnInit {
   login() {
     this.authService.verifyOtp(`91${this.phone}`, this.otp).subscribe({
       next: (res: any) => {
+        console.log(res);
         const { access, refresh } = res?.token || {};
 
         if (access && refresh) {
