@@ -1,18 +1,18 @@
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, RouterLink, RouterLinkActive } from '@angular/router';
+import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { CartService } from '../../services/cart.service';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { ProductsService } from '../../services/products.service';
 import { HttpErrorResponse } from '@angular/common/http';
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   standalone: true,
   selector: 'app-products',
   templateUrl: './products.component.html',
-  styleUrl: './products.component.scss',
-  imports: [CommonModule, FormsModule]
+  styleUrls: ['./products.component.scss'],
+  imports: [CommonModule, FormsModule],
 })
 export class ProductsComponent implements OnInit {
   products: any[] = [];
@@ -22,53 +22,34 @@ export class ProductsComponent implements OnInit {
   subscriptionPlan = 'daily';
   startDate: string = '';
 
+  @ViewChild('subscribeModal') subscribeModal!: TemplateRef<any>;
+  private subscribeModalRef!: NgbModalRef;
+
   categories = [
     { id: 1, name: 'Beauty & Salon', count: 3 },
     { id: 2, name: 'Restaurants', count: 1 },
-    { id: 3, name: 'Spa & Massage', count: 34 }
+    { id: 3, name: 'Spa & Massage', count: 34 },
   ];
-
-  locationsGroupedByCity = [
-    {
-      city: 'New Delhi',
-      locations: [
-        { id: 101, name: 'Connaught Place', count: 4 },
-        { id: 102, name: 'AeroCity', count: 2 },
-        { id: 103, name: 'Defence Colony', count: 2 },
-        { id: 104, name: 'Lajpat Nagar 2', count: 2 },
-        { id: 105, name: 'Lajpat Nagar 4', count: 2 }
-      ]
-    },
-    {
-      city: 'New Delhi',
-      locations: [
-        { id: 201, name: 'Mahipalpur', count: 2 },
-        { id: 202, name: 'Acharya Niketan', count: 1 },
-        { id: 203, name: 'Samalka', count: 1 }
-      ]
-    }
-  ];
-
-  locationSearch = '';
-
 
   constructor(
     private cartService: CartService,
     private productService: ProductsService,
     private route: ActivatedRoute,
     private modal: NgbModal
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     const categorySlug = this.route.snapshot.paramMap.get('slug');
     if (categorySlug) {
       this.categoryName = categorySlug;
-      this.productService.getProductsByCategorySlug(categorySlug).subscribe((res: any) => {
-        this.products = res.results;
+      this.productService.getProductsByCategorySlug(categorySlug).subscribe({
+        next: (res: any) => (this.products = res.results),
+        error: (err) => console.error('Error fetching products:', err),
       });
     } else {
-      this.productService.getProducts().subscribe((res: any) => {
-        this.products = res.results;
+      this.productService.getProducts().subscribe({
+        next: (res: any) => (this.products = res.results),
+        error: (err) => console.error('Error fetching products:', err),
       });
     }
   }
@@ -76,68 +57,64 @@ export class ProductsComponent implements OnInit {
   addToCart(product: any) {
     product.qty = 1;
     this.cartService.addToCart(product).subscribe({
-      next: (res: any) => {
-        console.log('Added to cart successfully:', res);
-      },
-      error: (err:  HttpErrorResponse) => {
-        console.error('Failed to add to cart:', err);
-      }
+      next: (res: any) => console.log('Added to cart:', res),
+      error: (err: HttpErrorResponse) => console.error('Add to cart failed:', err),
     });
-
   }
 
-  subscribeProduct(product: any) {
-    this.selectedProduct = product;
-    this.modal.open('subscribeModal');
-  }
-
-  confirmSubscription() {
-    this.cartService.addSubscription(this.selectedProduct, this.subscriptionPlan, this.startDate);
-  }
-
-
-  increaseQty(product: any): void {
-    product.qty += 1;
-    this.cartService.updateCartItem(product.id, product.qty).subscribe(cart => {
-    console.log('Updated cart:', cart);
-});
-
-  }
-
-  decreaseQty(product: any): void {
-    if (product.qty > 1) {
-      product.qty -= 1;
-      this.cartService.updateCartItem(product.id, product.qty).subscribe(cart => {
-        console.log('Updated cart:', cart);
-      });
-
-    } else {
-      product.qty = 0; // Reset to allow Buy Now button again
-      this.cartService.deleteCartItem(product.id).subscribe(cart => {
-        console.log('Cart after delete:', cart);
-      });
-    }
-  }
-
-  openSubscribeModal(product: any, modalRef: any) {
-    this.selectedProduct = { ...product }; // clone product to avoid direct mutation
-    // Ensure at least qty = 1 when opening the modal
-    if (!this.selectedProduct.qty || this.selectedProduct.qty < 1) {
-      this.selectedProduct.qty = 1;
-    }
-    this.modal.open(modalRef, {
+  openSubscribeModal(product: any) {
+    this.selectedProduct = { ...product, qty: product.qty || 1 };
+    this.subscribeModalRef = this.modal.open(this.subscribeModal, {
       centered: true,
-      size: 'md',
       backdrop: 'static',
     });
   }
 
+  confirmSubscription() {
+    if (!this.selectedProduct) return;
+
+    this.cartService
+      .addSubscription(
+        this.selectedProduct,
+        this.subscriptionPlan,
+        this.startDate,
+        this.selectedProduct.qty
+      )
+      .subscribe({
+        next: (res) => {
+          console.log('Subscription confirmed:', res);
+          this.subscribeModalRef?.close(); // ✅ now reliably closes modal
+        },
+        error: (err) => console.error('Error creating subscription:', err),
+      });
+  }
+
+  increaseQty(product: any): void {
+    product.qty = (product.qty || 0) + 1;
+    this.cartService.updateCartItem(product.id, product.qty).subscribe({
+      next: (res) => console.log('Cart updated:', res),
+      error: (err) => console.error('Cart update failed:', err),
+    });
+  }
+
+  decreaseQty(product: any): void {
+    if ((product.qty || 1) > 1) {
+      product.qty -= 1;
+      this.cartService.updateCartItem(product.id, product.qty).subscribe({
+        next: (res) => console.log('Cart updated:', res),
+        error: (err) => console.error('Cart update failed:', err),
+      });
+    } else {
+      product.qty = 0;
+      this.cartService.deleteCartItem(product.id).subscribe({
+        next: (res) => console.log('Cart item removed:', res),
+        error: (err) => console.error('Cart delete failed:', err),
+      });
+    }
+  }
+
   selectedCategories: string[] = [];
 
-  filterProducts() {
-    // Call your filtering logic or API here
-    console.log('Selected categories:', this.selectedCategories);
-  }
   onCategoryChange(event: Event): void {
     const checkbox = event.target as HTMLInputElement;
     const categoryId = checkbox.value;
@@ -145,11 +122,9 @@ export class ProductsComponent implements OnInit {
     if (checkbox.checked) {
       this.selectedCategories.push(categoryId);
     } else {
-      this.selectedCategories = this.selectedCategories.filter(id => id !== categoryId);
+      this.selectedCategories = this.selectedCategories.filter((id) => id !== categoryId);
     }
 
-    this.filterProducts();
+    console.log('Selected categories:', this.selectedCategories);
   }
-
-
 }

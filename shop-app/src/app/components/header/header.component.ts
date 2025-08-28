@@ -58,6 +58,16 @@ export class HeaderComponent {
     this.router.navigate(['/']);
   }
 
+  get subscriptionCount(): number {
+    if (isPlatformBrowser(this.platformId)) {
+      return 0;
+    }
+    return 0;
+  }
+  get cartCount(): number{
+    return 0;
+  }
+
   @HostListener('document:click', ['$event'])
   onClickOutside(event: Event): void {
     const target = event.target as HTMLElement;

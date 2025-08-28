@@ -1,0 +1,38 @@
+.subscriptions-container {
+  max-height: 70vh; // Adjust as needed
+  overflow-y: auto;
+  padding-right: 10px; // for scrollbar spacing
+
+  .subscription-card {
+    transition: transform 0.2s;
+    
+    &:hover {
+      transform: translateY(-3px);
+    }
+
+    .product-img {
+      object-fit: cover;
+      height: 150px;
+      border-bottom: 1px solid #dee2e6;
+    }
+  }
+}
+
+/* Optional: style scrollbar */
+.subscriptions-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.subscriptions-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.subscriptions-container::-webkit-scrollbar-thumb {
+  background: #c23c3c;
+  border-radius: 4px;
+}
+
+.wallet-info {
+  font-size: 0.95rem;
+}

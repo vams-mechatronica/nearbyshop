@@ -18,9 +18,6 @@ export class CartService {
         product_id: product.id,
         quantity: 1
       };
-
-      console.log(body);
-
       return this.http.post<any>(API_ENDPOINTS.ADD_TO_CART, body);
     } else {
       // Fallback: store in localStorage for guest users
@@ -41,10 +38,23 @@ export class CartService {
     }
   }
 
-  addSubscription(product: any, frequency: string, startDate: string) {
-    // let subs = JSON.parse(localStorage.getItem('subscriptions') || '[]');
-    // subs.push({ product, frequency, startDate });
-    // localStorage.setItem('subscriptions', JSON.stringify(subs));
+  addSubscription(product: any, frequency: string, startDate: string, quantity: number) {
+    if (this.hasToken()) {
+
+      const body = {
+        product_id: product.id,
+        start_date: startDate,
+        frequency: frequency,
+        quantity: quantity
+      };
+      return this.http.post<any>(API_ENDPOINTS.ADD_SUBSCRIPTION, body);
+    } else {
+      // Fallback: store in localStorage for guest users
+      let subs = JSON.parse(localStorage.getItem('subscriptions') || '[]');
+      subs.push({ product, frequency, startDate });
+      localStorage.setItem('subscriptions', JSON.stringify(subs));
+      return of(subs);
+    }
   }
 
   getCart(): Observable<any> {
@@ -60,9 +70,6 @@ export class CartService {
     }
   }
 
-  getSubscriptions() {
-    return JSON.parse('[]');
-  }
 
   private hasToken(): boolean {
     if (typeof window !== 'undefined' && typeof sessionStorage !== 'undefined') {
