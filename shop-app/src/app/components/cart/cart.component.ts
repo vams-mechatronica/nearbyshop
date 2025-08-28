@@ -2,45 +2,55 @@ import { Component, OnInit } from '@angular/core';
 import { CartService } from '../../services/cart.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
   standalone: true,
   selector: 'app-cart',
   templateUrl: './cart.component.html',
+  styleUrls: ['./cart.component.scss'],
   imports: [CommonModule, FormsModule]
 })
 export class CartComponent implements OnInit {
   cartItems: any[] = [];
-  user = { mobile: '', otp: '', address: '' };
+  gTotal: number = 0;
 
-  constructor(private cartService: CartService) {
-  }
+  // User + Address
+  user = { mobile: '', otp: '', address: '' };
+  addresses: any[] = [];
+  selectedAddress: any = null;
+
+  newAddress = {
+    name: '',
+    address: '',
+    city: '',
+    state: '',
+    zip: ''
+  };
+
+  constructor(private cartService: CartService) { }
 
   ngOnInit(): void {
     this.loadCart();
+    this.loadAddresses();
   }
 
-  sendOTP() {
-    alert('OTP sent to ' + this.user.mobile);
+  showAddressModal: boolean = false;
+
+  openAddressModal() {
+    this.showAddressModal = true;
   }
 
-  placeOrder() {
-    console.log('Order placed:', this.cartItems, this.user);
+  closeAddressModal() {
+    this.showAddressModal = false;
   }
 
-  getTotal() {
-    return this.cartItems.reduce((sum, item) => sum + item.qty * item.price, 0);
-  }
 
-  removeItem(item: any) {
-    this.cartItems = this.cartItems.filter(i => i !== item);
-  }
-
+  // ========== CART ==========
   loadCart() {
     this.cartService.getCart().subscribe({
       next: (data) => {
         this.cartItems = data.items || data;
+        this.gTotal = data.total || this.getTotal();
       },
       error: (err) => {
         console.error('Error fetching cart:', err);
@@ -48,4 +58,66 @@ export class CartComponent implements OnInit {
     });
   }
 
+  getTotal() {
+    return this.cartItems.reduce((sum, item) => sum + (item.price || 0), 0);
+  }
+
+  removeItem(item: any) {
+    this.cartItems = this.cartItems.filter(i => i !== item);
+    this.gTotal = this.getTotal();
+  }
+
+  increaseQuantity(item: any) {
+    item.quantity++;
+    item.price = item.product.price * item.quantity;
+    this.gTotal = this.getTotal();
+  }
+
+  decreaseQuantity(item: any) {
+    if (item.quantity > 1) {
+      item.quantity--;
+      item.price = item.product.price * item.quantity;
+      this.gTotal = this.getTotal();
+    }
+  }
+
+  // ========== OTP / ORDER ==========
+  sendOTP() {
+    alert('OTP sent to ' + this.user.mobile);
+  }
+
+  placeOrder() {
+    console.log('Order placed:', this.cartItems, this.user, this.selectedAddress);
+  }
+
+  // ========== ADDRESS MGMT ==========
+  loadAddresses() {
+    const stored = localStorage.getItem('addresses');
+    if (stored) {
+      this.addresses = JSON.parse(stored);
+    }
+    const selected = localStorage.getItem('selectedAddress');
+    if (selected) {
+      this.selectedAddress = JSON.parse(selected);
+    }
+  }
+
+  addAddress() {
+    if (!this.newAddress.name || !this.newAddress.address) return;
+    this.addresses.push({ ...this.newAddress });
+    localStorage.setItem('addresses', JSON.stringify(this.addresses));
+
+    // Auto-select the new address
+    this.selectedAddress = this.newAddress;
+    localStorage.setItem('selectedAddress', JSON.stringify(this.selectedAddress));
+
+    // Reset input form
+    this.newAddress = { name: '', address: '', city: '', state: '', zip: '' };
+    this.loadAddresses();
+  }
+
+  selectAddress(index: number) {
+    this.selectedAddress = this.addresses[index];
+    localStorage.setItem('selectedAddress', JSON.stringify(this.selectedAddress));
+  }
 }

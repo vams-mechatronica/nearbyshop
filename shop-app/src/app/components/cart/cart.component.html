@@ -1,49 +1,175 @@
 <div class="container mt-5">
-  <div class="card shadow-sm border-0 rounded-3">
-    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-      <h4 class="mb-0">🛒 Your Cart</h4>
-      <span class="badge bg-light text-dark fs-6">{{ cartItems.length }} items</span>
+  <div class="row g-4">
+
+    <!-- Left Side: Products -->
+    <div class="col-lg-8">
+      <div class="card shadow-sm border-0 rounded-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h4 class="mb-0">🛒 Shopping Cart</h4>
+          <span class="badge">{{ cartItems.length }} items</span>
+        </div>
+
+        <div class="card-body p-0">
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item" *ngFor="let item of cartItems">
+              <div class="row align-items-center border-bottom py-2">
+
+                <!-- Product image -->
+                <div class="col-2">
+                  <img [src]="item.product.image" alt="{{ item.product.name }}" class="rounded img-fluid"
+                    style="width: 80px; height: 80px; object-fit: cover;">
+                </div>
+
+                <!-- Product details -->
+                <div class="col-4">
+                  <h6 class="mb-1 fw-semibold">{{ item.product.name }}</h6>
+                  <small class="text-muted">₹{{ item.product.price }} each</small>
+                </div>
+
+                <!-- Quantity Selector -->
+                <div class="col-3">
+                  <div class="quantity-control d-flex align-items-center">
+                    <button class="btn btn-sm btn-outline-secondary" (click)="decreaseQuantity(item)">−</button>
+                    <input type="text" [value]="item.quantity" class="form-control form-control-sm mx-2 text-center"
+                      style="width: 50px;" readonly>
+                    <button class="btn btn-sm btn-outline-secondary" (click)="increaseQuantity(item)">+</button>
+                  </div>
+                </div>
+
+                <!-- Subtotal -->
+                <div class="col-2 text-end fw-semibold">
+                  ₹{{ item.price }}
+                </div>
+
+                <!-- Actions -->
+                <div class="col-1 text-end">
+                  <button class="btn btn-sm btn-outline-danger" (click)="removeItem(item)">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+
+              </div>
+
+            </li>
+          </ul>
+        </div>
+      </div>
     </div>
 
-    <div class="card-body p-0">
-      <table class="table table-hover align-middle mb-0">
-        <thead class="table-light">
-          <tr>
-            <th scope="col">Product</th>
-            <th scope="col" class="text-center">Quantity</th>
-            <th scope="col" class="text-end">Price</th>
-            <th scope="col" class="text-end">Subtotal</th>
-            <th scope="col" class="text-center">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let item of cartItems">
-            <td>{{ item.product.name }}</td>
-            <td class="text-center">
-              <input 
-                type="number" 
-                [(ngModel)]="item.quantity" 
-                class="form-control form-control-sm text-center w-50 mx-auto"
-                min="1"
-              />
-            </td>
-            <td class="text-end">₹{{ item.product.price }}</td>
-            <td class="text-end fw-semibold">₹{{ item.price }}</td>
-            <td class="text-center">
-              <button class="btn btn-sm btn-outline-danger" (click)="removeItem(item)">
-                <i class="bi bi-trash"></i> Remove
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <!-- Right Side: Delivery + Summary -->
+    <div class="col-lg-4">
+      <!-- Delivery Address Section -->
+      <div class="card shadow-sm border-0 rounded-3 p-3 mb-3">
+        <h5 class="fw-bold">Delivery Address</h5>
+
+        <div *ngIf="selectedAddress; else noAddress">
+          <p class="mb-1"><strong>{{ selectedAddress.name }}</strong></p>
+          <p class="mb-1">{{ selectedAddress.address }}</p>
+          <p class="mb-1">{{ selectedAddress.city }}, {{ selectedAddress.state }} - {{ selectedAddress.zip }}</p>
+          <button class="btn btn-sm btn-outline-primary mt-2" (click)="openAddressModal()">
+            Change Address
+          </button>
+        </div>
+
+        <ng-template #noAddress>
+          <p>No address selected</p>
+          <button class="btn btn-sm btn-primary" (click)="openAddressModal()">Add Address</button>
+        </ng-template>
+      </div>
+
+      <!-- Order Summary -->
+      <div class="card shadow-sm border-0 rounded-3">
+        <div class="card-body">
+          <h5 class="fw-semibold mb-3">Order Summary</h5>
+          <div class="d-flex justify-content-between mb-2">
+            <span>Subtotal ({{ cartItems.length }} items)</span>
+            <span>₹{{ getTotal() }}</span>
+          </div>
+          <div class="d-flex justify-content-between mb-2">
+            <span>Shipping</span>
+            <span class="text-success fw-semibold">FREE</span>
+          </div>
+          <div class="d-flex justify-content-between mb-3">
+            <span>Discount</span>
+            <span>-</span>
+          </div>
+          <hr>
+          <div class="d-flex justify-content-between mb-4">
+            <strong>Total</strong>
+            <strong>₹{{ getTotal() }}</strong>
+          </div>
+
+          <!-- Discount code -->
+          <div class="input-group mb-3">
+            <input type="text" class="form-control" placeholder="Discount code">
+            <button class="btn btn-outline-secondary">Apply</button>
+          </div>
+
+          <!-- Checkout -->
+          <button class="btn checkout w-100 btn-lg">
+            <i class="bi bi-bag-check"></i> Checkout
+          </button>
+        </div>
+      </div>
     </div>
 
-    <div class="card-footer bg-light d-flex justify-content-between align-items-center">
-      <h5 class="mb-0">Total: ₹{{ getTotal() }}</h5>
-      <button class="btn btn-success btn-lg">
-        <i class="bi bi-bag-check"></i> Checkout
-      </button>
+  </div>
+</div>
+
+<!-- Address Modal -->
+<div class="modal fade show" tabindex="-1" *ngIf="showAddressModal" style="display:block; background: rgba(0,0,0,0.6);">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Select / Add Delivery Address</h5>
+        <button type="button" class="btn-close" (click)="closeAddressModal()"></button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Address List -->
+        <div *ngIf="addresses.length > 0; else noAddrList">
+          <ul class="list-group mb-3">
+            <li *ngFor="let addr of addresses; let i=index"
+              class="list-group-item d-flex justify-content-between align-items-center"
+              [class.active]="selectedAddress === addr" (click)="selectAddress(i)">
+              <div>
+                <strong>{{ addr.name }}</strong><br>
+                {{ addr.address }}, {{ addr.city }}, {{ addr.state }} - {{ addr.zip }}
+              </div>
+              <span class="badge bg-primary">Select</span>
+            </li>
+          </ul>
+        </div>
+        <ng-template #noAddrList>
+          <p>No addresses saved yet</p>
+        </ng-template>
+
+        <!-- Add New Address Form -->
+        <h6>Add New Address</h6>
+        <div class="row g-2">
+          <div class="col-md-6">
+            <input type="text" [(ngModel)]="newAddress.name" class="form-control" placeholder="Name">
+          </div>
+          <div class="col-md-6">
+            <input type="text" [(ngModel)]="newAddress.address" class="form-control" placeholder="Street Address">
+          </div>
+          <div class="col-md-4">
+            <input type="text" [(ngModel)]="newAddress.city" class="form-control" placeholder="City">
+          </div>
+          <div class="col-md-4">
+            <input type="text" [(ngModel)]="newAddress.state" class="form-control" placeholder="State">
+          </div>
+          <div class="col-md-4">
+            <input type="text" [(ngModel)]="newAddress.zip" class="form-control" placeholder="Zip Code">
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-success" (click)="addAddress()">Save Address</button>
+        <button class="btn btn-secondary" (click)="closeAddressModal()">Close</button>
+      </div>
     </div>
   </div>
 </div>
