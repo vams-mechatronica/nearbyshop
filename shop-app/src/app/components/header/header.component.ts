@@ -1,36 +1,68 @@
-import { Component } from '@angular/core';
+import { Component, HostListener, Inject } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { UserInfoComponent } from '../user-info/user-info.component';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+// import { Component, Inject } from '@angular/core';
+import { PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+
 import { AuthComponent } from '../auth/auth.component';
-
-
+import { UserInfoComponent } from '../user-info/user-info.component';
 
 @Component({
   selector: 'app-header',
   standalone: true,
   templateUrl: './header.component.html',
-  styleUrl: './header.component.scss',
-  imports: [CommonModule,FormsModule,RouterLink, RouterLinkActive],
+  styleUrls: ['./header.component.scss'], // ✅ fixed: should be styleUrls
+  imports: [CommonModule, FormsModule, RouterLink, RouterLinkActive],
 })
-
 export class HeaderComponent {
-  searchQuery: string = '';
-  constructor(private router: Router, private modalService: NgbModal) {}
+  searchQuery = '';
+  userName = 'John Doe';
+  showProfileDropdown = false;
 
-  loginSignup() {
-    this.modalService.open(AuthComponent, {
-      centered: true,
-      size: 'sm',
-    });
-    // this.router.navigate(['/auth'], { queryParams: { redirectTo: this.router.url } });
+
+  constructor(private router: Router, private modalService: NgbModal,@Inject(PLATFORM_ID) private platformId: Object) { }
+
+  get isLoggedIn(): boolean {
+    if (isPlatformBrowser(this.platformId)) {
+      return !!sessionStorage.getItem('access_token');
+    }
+    return false;
   }
 
-  onSearch() {
+
+
+  loginSignup(): void {
+    this.modalService.open(AuthComponent, { centered: true, size: 'sm' });
+  }
+
+  onSearch(): void {
     if (this.searchQuery.trim()) {
       this.router.navigate(['/search'], { queryParams: { q: this.searchQuery } });
+    }
+  }
+
+  toggleProfileDropdown(): void {
+    this.showProfileDropdown = !this.showProfileDropdown;
+  }
+
+  changePassword(): void {
+    this.modalService.open(UserInfoComponent, { centered: true, size: 'md' });
+  }
+
+  logout(): void {
+    sessionStorage.removeItem('access_token');
+    this.showProfileDropdown = false;
+    this.router.navigate(['/']);
+  }
+
+  @HostListener('document:click', ['$event'])
+  onClickOutside(event: Event): void {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.profile-nav') && this.showProfileDropdown) {
+      this.showProfileDropdown = false;
     }
   }
 }

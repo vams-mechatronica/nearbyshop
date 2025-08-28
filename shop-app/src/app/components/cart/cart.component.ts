@@ -8,7 +8,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
   standalone: true,
   selector: 'app-cart',
   templateUrl: './cart.component.html',
-  imports: [CommonModule, FormsModule, RouterLink, RouterLinkActive]
+  imports: [CommonModule, FormsModule]
 })
 export class CartComponent implements OnInit {
   cartItems: any[] = [];

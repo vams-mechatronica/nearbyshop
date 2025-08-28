@@ -12,7 +12,7 @@ import { HttpErrorResponse } from '@angular/common/http';
   selector: 'app-products',
   templateUrl: './products.component.html',
   styleUrl: './products.component.scss',
-  imports: [CommonModule, FormsModule, RouterLink, RouterLinkActive]
+  imports: [CommonModule, FormsModule]
 })
 export class ProductsComponent implements OnInit {
   products: any[] = [];

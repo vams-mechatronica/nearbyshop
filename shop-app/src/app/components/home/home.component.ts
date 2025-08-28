@@ -9,7 +9,7 @@ import { CategoryService } from '../../services/category.service';
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
-  imports: [CommonModule,RouterLink, RouterLinkActive],
+  imports: [CommonModule],
 })
 export class HomeComponent implements OnInit{
   categories: any[] = [];

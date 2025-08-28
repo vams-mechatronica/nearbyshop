@@ -12,14 +12,7 @@ export class CartService {
     @Inject(PLATFORM_ID) private platformId: Object
   ) { }
   addToCart(product: any) {
-    const token = sessionStorage.getItem('access_token');
-    console.log(token);
-
-    if (token !== null && token !== '') {
-      const headers = new HttpHeaders({
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      });
+    if (this.hasToken()) {
 
       const body = {
         product_id: product.id,
@@ -28,7 +21,7 @@ export class CartService {
 
       console.log(body);
 
-      return this.http.post<any>(API_ENDPOINTS.ADD_TO_CART, body, { headers });
+      return this.http.post<any>(API_ENDPOINTS.ADD_TO_CART, body);
     } else {
       // Fallback: store in localStorage for guest users
       let cart = JSON.parse(localStorage.getItem('cart') || '[]');
@@ -55,15 +48,11 @@ export class CartService {
   }
 
   getCart(): Observable<any> {
-    const token = sessionStorage.getItem('access_token');
 
-    if (token && token !== '') {
-      const headers = new HttpHeaders({
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      });
+    if (this.hasToken()) {
 
-      return this.http.get<any>(API_ENDPOINTS.GET_CART, { headers });
+
+      return this.http.get<any>(API_ENDPOINTS.GET_CART);
     } else {
       // Fallback: return cart from localStorage for guest users
       const cart = JSON.parse(localStorage.getItem('cart') || '[]');
@@ -76,9 +65,13 @@ export class CartService {
   }
 
   private hasToken(): boolean {
-    const token = sessionStorage.getItem('access_token');
-    return !!token && token !== '';
+    if (typeof window !== 'undefined' && typeof sessionStorage !== 'undefined') {
+      const token = sessionStorage.getItem('access_token');
+      return !!token && token !== '';
+    }
+    return false; // running on server, no token
   }
+
 
   /** ✅ Update quantity */
   updateCartItem(productId: number, quantity: number): Observable<any> {

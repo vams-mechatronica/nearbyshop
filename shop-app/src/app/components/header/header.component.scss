@@ -1,4 +1,6 @@
-// Common styles for all navbars
+// ==============================
+// Common Navbar Styles
+// ==============================
 nav.navbar {
   width: 100%;
   position: relative;
@@ -24,50 +26,60 @@ nav.navbar {
   }
 }
 
-// Primary navbar (top)
+// ==============================
+// Primary Navbar (top)
+// ==============================
 .primary-navbar {
-    height: 40px;
-    font-size: smaller;
-    background-color: #f8f9fa;
-    border-bottom: 0.1px #dee2e6;
+  height: 40px;
+  font-size: smaller;
+  background-color: #f8f9fa;
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
+  border-bottom: 1px solid #dee2e6;
+  z-index: 1000;
+  position: relative;
+
+  .location-select {
     display: flex;
     align-items: center;
-    padding: 0 1rem;
-    border-bottom: 1px solid #ddd;
-    z-index: 1000;
-    position: relative;
 
-    .location-select {
-        display: flex;
-        align-items: center;
-        label {
-        font-size: small;
-        font-weight: 400;
-        }
-        select {
-        margin-left: 0.5rem;
-        width: 180px;
-        }
+    label {
+      font-size: small;
+      font-weight: 400;
     }
-    .btn {
-        height: 30px;
-        margin: 5px;
-        text-align: center;
-        padding: 2px;
+
+    select {
+      margin-left: 0.5rem;
+      width: 180px;
     }
+  }
+
+  .btn {
+    height: 30px;
+    margin: 5px;
+    text-align: center;
+    padding: 2px 8px;
+    font-size: 0.8rem;
+  }
 }
 
+// ==============================
 // Divider
+// ==============================
 .navbar-divider {
   margin: 0;
   border: none;
-  height: 0.1px;
+  height: 1px;
   background-color: #dee2e6;
 }
 
-// Secondary navbar (below primary)
+// ==============================
+// Secondary Navbar (below primary)
+// ==============================
 .secondary-navbar {
   background-color: #070606;
+  padding: 0.5rem 1rem;
 
   .search-form {
     display: flex;
@@ -75,16 +87,108 @@ nav.navbar {
 
     input[type="search"] {
       width: 400px;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid #ddd;
+      border-radius: 6px;
     }
-  
 
     button {
+      margin-left: 0.5rem;
       white-space: nowrap;
     }
   }
 }
 
-// Responsive adjustments
+// ==============================
+// Profile Dropdown
+// ==============================
+.profile-nav {
+  position: relative;
+
+  .profile-icon {
+    font-size: 1.8rem;
+    color: #007bff;
+    cursor: pointer;
+    transition: color 0.2s ease-in-out;
+
+    &:hover {
+      color: #0056b3;
+    }
+  }
+
+  .profile-dropdown-card {
+    position: absolute;
+    top: 45px;
+    right: 0;
+    width: 220px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 10px 0;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease-in-out;
+
+    .profile-header {
+      display: flex;
+      align-items: center;
+      padding: 8px 15px;
+      font-weight: 600;
+      font-size: 14px;
+      color: #333;
+
+      i {
+        font-size: 1.2rem;
+        margin-right: 8px;
+      }
+    }
+
+    .dropdown-divider {
+      height: 1px;
+      background: #e5e5e5;
+      margin: 6px 0;
+    }
+
+    .dropdown-item {
+      display: block;
+      padding: 10px 15px;
+      font-size: 14px;
+      color: #333;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 0.2s ease-in-out;
+
+      &:hover {
+        background: #f8f9fa;
+      }
+
+      &.logout {
+        color: #dc3545;
+
+        &:hover {
+          background: #fbeaea;
+        }
+      }
+    }
+  }
+}
+
+// ==============================
+// Animations
+// ==============================
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ==============================
+// Responsive Adjustments
+// ==============================
 @media (max-width: 768px) {
   .secondary-navbar .search-form {
     flex-direction: column;
@@ -97,6 +201,15 @@ nav.navbar {
 
     button {
       width: 100%;
+    }
+  }
+
+  .primary-navbar {
+    flex-wrap: wrap;
+    height: auto;
+
+    .location-select {
+      margin-top: 0.5rem;
     }
   }
 }

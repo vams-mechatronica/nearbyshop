@@ -1,4 +1,3 @@
-Primary Navbar
 <nav class="navbar navbar-expand navbar-light bg-light px-3 primary-navbar">
   <div class="d-flex align-items-center location-select">
     <label for="locationSelect" class="me-2 mb-0">
@@ -11,17 +10,40 @@ Primary Navbar
     </select>
   </div>
 
-  <ul class="navbar-nav ms-auto">
+  <ul class="navbar-nav ms-auto align-items-center">
     <li class="nav-item">
       <a class="nav-link" routerLink="/cart" routerLinkActive="active">Cart</a>
     </li>
     <li class="nav-item">
       <a class="nav-link" routerLink="/subscribe" routerLinkActive="active">Subscriptions</a>
     </li>
-    <li class="nav-item">
+
+    <!-- Show login button if not logged in -->
+    <li class="nav-item" *ngIf="!isLoggedIn">
       <button class="btn btn-outline-primary ms-2" (click)="loginSignup()">
         Login / Signup
       </button>
+    </li>
+
+    <!-- Show profile if logged in -->
+    <li class="nav-item dropdown profile-nav" *ngIf="isLoggedIn">
+      <div class="profile-icon" (click)="toggleProfileDropdown()">
+        <i class="fas fa-user-circle"></i>
+      </div>
+
+      <div
+        class="profile-dropdown-card"
+        *ngIf="showProfileDropdown"
+        (mouseleave)="showProfileDropdown = false"
+      >
+        <div class="profile-header">
+          <i class="fas fa-user-circle me-2"></i>
+          <span>{{ userName }}</span>
+        </div>
+        <div class="dropdown-divider"></div>
+        <a class="dropdown-item" (click)="changePassword()">Change Password</a>
+        <a class="dropdown-item logout" (click)="logout()">Logout</a>
+      </div>
     </li>
   </ul>
 </nav>
