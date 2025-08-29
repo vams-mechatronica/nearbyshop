@@ -2,13 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { CartService } from '../../services/cart.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 
 @Component({
   standalone: true,
   selector: 'app-cart',
   templateUrl: './cart.component.html',
   styleUrls: ['./cart.component.scss'],
-  imports: [CommonModule, FormsModule]
+  imports: [CommonModule, FormsModule, RouterLink]
 })
 export class CartComponent implements OnInit {
   cartItems: any[] = [];
@@ -50,7 +51,7 @@ export class CartComponent implements OnInit {
     this.cartService.getCart().subscribe({
       next: (data) => {
         this.cartItems = data.items || data;
-        this.gTotal = data.total || this.getTotal();
+        this.gTotal = data.total ? parseFloat(data.total) : this.getTotal();
       },
       error: (err) => {
         console.error('Error fetching cart:', err);
@@ -59,25 +60,52 @@ export class CartComponent implements OnInit {
   }
 
   getTotal() {
-    return this.cartItems.reduce((sum, item) => sum + (item.price || 0), 0);
+    return this.cartItems.reduce((sum, item) => sum + (Number(item.price) || 0), 0);
   }
 
+
   removeItem(item: any) {
-    this.cartItems = this.cartItems.filter(i => i !== item);
-    this.gTotal = this.getTotal();
+    this.cartService.deleteCartItem(item.product.id).subscribe({
+      next: (res) => {
+        this.loadCart();
+      },
+      error: (err) => {
+        console.log('Error Deleting the Cart Item', err);
+      }
+    })
   }
 
   increaseQuantity(item: any) {
     item.quantity++;
-    item.price = item.product.price * item.quantity;
-    this.gTotal = this.getTotal();
+
+    this.cartService.updateCartItem(item.product.id, item.quantity).subscribe({
+      next: (res) => {
+        console.log('Successfully updated cart', res);
+        this.loadCart();  // 🔥 refresh only after success
+      },
+      error: (err) => {
+        console.log('Error updating cart', err);
+        // rollback in case of failure
+        item.quantity--;
+      }
+    });
   }
+
 
   decreaseQuantity(item: any) {
     if (item.quantity > 1) {
       item.quantity--;
-      item.price = item.product.price * item.quantity;
-      this.gTotal = this.getTotal();
+      this.cartService.updateCartItem(item.product.id, item.quantity).subscribe({
+      next: (res) => {
+        console.log('Successfully updated cart', res);
+        this.loadCart();  // 🔥 refresh only after success
+      },
+      error: (err) => {
+        console.log('Error updating cart', err);
+        // rollback in case of failure
+        item.quantity++;
+      }
+    });
     }
   }
 

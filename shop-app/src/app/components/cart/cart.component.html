@@ -1,58 +1,69 @@
-<div class="container mt-5">
-  <div class="row g-4">
+<div class="container mt-4">
+  <div class="row g-4 mb-3">
 
     <!-- Left Side: Products -->
     <div class="col-lg-8">
-      <div class="card shadow-sm border-0 rounded-3">
+      <div class="card shadow-sm border-0 rounded-3 p-3 mb-3">
         <div class="card-header d-flex justify-content-between align-items-center">
-          <h4 class="mb-0">🛒 Shopping Cart</h4>
+          <h4 class="mb-0">Shopping Cart</h4>
           <span class="badge">{{ cartItems.length }} items</span>
         </div>
 
         <div class="card-body p-0">
-          <ul class="list-group list-group-flush">
-            <li class="list-group-item" *ngFor="let item of cartItems">
-              <div class="row align-items-center border-bottom py-2">
+          <ng-container *ngIf="cartItems && cartItems.length > 0; else emptyCart">
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item" *ngFor="let item of cartItems">
+                <div class="row align-items-center border-bottom py-2">
+                  <!-- Product image -->
+                  <div class="col-2">
+                    <img [src]="item.product.image" alt="{{ item.product.name }}" class="rounded img-fluid"
+                      style="width: 80px; height: 80px; object-fit: cover;">
+                  </div>
 
-                <!-- Product image -->
-                <div class="col-2">
-                  <img [src]="item.product.image" alt="{{ item.product.name }}" class="rounded img-fluid"
-                    style="width: 80px; height: 80px; object-fit: cover;">
-                </div>
+                  <!-- Product details -->
+                  <div class="col-4">
+                    <h6 class="mb-1 fw-semibold">{{ item.product.name }}</h6>
+                    <small class="text-muted">₹{{ item.product.price }} each</small>
+                  </div>
 
-                <!-- Product details -->
-                <div class="col-4">
-                  <h6 class="mb-1 fw-semibold">{{ item.product.name }}</h6>
-                  <small class="text-muted">₹{{ item.product.price }} each</small>
-                </div>
+                  <!-- Quantity Selector -->
+                  <div class="col-3">
+                    <div class="quantity-control d-flex align-items-center">
+                      <button class="btn btn-sm btn-outline-secondary" (click)="decreaseQuantity(item)">−</button>
+                      <input type="text" [value]="item.quantity" class="form-control form-control-sm mx-2 text-center"
+                        style="width: 50px;" readonly>
+                      <button class="btn btn-sm btn-outline-secondary" (click)="increaseQuantity(item)">+</button>
+                    </div>
+                  </div>
 
-                <!-- Quantity Selector -->
-                <div class="col-3">
-                  <div class="quantity-control d-flex align-items-center">
-                    <button class="btn btn-sm btn-outline-secondary" (click)="decreaseQuantity(item)">−</button>
-                    <input type="text" [value]="item.quantity" class="form-control form-control-sm mx-2 text-center"
-                      style="width: 50px;" readonly>
-                    <button class="btn btn-sm btn-outline-secondary" (click)="increaseQuantity(item)">+</button>
+                  <!-- Subtotal -->
+                  <div class="col-2 text-end fw-semibold">
+                    ₹{{ item.price }}
+                  </div>
+
+                  <!-- Actions -->
+                  <div class="col-1 text-end">
+                    <button class="btn btn-sm btn-outline-danger" (click)="removeItem(item)">
+                      <i class="fa-solid fa-trash"></i>
+                    </button>
                   </div>
                 </div>
+              </li>
+            </ul>
+          </ng-container>
 
-                <!-- Subtotal -->
-                <div class="col-2 text-end fw-semibold">
-                  ₹{{ item.price }}
-                </div>
-
-                <!-- Actions -->
-                <div class="col-1 text-end">
-                  <button class="btn btn-sm btn-outline-danger" (click)="removeItem(item)">
-                    <i class="bi bi-trash"></i>
-                  </button>
-                </div>
-
-              </div>
-
-            </li>
-          </ul>
+          <!-- Empty Cart Template -->
+          <ng-template #emptyCart>
+            <div class="text-center py-5">
+              <i class="fa-solid fa-cart-shopping fa-3x text-muted mb-3"></i>
+              <h5 class="text-muted">Your cart is empty</h5>
+              <button class="btn btn-primary mt-3" routerLink="/">
+                Continue Shopping
+              </button>
+            </div>
+          </ng-template>
         </div>
+
       </div>
     </div>
 

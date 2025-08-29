@@ -2,25 +2,28 @@
   <h4>Categories</h4>
 
   <div class="carousel-container">
-  <button class="carousel-arrow left" (click)="scrollLeft()">
-    <span>&#10094;</span>
-  </button>
+    <button class="carousel-arrow left" (click)="scrollLeft()">
+      <span>&#10094;</span>
+    </button>
 
-  <div class="carousel-wrapper" #carousel>
-    <div class="category-card" *ngFor="let cat of categories" (click)="selectCategory(cat)">
-      <img [src]="cat.image" alt="{{ cat.name }}">
-      <div class="label">{{ cat.name }}</div>
+    <div class="carousel-wrapper" #carousel>
+      <div class="category-card" *ngFor="let cat of categories" (click)="selectCategory(cat)">
+        <img [src]="cat.image" alt="{{ cat.name }}">
+        <div class="label">{{ cat.name }}</div>
+      </div>
     </div>
+
+    <button class="carousel-arrow right" (click)="scrollRight()">
+      <span>&#10095;</span>
+    </button>
   </div>
 
-  <button class="carousel-arrow right" (click)="scrollRight()">
-    <span>&#10095;</span>
-  </button>
+  <div class="banner-carousel-container">
+  <div class="banner-carousel" [style.transform]="'translateX(-' + currentIndex * (100/3) + '%)'">
+    <div class="banner-card" *ngFor="let banner of processedBanners">
+      <img [src]="banner.image" alt="{{ banner.title }}" />
+    </div>
+  </div>
 </div>
 
-
-  <h4 class="mt-4">Recent Visits</h4>
-  <ul>
-    <li *ngFor="let visit of recentVisits">{{ visit }}</li>
-  </ul>
 </div>

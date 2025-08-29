@@ -60,8 +60,6 @@ export class CartService {
   getCart(): Observable<any> {
 
     if (this.hasToken()) {
-
-
       return this.http.get<any>(API_ENDPOINTS.GET_CART);
     } else {
       // Fallback: return cart from localStorage for guest users
@@ -85,7 +83,7 @@ export class CartService {
     if (this.hasToken()) {
       // Logged-in user → API call (interceptor adds headers)
       const body = { product_id: productId, quantity: quantity };
-      return this.http.put<any>(API_ENDPOINTS.UPDATE_CART_ITEM, body);
+      return this.http.put<any>(`${API_ENDPOINTS.UPDATE_CART_ITEM}`, body);
     } else {
       // Guest user → update localStorage
       let cart = JSON.parse(localStorage.getItem('cart') || '[]');
