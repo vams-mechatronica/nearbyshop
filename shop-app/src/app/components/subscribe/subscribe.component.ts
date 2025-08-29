@@ -31,9 +31,7 @@ export class SubscriptionsComponent implements OnInit {
   loadSubscriptions() {
     this.subscriptionService.getSubscriptions().subscribe({
       next: (res: any) => {
-        // res.results contains the actual subscription list
         this.subscriptions = res?.results || [];
-        console.log('Subscriptions:', this.subscriptions);
       },
       error: (err) => console.error('Failed to fetch subscriptions:', err)
     });
@@ -50,8 +48,6 @@ export class SubscriptionsComponent implements OnInit {
   }
 
   addFunds() {
-    // Logic to add funds to the wallet
-    console.log('Adding funds to wallet');
   }
 
   loadSelectedAddress() {

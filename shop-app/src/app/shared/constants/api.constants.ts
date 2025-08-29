@@ -1,4 +1,4 @@
-export const API_BASE_URL = 'http://localhost:8000';
+export const API_BASE_URL = 'http://localhost:8100';
 // export const API_BASE_URL = 'https://api.vamsmechatronica.in';
 
 export const API_ENDPOINTS = {
@@ -27,5 +27,10 @@ export const API_ENDPOINTS = {
 
   //
   GET_BANNERS: API_BASE_URL + '/api/v1/banners/',
+
+  // User Related
+  GET_USERINFO: API_BASE_URL,
+  GET_USERADDRESS: API_BASE_URL,
+  GET_WALLETDETAILS: API_BASE_URL,
 };
  

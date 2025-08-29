@@ -9,14 +9,14 @@
         <h5 class="fw-bold">Categories</h5>
         <div *ngFor="let category of categories">
           <div class="form-check">
-            <input class="form-check-input" type="checkbox" [value]="category.id" (change)="onCategoryChange($event)" />
+            <input class="form-check-input" type="checkbox" [value]="category.slug" (change)="onCategoryChange($event)" />
             <label class="form-check-label">{{ category.name }} ({{ category.count }})</label>
           </div>
         </div>
 
         <hr />
 
-        <h5 class="fw-bold">Location</h5>
+        <!-- <h5 class="fw-bold">Location</h5> -->
         <!-- <input type="text" class="form-control mb-2" placeholder="Search for a location" [(ngModel)]="locationSearch" />
         <div *ngFor="let group of locationsGroupedByCity">
           <div class="mt-2 fw-semibold text-danger">{{ group.city }}</div>
@@ -34,12 +34,17 @@
         <div class="col-6 col-sm-4 col-lg-2-4 mb-4" *ngFor="let product of products">
           <div class="card product-card shadow-sm rounded border-0 h-100">
 
+            <!-- Discount Badge -->
+            <div *ngIf="product.originalPrice && product.originalPrice > product.price" class="discount-badge">
+              {{ (((product.originalPrice - product.price) / product.originalPrice) * 100) | number:'1.0-0' }}% OFF
+            </div>
+
+
             <!-- Image / Carousel -->
             <div id="carousel-{{ product.id }}" class="carousel slide" data-bs-ride="carousel">
               <div class="carousel-inner rounded-top">
                 <div *ngIf="!product.images.length" class="carousel-item active">
-                  <img [src]="product.image" class="d-block w-100 product-img" style="object-fit: cover; height: 150px;"
-                    alt="{{ product.name }}" />
+                  <img [src]="product.image" class="d-block w-100 product-img" alt="{{ product.name }}" />
                 </div>
                 <div *ngFor="let img of product.images; let i = index" class="carousel-item" [class.active]="i === 0">
                   <img [src]="img" class="d-block w-100 product-img img-thumbnail border"
@@ -60,7 +65,7 @@
 
               <!-- Unit -->
               <p class="card-text small mb-2">
-                <span class="badge bg-light text-dark">Unit: {{ product.unit || 'N/A' }}</span>
+                <span class="badge bg-light text-dark">Unit: {{ product.unit.code || 'N/A' }}</span>
               </p>
 
               <!-- Price -->
@@ -88,8 +93,7 @@
 
                 <!-- Subscribe Button -->
                 <div class="subscribe-btn-wrapper w-50">
-                  <button class="btn btn-sm w-100 text-white subscribe-btn"
-                    (click)="openSubscribeModal(product)">
+                  <button class="btn btn-sm w-100 text-white subscribe-btn" (click)="openSubscribeModal(product)">
                     Subscribe
                   </button>
                 </div>
@@ -138,8 +142,8 @@
         <button class="qty-btn" (click)="decreaseQty(selectedProduct)">−</button>
         <input type="number" [(ngModel)]="selectedProduct.qty"
           (ngModelChange)="selectedProduct.qty = selectedProduct.qty < 1 ? 1 : selectedProduct.qty"
-          class="qty-input mx-2"
-          style="width: 50px; text-align: center; border: none; outline: none; height: 100%;" min="1" />
+          class="qty-input mx-2" style="width: 50px; text-align: center; border: none; outline: none; height: 100%;"
+          min="1" />
         <button class="qty-btn" (click)="increaseQty(selectedProduct)">+</button>
       </div>
     </div>

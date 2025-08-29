@@ -2,6 +2,7 @@ import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CartService } from '../../services/cart.service';
 import { ProductsService } from '../../services/products.service';
+import { CategoryService } from '../../services/category.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { CommonModule } from '@angular/common';
@@ -17,7 +18,7 @@ import { FormsModule } from '@angular/forms';
 export class ProductsComponent implements OnInit {
   products: any[] = [];
   categoryName: string = 'Darity';
-
+  categories: any[] = [];
   selectedProduct: any;
   subscriptionPlan = 'daily';
   startDate: string = '';
@@ -25,21 +26,17 @@ export class ProductsComponent implements OnInit {
   @ViewChild('subscribeModal') subscribeModal!: TemplateRef<any>;
   private subscribeModalRef!: NgbModalRef;
 
-  categories = [
-    { id: 1, name: 'Beauty & Salon', count: 3 },
-    { id: 2, name: 'Restaurants', count: 1 },
-    { id: 3, name: 'Spa & Massage', count: 34 },
-  ];
-
   constructor(
     private cartService: CartService,
     private productService: ProductsService,
     private route: ActivatedRoute,
-    private modal: NgbModal
+    private modal: NgbModal,
+    private categoryService: CategoryService,
   ) {}
 
   ngOnInit(): void {
     const categorySlug = this.route.snapshot.paramMap.get('slug');
+    this.getCategory();
     if (categorySlug) {
       this.categoryName = categorySlug;
       this.productService.getProductsByCategorySlug(categorySlug).subscribe({
@@ -52,6 +49,12 @@ export class ProductsComponent implements OnInit {
         error: (err) => console.error('Error fetching products:', err),
       });
     }
+  }
+  getCategory(){
+    this.categoryService.getCategories().subscribe({
+      next: (res: any) => (this.categories = res.results),
+      error: (err) => console.error('Error fetching categories:', err),
+    });
   }
 
   addToCart(product: any) {
@@ -113,18 +116,21 @@ export class ProductsComponent implements OnInit {
     }
   }
 
-  selectedCategories: string[] = [];
-
   onCategoryChange(event: Event): void {
     const checkbox = event.target as HTMLInputElement;
-    const categoryId = checkbox.value;
+    const categorySlug = checkbox.value;
 
     if (checkbox.checked) {
-      this.selectedCategories.push(categoryId);
-    } else {
-      this.selectedCategories = this.selectedCategories.filter((id) => id !== categoryId);
-    }
+      this.productService.getProductsByCategorySlug(categorySlug).subscribe({
+        next: (res: any) => (this.products = res.results),
+        error: (err) => console.error('Error fetching products:', err),
+      });
 
-    console.log('Selected categories:', this.selectedCategories);
+    } else {
+      this.productService.getProductsByCategorySlug(this.categoryName.toLowerCase()).subscribe({
+        next: (res: any) => (this.products = res.results),
+        error: (err) => console.error('Error fetching products:', err),
+      });
+    }
   }
 }

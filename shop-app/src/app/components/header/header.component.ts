@@ -3,10 +3,8 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-// import { Component, Inject } from '@angular/core';
 import { PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-
 import { AuthComponent } from '../auth/auth.component';
 import { UserInfoComponent } from '../user-info/user-info.component';
 
@@ -14,7 +12,7 @@ import { UserInfoComponent } from '../user-info/user-info.component';
   selector: 'app-header',
   standalone: true,
   templateUrl: './header.component.html',
-  styleUrls: ['./header.component.scss'], // ✅ fixed: should be styleUrls
+  styleUrls: ['./header.component.scss'],
   imports: [CommonModule, FormsModule, RouterLink, RouterLinkActive],
 })
 export class HeaderComponent {
