@@ -31,6 +31,6 @@ export const API_ENDPOINTS = {
   // User Related
   GET_USERINFO: API_BASE_URL + '/api/v1/user/',
   GET_USERADDRESS: API_BASE_URL + '/api/v1/user/addresses/',
-  GET_WALLETDETAILS: API_BASE_URL + '/api/v1/wallet/balance/',
+  GET_USERWALLET: API_BASE_URL + '/api/v1/wallet/balance/',
 };
  

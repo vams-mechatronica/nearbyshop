@@ -2,22 +2,22 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { API_ENDPOINTS } from '../shared/constants/api.constants';
+import { UserInfo } from '../models/user.model';
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
   constructor(private http: HttpClient) { }
 
-  sendLoginOtp(phone: string) {
-    return this.http.post(API_ENDPOINTS.GET_LOGIN_OTP, {
-      phone_number: phone  // <-- change the key here
-    });
+  getUserInfo(): Observable<UserInfo> {
+    return this.http.get<UserInfo>(API_ENDPOINTS.GET_USERINFO);
   }
 
-  verifyOtp(phone: string, otp: string) {
-    return this.http.post(API_ENDPOINTS.VERIFY_OTP, {
-      phone_number: phone,
-      otp: otp
-    });
+  getUserAddress() {
+    return this.http.get(API_ENDPOINTS.GET_USERADDRESS);
+  }
+
+  getUserWallet(){
+    return this.http.get(API_ENDPOINTS.GET_USERWALLET);
   }
 
 }

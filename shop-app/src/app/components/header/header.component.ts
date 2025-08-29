@@ -1,4 +1,4 @@
-import { Component, HostListener, Inject } from '@angular/core';
+import { Component, HostListener, Inject, OnInit } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -7,6 +7,7 @@ import { PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { AuthComponent } from '../auth/auth.component';
 import { UserInfoComponent } from '../user-info/user-info.component';
+import { UserService } from '../../services/user.service';
 
 @Component({
   selector: 'app-header',
@@ -15,13 +16,16 @@ import { UserInfoComponent } from '../user-info/user-info.component';
   styleUrls: ['./header.component.scss'],
   imports: [CommonModule, FormsModule, RouterLink, RouterLinkActive],
 })
-export class HeaderComponent {
+export class HeaderComponent implements OnInit{
   searchQuery = '';
   userName = 'John Doe';
   showProfileDropdown = false;
 
 
-  constructor(private router: Router, private modalService: NgbModal,@Inject(PLATFORM_ID) private platformId: Object) { }
+  constructor(private router: Router,
+     private modalService: NgbModal,
+     private userService: UserService,
+     @Inject(PLATFORM_ID) private platformId: Object) { }
 
   get isLoggedIn(): boolean {
     if (isPlatformBrowser(this.platformId)) {
@@ -30,6 +34,21 @@ export class HeaderComponent {
     return false;
   }
 
+  ngOnInit(): void {
+    if (this.isLoggedIn) {
+      this.getUserInfo();
+    }
+  }
+
+  getUserInfo() {
+    this.userService.getUserInfo().subscribe({
+      next: (res) =>{
+        this.userName = res.username;
+        console.log(res);
+      },
+      error: (err) => {console.error(err);}
+    });
+  }
 
 
   loginSignup(): void {
@@ -46,7 +65,7 @@ export class HeaderComponent {
     this.showProfileDropdown = !this.showProfileDropdown;
   }
 
-  changePassword(): void {
+  userProfile(): void {
     this.modalService.open(UserInfoComponent, { centered: true, size: 'md' });
   }
 
