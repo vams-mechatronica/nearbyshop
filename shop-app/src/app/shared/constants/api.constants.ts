@@ -29,8 +29,8 @@ export const API_ENDPOINTS = {
   GET_BANNERS: API_BASE_URL + '/api/v1/banners/',
 
   // User Related
-  GET_USERINFO: API_BASE_URL,
-  GET_USERADDRESS: API_BASE_URL,
-  GET_WALLETDETAILS: API_BASE_URL,
+  GET_USERINFO: API_BASE_URL + '/api/v1/user/',
+  GET_USERADDRESS: API_BASE_URL + '/api/v1/user/addresses/',
+  GET_WALLETDETAILS: API_BASE_URL + '/api/v1/wallet/balance/',
 };
  
