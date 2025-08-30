@@ -1,4 +1,4 @@
-export const API_BASE_URL = 'http://localhost:8100';
+export const API_BASE_URL = 'http://localhost:8000';
 // export const API_BASE_URL = 'https://api.vamsmechatronica.in';
 
 export const API_ENDPOINTS = {
@@ -20,7 +20,7 @@ export const API_ENDPOINTS = {
 
   // Subscription
   GET_SUBSCRIPTION: API_BASE_URL + '/api/v1/subscriptions/',
-  UPDATE_SUBSCRIPTION: API_BASE_URL + '/api/v1/subscriptions/',
+  UPDATE_SUBSCRIPTION: API_BASE_URL + '/api/v1/subscriptions',
   PATCH_SUBSCRIPTION: API_BASE_URL + '/api/v1/subscriptions/',
   DELETE_SUBSCRIPTION: API_BASE_URL + '/api/v1/subscriptions/',
   ADD_SUBSCRIPTION: API_BASE_URL + '/api/v1/subscriptions/create/',
@@ -31,6 +31,12 @@ export const API_ENDPOINTS = {
   // User Related
   GET_USERINFO: API_BASE_URL + '/api/v1/user/',
   GET_USERADDRESS: API_BASE_URL + '/api/v1/user/addresses/',
+  ADD_USERADDRESS: API_BASE_URL + '/api/v1/user/addresses/',
   GET_USERWALLET: API_BASE_URL + '/api/v1/wallet/balance/',
+
+
+  // Waller
+  CREATE_RAZORPAY_ORDER: API_BASE_URL + '/api/v1/wallet/recharge/initiate/',
+  VERIFY_RAZORPAY_ORDER: API_BASE_URL + '/api/v1/wallet/recharge/verify/',
 };
  

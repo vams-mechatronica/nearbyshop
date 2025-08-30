@@ -3,6 +3,10 @@ import { CartService } from '../../services/cart.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { hasToken } from '../../shared/utility/utils.common';
+import { UserService } from '../../services/user.service';
+import { ToastrService } from 'ngx-toastr';
+import { AddDeliveryAddress } from '../../models/user.model';
 
 @Component({
   standalone: true,
@@ -25,10 +29,14 @@ export class CartComponent implements OnInit {
     address: '',
     city: '',
     state: '',
-    zip: ''
+    zip: '',
+    phone: ''
   };
 
-  constructor(private cartService: CartService) { }
+  constructor(private cartService: CartService,
+    private userService: UserService,
+    private toastrService: ToastrService
+  ) { }
 
   ngOnInit(): void {
     this.loadCart();
@@ -65,14 +73,18 @@ export class CartComponent implements OnInit {
 
 
   removeItem(item: any) {
-    this.cartService.deleteCartItem(item.product.id).subscribe({
-      next: (res) => {
-        this.loadCart();
-      },
-      error: (err) => {
-        console.log('Error Deleting the Cart Item', err);
-      }
-    })
+    if (hasToken()) {
+      this.cartService.deleteCartItem(item.product.id).subscribe({
+        next: (res) => {
+          this.loadCart();
+        },
+        error: (err) => {
+          console.log('Error Deleting the Cart Item', err);
+        }
+      })
+    } else {
+
+    }
   }
 
   increaseQuantity(item: any) {
@@ -96,16 +108,16 @@ export class CartComponent implements OnInit {
     if (item.quantity > 1) {
       item.quantity--;
       this.cartService.updateCartItem(item.product.id, item.quantity).subscribe({
-      next: (res) => {
-        console.log('Successfully updated cart', res);
-        this.loadCart();  // 🔥 refresh only after success
-      },
-      error: (err) => {
-        console.log('Error updating cart', err);
-        // rollback in case of failure
-        item.quantity++;
-      }
-    });
+        next: (res) => {
+          console.log('Successfully updated cart', res);
+          this.loadCart();  // 🔥 refresh only after success
+        },
+        error: (err) => {
+          console.log('Error updating cart', err);
+          // rollback in case of failure
+          item.quantity++;
+        }
+      });
     }
   }
 
@@ -120,29 +132,100 @@ export class CartComponent implements OnInit {
 
   // ========== ADDRESS MGMT ==========
   loadAddresses() {
-    const stored = localStorage.getItem('addresses');
-    if (stored) {
-      this.addresses = JSON.parse(stored);
+    if (hasToken()) {
+      this.userService.getUserAddress().subscribe({
+        next: (res: any) => {
+          this.addresses = res?.results || [];
+
+          // Try to restore selectedAddress from localStorage
+          const stored = localStorage.getItem('selectedAddress');
+          if (stored) {
+            const saved = JSON.parse(stored);
+            // Match with current API addresses (by id)
+            this.selectedAddress = this.addresses.find(a => a.id === saved.id) || null;
+          }
+
+          // If nothing selected yet, auto-select first address
+          if (!this.selectedAddress && this.addresses.length > 0) {
+            this.setSelectedAddress(this.addresses[0]);
+          }
+        },
+        error: () => {
+          this.toastrService.error('Error in fetching address', 'Error');
+        }
+      });
+    } else {
+      const stored = localStorage.getItem('addresses');
+      if (stored) {
+        this.addresses = JSON.parse(stored);
+      }
+
+      const selected = localStorage.getItem('selectedAddress');
+      if (selected) {
+        this.selectedAddress = JSON.parse(selected);
+      }
+
+      // If nothing selected, auto-select first saved address
+      if (!this.selectedAddress && this.addresses.length > 0) {
+        this.setSelectedAddress(this.addresses[0]);
+      }
     }
-    const selected = localStorage.getItem('selectedAddress');
-    if (selected) {
-      this.selectedAddress = JSON.parse(selected);
-    }
+  }
+
+  setSelectedAddress(address: any) {
+    this.selectedAddress = address;
+    localStorage.setItem('selectedAddress', JSON.stringify(address));
   }
 
   addAddress() {
+    // Basic validation
     if (!this.newAddress.name || !this.newAddress.address) return;
-    this.addresses.push({ ...this.newAddress });
-    localStorage.setItem('addresses', JSON.stringify(this.addresses));
 
-    // Auto-select the new address
-    this.selectedAddress = this.newAddress;
-    localStorage.setItem('selectedAddress', JSON.stringify(this.selectedAddress));
+    const addressPayload: AddDeliveryAddress = {
+      name: this.newAddress.name,
+      address_line: this.newAddress.address,
+      city: this.newAddress.city,
+      state: this.newAddress.state,
+      zip_code: this.newAddress.zip,
+      phone_number: this.newAddress.phone,
+    };
 
-    // Reset input form
-    this.newAddress = { name: '', address: '', city: '', state: '', zip: '' };
-    this.loadAddresses();
+    if (hasToken()) {
+      // Logged in: save via API
+      this.userService.addUserAddress(addressPayload).subscribe({
+        next: (res) => {
+          // Add to addresses list
+          this.addresses.push(res);
+
+          // Select newly added
+          this.setSelectedAddress(res);
+          
+          this.toastrService.success('Address added successfully', 'Success');
+
+          // Reset form
+          this.newAddress = { name: '', address: '', city: '', state: '', zip: '', phone: '' };
+
+          this.loadAddresses();
+        },
+        error: () => {
+          this.toastrService.error('Failed to add address', 'Error');
+        }
+      });
+    } else {
+      // Guest user: store in localStorage
+      this.addresses.push(addressPayload);
+
+      localStorage.setItem('addresses', JSON.stringify(this.addresses));
+      this.setSelectedAddress(addressPayload);
+
+      this.toastrService.info('Address saved locally', 'Guest Mode');
+
+      this.newAddress = { name: '', address: '', city: '', state: '', zip: '', phone: '' };
+      this.loadAddresses();
+    }
   }
+
+
 
   selectAddress(index: number) {
     this.selectedAddress = this.addresses[index];

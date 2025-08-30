@@ -4,6 +4,7 @@ import { ProductsComponent } from './components/products/products.component';
 import { CartComponent } from './components/cart/cart.component';
 import { SubscriptionsComponent } from './components/subscribe/subscribe.component';
 import { AuthComponent } from './components/auth/auth.component';
+import { UserProfileComponent } from './components/user-info/user-info.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -11,5 +12,6 @@ export const routes: Routes = [
   { path: 'cart', component: CartComponent },
   { path: 'products/:slug', component: ProductsComponent },
   { path: 'subscribe', component: SubscriptionsComponent },
+  { path: 'profile', component: UserProfileComponent },
 ];
 

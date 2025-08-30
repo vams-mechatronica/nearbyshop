@@ -4,6 +4,9 @@ import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/
 import { routes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { isPlatformBrowser } from '@angular/common';
+import { provideAnimations } from '@angular/platform-browser/animations';
+import { provideToastr } from 'ngx-toastr';
+
 
 export const authInterceptor = (req: any, next: any) => {
   const platformId = inject(PLATFORM_ID);
@@ -31,7 +34,17 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }), 
     provideRouter(routes), 
     provideClientHydration(withEventReplay()),
-    provideHttpClient(withFetch(),withInterceptors([authInterceptor]))
-
+    provideHttpClient(withFetch(),withInterceptors([authInterceptor])),
+    provideAnimations(), // required for toastr
+    provideToastr({
+      timeOut: 3000,
+      positionClass: 'toast-top-right',
+      preventDuplicates: true,
+      closeButton: true,
+      progressBar: true,
+      extendedTimeOut: 2000, // extra time if hovered
+      tapToDismiss: true,   
+    }),
+    
   ]
 };

@@ -1,5 +1,10 @@
 <app-header></app-header>
 
+<!-- Loader -->
+<div *ngIf="loaderService.isLoading | async" class="global-loader">
+  <div class="spinner-border text-primary"></div>
+</div>
+
 <!-- 🔽 This is where routed components render -->
 <div class="container mt-4">
   <router-outlet />

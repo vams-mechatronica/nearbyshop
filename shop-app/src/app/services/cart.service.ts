@@ -38,24 +38,7 @@ export class CartService {
     }
   }
 
-  addSubscription(product: any, frequency: string, startDate: string, quantity: number) {
-    if (this.hasToken()) {
-
-      const body = {
-        product_id: product.id,
-        start_date: startDate,
-        frequency: frequency,
-        quantity: quantity
-      };
-      return this.http.post<any>(API_ENDPOINTS.ADD_SUBSCRIPTION, body);
-    } else {
-      // Fallback: store in localStorage for guest users
-      let subs = JSON.parse(localStorage.getItem('subscriptions') || '[]');
-      subs.push({ product, frequency, startDate });
-      localStorage.setItem('subscriptions', JSON.stringify(subs));
-      return of(subs);
-    }
-  }
+  
 
   getCart(): Observable<any> {
 

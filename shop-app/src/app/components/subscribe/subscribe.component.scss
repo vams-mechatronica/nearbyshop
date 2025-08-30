@@ -36,3 +36,18 @@
 .wallet-info {
   font-size: 0.95rem;
 }
+
+.product-thumb {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.subscription-row {
+  transition: background 0.2s;
+}
+.subscription-row:hover {
+  background: #f9f9f9;
+}
+

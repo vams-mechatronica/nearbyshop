@@ -7,6 +7,9 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { hasToken } from '../../shared/utility/utils.common';
+import { ToastrService } from 'ngx-toastr';
+import { SubscriptionService } from '../../services/subscribe.service';
 
 @Component({
   standalone: true,
@@ -32,7 +35,9 @@ export class ProductsComponent implements OnInit {
     private route: ActivatedRoute,
     private modal: NgbModal,
     private categoryService: CategoryService,
-  ) {}
+    private subscribeService: SubscriptionService,
+    private toastr: ToastrService,
+  ) { }
 
   ngOnInit(): void {
     const categorySlug = this.route.snapshot.paramMap.get('slug');
@@ -50,7 +55,7 @@ export class ProductsComponent implements OnInit {
       });
     }
   }
-  getCategory(){
+  getCategory() {
     this.categoryService.getCategories().subscribe({
       next: (res: any) => (this.categories = res.results),
       error: (err) => console.error('Error fetching categories:', err),
@@ -58,11 +63,43 @@ export class ProductsComponent implements OnInit {
   }
 
   addToCart(product: any) {
+    // initialize cart structure if not present
+    let cart = JSON.parse(localStorage.getItem('cart') || '{"items": [], "total": 0}');
+
+    // check if product already exists
+    const existingItem = cart.items.find((item: any) => item.product.id === product.id);
+
+    if (existingItem) {
+      existingItem.quantity += 1;
+      existingItem.price = (parseFloat(product.price) * existingItem.quantity).toFixed(2);
+    } else {
+      cart.items.push({
+        id: new Date().getTime(), // temporary id for local cart
+        product: {
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          image: product.image
+        },
+        quantity: 1,
+        price: product.price
+      });
+    }
+
+    // update total
+    cart.total = cart.items.reduce((sum: number, item: any) => sum + parseFloat(item.price), 0);
+
+    // save back to localStorage
+    localStorage.setItem('cart', JSON.stringify(cart));
+
+    this.toastr.success(`${product.name} added to cart`, 'Cart Updated');
+
     product.qty = 1;
+    if (hasToken()) {
     this.cartService.addToCart(product).subscribe({
       next: (res: any) => console.log('Added to cart:', res),
       error: (err: HttpErrorResponse) => console.error('Add to cart failed:', err),
-    });
+    }); }
   }
 
   openSubscribeModal(product: any) {
@@ -76,7 +113,7 @@ export class ProductsComponent implements OnInit {
   confirmSubscription() {
     if (!this.selectedProduct) return;
 
-    this.cartService
+    this.subscribeService
       .addSubscription(
         this.selectedProduct,
         this.subscriptionPlan,
@@ -88,7 +125,9 @@ export class ProductsComponent implements OnInit {
           console.log('Subscription confirmed:', res);
           this.subscribeModalRef?.close(); // ✅ now reliably closes modal
         },
-        error: (err) => console.error('Error creating subscription:', err),
+        error: (err) => {
+          this.toastr.error(err.error.message,'Subscription Failed');
+        },
       });
   }
 

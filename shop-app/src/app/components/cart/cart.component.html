@@ -75,8 +75,9 @@
 
         <div *ngIf="selectedAddress; else noAddress">
           <p class="mb-1"><strong>{{ selectedAddress.name }}</strong></p>
-          <p class="mb-1">{{ selectedAddress.address }}</p>
-          <p class="mb-1">{{ selectedAddress.city }}, {{ selectedAddress.state }} - {{ selectedAddress.zip }}</p>
+          <p class="mb-1">{{ selectedAddress.address_line }}</p>
+          <p class="mb-1">{{ selectedAddress.city }}, {{ selectedAddress.state }} - {{ selectedAddress.zip_code }}</p>
+          <p class="mb-1">Ph: {{ selectedAddress.phone_number }}</p>
           <button class="btn btn-sm btn-outline-primary mt-2" (click)="openAddressModal()">
             Change Address
           </button>
@@ -146,7 +147,7 @@
               [class.active]="selectedAddress === addr" (click)="selectAddress(i)">
               <div>
                 <strong>{{ addr.name }}</strong><br>
-                {{ addr.address }}, {{ addr.city }}, {{ addr.state }} - {{ addr.zip }}
+                {{ addr.address_line }}, {{ addr.city }}, {{ addr.state }} - {{ addr.zip_code }}
               </div>
               <span class="badge bg-primary">Select</span>
             </li>
@@ -158,7 +159,7 @@
 
         <!-- Add New Address Form -->
         <h6>Add New Address</h6>
-        <div class="row g-2">
+        <div class="row g-3">
           <div class="col-md-6">
             <input type="text" [(ngModel)]="newAddress.name" class="form-control" placeholder="Name">
           </div>
@@ -173,6 +174,9 @@
           </div>
           <div class="col-md-4">
             <input type="text" [(ngModel)]="newAddress.zip" class="form-control" placeholder="Zip Code">
+          </div>
+          <div class="col-md-12">
+            <input type="text" [(ngModel)]="newAddress.phone" class="form-control" placeholder="Phone Number">
           </div>
         </div>
       </div>

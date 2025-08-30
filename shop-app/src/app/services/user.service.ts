@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { API_ENDPOINTS } from '../shared/constants/api.constants';
-import { UserInfo } from '../models/user.model';
+import { AddDeliveryAddress, UserInfo } from '../models/user.model';
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
@@ -14,6 +14,10 @@ export class UserService {
 
   getUserAddress() {
     return this.http.get(API_ENDPOINTS.GET_USERADDRESS);
+  }
+
+  addUserAddress(data: AddDeliveryAddress){
+    return this.http.post(API_ENDPOINTS.ADD_USERADDRESS,data);
   }
 
   getUserWallet(){

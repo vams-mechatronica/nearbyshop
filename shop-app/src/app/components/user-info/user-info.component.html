@@ -1,7 +1,186 @@
-<div class="modal-header">
-  <h5 class="modal-title">User Info</h5>
+<div class="container-fluid py-4">
+  <div class="row">
+    <!-- Sidebar -->
+    <div class="col-md-3">
+      <div class="card shadow-sm border-0 rounded-3">
+        <div class="card-body p-0">
+          <div class="list-group list-group-flush">
+            <button class="list-group-item list-group-item-action" [class.active]="activeTab === 'profile'"
+              (click)="setActiveTab('profile')">
+              <i class="fa-solid fa-user me-2"></i> Profile Details
+            </button>
+
+            <button class="list-group-item list-group-item-action" [class.active]="activeTab === 'orders'"
+              (click)="setActiveTab('orders')">
+              <i class="fa-solid fa-box me-2"></i> Order History
+            </button>
+
+            <button class="list-group-item list-group-item-action" [class.active]="activeTab === 'transactions'"
+              (click)="setActiveTab('transactions')">
+              <i class="fa-solid fa-credit-card me-2"></i> Transactions
+            </button>
+
+            <button class="list-group-item list-group-item-action" [class.active]="activeTab === 'subscriptions'"
+              (click)="setActiveTab('subscriptions')">
+              <i class="fa-solid fa-file-contract me-2"></i> Subscriptions
+            </button>
+
+            <button class="list-group-item list-group-item-action" [class.active]="activeTab === 'cart'"
+              (click)="setActiveTab('cart')">
+              <i class="fa-solid fa-cart-shopping me-2"></i> Cart
+            </button>
+
+            <button class="list-group-item list-group-item-action" [class.active]="activeTab === 'wallet'"
+              (click)="setActiveTab('wallet')">
+              <i class="fa-solid fa-wallet me-2"></i> Wallet
+            </button>
+
+            <button class="list-group-item list-group-item-action" [class.active]="activeTab === 'bank'"
+              (click)="setActiveTab('bank')">
+              <i class="fa-solid fa-building-columns me-2"></i> Bank Details
+            </button>
+
+            <button class="list-group-item list-group-item-action" [class.active]="activeTab === 'refunds'"
+              (click)="setActiveTab('refunds')">
+              <i class="fa-solid fa-rotate-left me-2"></i> Refund History
+            </button>
+
+            <button class="list-group-item list-group-item-action" [class.active]="activeTab === 'tracking'"
+              (click)="setActiveTab('tracking')">
+              <i class="fa-solid fa-truck me-2"></i> Order Tracking
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="col-md-9">
+      <div class="card shadow-sm border-0 rounded-3">
+        <div class="card-body">
+          <!-- Profile -->
+          <div *ngIf="activeTab === 'profile'">
+            <h4 class="mb-3">Profile Details</h4>
+            <div class="row">
+              <div class="col-md-6 mb-2"><strong>Name:</strong> {{user.username}}</div>
+              <div class="col-md-6 mb-2"><strong>Email:</strong> {{user.email}}</div>
+              <div class="col-md-6 mb-2"><strong>Phone:</strong> {{user.phone_number}}</div>
+              <div class="col-md-6 mb-2"><strong>Role:</strong> {{user.role}}</div>
+            </div>
+          </div>
+
+          <!-- Orders -->
+          <div *ngIf="activeTab === 'orders'">
+            <h4 class="mb-3">Order History</h4>
+            <ag-grid-angular class="ag-theme-alpine w-100" [rowData]="orders" [columnDefs]="orderCols"
+              rowSelection="single" style="height: 400px">
+            </ag-grid-angular>
+          </div>
+
+          <!-- Transactions -->
+          <div *ngIf="activeTab === 'transactions'">
+            <h4 class="mb-3">Transaction History</h4>
+            <ag-grid-angular class="ag-theme-alpine w-100" [rowData]="transactions" [columnDefs]="txnCols"
+              style="height: 400px">
+            </ag-grid-angular>
+          </div>
+
+          <!-- Subscriptions -->
+          <div *ngIf="activeTab === 'subscriptions'">
+            <h4 class="mb-3">Subscriptions</h4>
+            <ag-grid-angular class="ag-theme-alpine w-100" [rowData]="subscriptions" [columnDefs]="subCols"
+              style="height: 400px">
+            </ag-grid-angular>
+          </div>
+
+          <!-- Cart -->
+          <div *ngIf="activeTab === 'cart'">
+            <h4 class="mb-3">Cart</h4>
+            <ag-grid-angular class="ag-theme-alpine w-100" [rowData]="cart" [columnDefs]="cartCols"
+              style="height: 400px">
+            </ag-grid-angular>
+          </div>
+
+
+          <!-- Wallet -->
+          <div *ngIf="activeTab === 'wallet'">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h4 class="mb-0">Wallet</h4>
+              <button class="btn btn-sm btn-outline-primary" (click)="openAddFundsModal()">
+                Add Funds
+              </button>
+            </div>
+            <p><strong>Balance:</strong> ₹{{ wallet.balance }}</p>
+          </div>
+
+
+          <!-- Bank -->
+          <div *ngIf="activeTab === 'bank'">
+            <h4 class="mb-3">Bank Details</h4>
+            <p><strong>Bank:</strong> {{bank.bankName}}</p>
+            <p><strong>Account No:</strong> {{bank.accountNumber}}</p>
+            <p><strong>IFSC:</strong> {{bank.ifsc}}</p>
+          </div>
+
+          <!-- Refunds -->
+          <div *ngIf="activeTab === 'refunds'">
+            <h4 class="mb-3">Refund History</h4>
+            <table class="table table-bordered">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let refund of refunds">
+                  <td>{{refund.date}}</td>
+                  <td>₹{{refund.amount}}</td>
+                  <td>{{refund.status}}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Tracking -->
+          <div *ngIf="activeTab === 'tracking'">
+            <h4 class="mb-3">Order Tracking</h4>
+            <div *ngFor="let track of tracking" class="mb-2">
+              <div class="p-2 border rounded">
+                <strong>Order #{{track.orderId}}</strong> - {{track.status}} ({{track.updated}})
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
-<div class="modal-body">
-  <p><strong>Mobile:</strong> {{ user.mobile }}</p>
-  <p><strong>Wallet:</strong> ₹{{ user.wallet }}</p>
+<!-- Add Funds Modal -->
+<div class="modal fade show" tabindex="-1" *ngIf="showAddFundsModal" style="display:block; background: rgba(0,0,0,0.6);"
+  (click)="closeAddFundsModal()">
+  <div class="modal-dialog modal-dialog-centered" (click)="$event.stopPropagation()">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add Funds</h5>
+        <button type="button" class="btn-close" (click)="closeAddFundsModal()"></button>
+      </div>
+      <div class="modal-body">
+        <label for="amount" class="form-label">Enter Amount</label>
+        <input id="amount" type="number" class="form-control" [(ngModel)]="amount" placeholder="Enter amount">
+        <div class="mt-3">
+          <button type="button" class="btn btn-outline-primary me-2 mb-2"
+            *ngFor="let amt of [100,200,500,1000,2000,5000]" (click)="setRechargeAmount(amt)">
+            ₹{{ amt }}
+          </button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeAddFundsModal()">Cancel</button>
+        <button class="btn btn-success" (click)="rechargeNow()">Recharge Now</button>
+      </div>
+    </div>
+  </div>
 </div>

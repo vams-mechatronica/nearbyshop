@@ -4,6 +4,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { Component, EventEmitter, Output, OnInit } from '@angular/core';
 import { RouterModule, ActivatedRoute, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { ToastrService } from 'ngx-toastr';
 
 
 @Component({
@@ -23,7 +24,8 @@ export class AuthComponent implements OnInit {
     private route: ActivatedRoute,
     private authService: AuthService,
     private router: Router,
-    public activeModal: NgbActiveModal
+    public activeModal: NgbActiveModal,
+    private toastrService: ToastrService,
   ) { }
 
   ngOnInit(): void {
@@ -54,7 +56,6 @@ export class AuthComponent implements OnInit {
   login() {
     this.authService.verifyOtp(`91${this.phone}`, this.otp).subscribe({
       next: (res: any) => {
-        console.log(res);
         const { access, refresh } = res?.token || {};
 
         if (access && refresh) {
@@ -65,15 +66,16 @@ export class AuthComponent implements OnInit {
 
         // ✅ Close the modal after login
         this.activeModal.close('logged-in');
-
+        
+        this.toastrService.success('User logged in successfully','Login Success');
         // ✅ Redirect only if redirectTo is provided
         if (this.redirectTo) {
           this.router.navigateByUrl(this.redirectTo);
         }
+
       },
       error: (err) => {
-        console.error('OTP verification failed:', err);
-        alert('Invalid OTP or verification failed. Please try again.');
+        this.toastrService.error('Please try again', 'OTP verification failed');
       },
     });
   }

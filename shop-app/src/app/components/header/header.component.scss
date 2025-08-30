@@ -81,17 +81,10 @@ nav.navbar {
   background-color: #070606;
   padding: 0.5rem 1rem;
 
-  .search-form {
+  .search-box {
     display: flex;
     align-items: center;
-
-    input[type="search"] {
-      width: 400px;
-      padding: 0.4rem 0.6rem;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-    }
-
+    width: 100%;
     button {
       margin-left: 0.5rem;
       white-space: nowrap;
@@ -190,14 +183,11 @@ nav.navbar {
 // Responsive Adjustments
 // ==============================
 @media (max-width: 768px) {
-  .secondary-navbar .search-form {
+  .secondary-navbar .search-box {
     flex-direction: column;
     align-items: flex-start;
-
-    input[type="search"] {
-      width: 100%;
-      margin-bottom: 0.5rem;
-    }
+    width: 100%;
+    
 
     button {
       width: 100%;

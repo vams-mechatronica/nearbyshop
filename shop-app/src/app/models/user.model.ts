@@ -10,3 +10,12 @@ export interface UserInfo {
   vendorprofile: any | null;    // same here
   bdaprofile: any | null;       // same here
 }
+
+export interface AddDeliveryAddress {
+  name: string;
+  address_line: string;
+  city: string;
+  state: string | null;
+  zip_code: string;
+  phone_number: string;
+}

@@ -6,7 +6,6 @@ import { CommonModule } from '@angular/common';
 import { PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { AuthComponent } from '../auth/auth.component';
-import { UserInfoComponent } from '../user-info/user-info.component';
 import { UserService } from '../../services/user.service';
 
 @Component({
@@ -66,7 +65,7 @@ export class HeaderComponent implements OnInit{
   }
 
   userProfile(): void {
-    this.modalService.open(UserInfoComponent, { centered: true, size: 'md' });
+    this.router.navigate(['/profile']);
   }
 
   logout(): void {
