@@ -7,6 +7,12 @@ import { hasToken } from '../../shared/utility/utils.common';
 import { UserService } from '../../services/user.service';
 import { ToastrService } from 'ngx-toastr';
 import { AddDeliveryAddress } from '../../models/user.model';
+import { InitiatePayment, InitiatePaymentOrder } from '../../models/payment.model';
+import { PaymentService } from '../../services/payment.service';
+import { Order } from '../../models/order.model';
+
+declare var Razorpay: any;
+
 
 @Component({
   standalone: true,
@@ -18,6 +24,7 @@ import { AddDeliveryAddress } from '../../models/user.model';
 export class CartComponent implements OnInit {
   cartItems: any[] = [];
   gTotal: number = 0;
+  cartId: number = 0;
 
   // User + Address
   user = { mobile: '', otp: '', address: '' };
@@ -32,10 +39,12 @@ export class CartComponent implements OnInit {
     zip: '',
     phone: ''
   };
+  // paymentService: any;
 
   constructor(private cartService: CartService,
     private userService: UserService,
-    private toastrService: ToastrService
+    private toastrService: ToastrService,
+    private paymentService: PaymentService
   ) { }
 
   ngOnInit(): void {
@@ -60,6 +69,7 @@ export class CartComponent implements OnInit {
       next: (data) => {
         this.cartItems = data.items || data;
         this.gTotal = data.total ? parseFloat(data.total) : this.getTotal();
+        this.cartId = data.id;
       },
       error: (err) => {
         console.error('Error fetching cart:', err);
@@ -199,7 +209,7 @@ export class CartComponent implements OnInit {
 
           // Select newly added
           this.setSelectedAddress(res);
-          
+
           this.toastrService.success('Address added successfully', 'Success');
 
           // Reset form
@@ -231,4 +241,36 @@ export class CartComponent implements OnInit {
     this.selectedAddress = this.addresses[index];
     localStorage.setItem('selectedAddress', JSON.stringify(this.selectedAddress));
   }
+
+  checkout(address: any) {
+    this.cartService.createOrder(this.cartId,address.id,'razorpay',null).subscribe({
+      next: (res: Order) => {
+        this.paymentRazorpay(res.total_price, res.id);
+      },
+      error: (err) => {this.toastrService.error('Failed to order', 'Error');}
+    });
+    
+  }
+
+  paymentRazorpay(amount: any, orderId: number){
+
+    this.paymentService.createCartPaymentOrder(amount, orderId).subscribe((order: InitiatePaymentOrder) => {
+      const options = {
+        key: order.razorpay_key,
+        amount: order.amount,
+        currency: order.currency,
+        name: 'Payment Order',
+        description: 'Checkout cart items payment',
+        order_id: order.razorpay_order_id,
+        handler: (response: any) => {
+          this.paymentService.verifyCartPaymentOrder(response).subscribe(() => {
+            this.toastrService.success('Payment successful!', 'Success');
+          });
+        }
+      };
+      const rzp = new Razorpay(options);
+      rzp.open();
+    });
+  }
+
 }

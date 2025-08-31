@@ -99,4 +99,14 @@ export class CartService {
       return of(cart);
     }
   }
+
+  createOrder(cartId: number, addressId: number, paymentMethod: string, coupon: string | null){
+    const body = {
+      cart_id: cartId,
+      address_id: addressId,
+      payment_method: paymentMethod,
+      coupon_code: coupon
+    }
+    return this.http.post<any>(API_ENDPOINTS.CREATE_ORDER,body);
+  }
 }

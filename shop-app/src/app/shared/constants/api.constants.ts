@@ -34,9 +34,16 @@ export const API_ENDPOINTS = {
   ADD_USERADDRESS: API_BASE_URL + '/api/v1/user/addresses/',
   GET_USERWALLET: API_BASE_URL + '/api/v1/wallet/balance/',
 
-
   // Waller
-  CREATE_RAZORPAY_ORDER: API_BASE_URL + '/api/v1/wallet/recharge/initiate/',
-  VERIFY_RAZORPAY_ORDER: API_BASE_URL + '/api/v1/wallet/recharge/verify/',
+  CREATE_WALLET_RECHARGE_RAZORPAY_ORDER: API_BASE_URL + '/api/v1/wallet/recharge/initiate/',
+  VERIFY_WALLET_RECHARGE_RAZORPAY_ORDER: API_BASE_URL + '/api/v1/wallet/recharge/verify/',
+
+  // Cart Checkout Payment
+  CREATE_CART_PAYMENT_RAZORPAY_ORDER: API_BASE_URL + '/api/v1/payment/initiate/?order_id=',
+  VERIFY_CART_PAYMENT_RAZORPAY_ORDER: API_BASE_URL + '/api/v1/payment/verify/',
+
+  // Create Order 
+  CREATE_ORDER: API_BASE_URL + '/api/v1/orders/create/',
+
 };
  
