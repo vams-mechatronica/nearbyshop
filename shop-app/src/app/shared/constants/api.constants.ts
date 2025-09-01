@@ -1,5 +1,5 @@
-export const API_BASE_URL = 'http://localhost:8000';
-// export const API_BASE_URL = 'https://api.vamsmechatronica.in';
+// export const API_BASE_URL = 'http://localhost:8000';
+export const API_BASE_URL = 'https://api.vamsmechatronica.in';
 
 export const API_ENDPOINTS = {
   CATEGORIES: `${API_BASE_URL}/api/v1/categories/?page_size=20`,
@@ -39,11 +39,12 @@ export const API_ENDPOINTS = {
   VERIFY_WALLET_RECHARGE_RAZORPAY_ORDER: API_BASE_URL + '/api/v1/wallet/recharge/verify/',
 
   // Cart Checkout Payment
-  CREATE_CART_PAYMENT_RAZORPAY_ORDER: API_BASE_URL + '/api/v1/payment/initiate/?order_id=',
+  CREATE_CART_PAYMENT_RAZORPAY_ORDER: API_BASE_URL + '/api/v1/payment/initiate/',
   VERIFY_CART_PAYMENT_RAZORPAY_ORDER: API_BASE_URL + '/api/v1/payment/verify/',
 
   // Create Order 
   CREATE_ORDER: API_BASE_URL + '/api/v1/orders/create/',
+  GET_ORDERSUMMARY: API_BASE_URL + '/api/v1/order',
 
 };
  

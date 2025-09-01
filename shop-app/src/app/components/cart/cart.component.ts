@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CartService } from '../../services/cart.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { hasToken } from '../../shared/utility/utils.common';
 import { UserService } from '../../services/user.service';
 import { ToastrService } from 'ngx-toastr';
@@ -44,7 +44,7 @@ export class CartComponent implements OnInit {
   constructor(private cartService: CartService,
     private userService: UserService,
     private toastrService: ToastrService,
-    private paymentService: PaymentService
+    private paymentService: PaymentService,private router: Router,
   ) { }
 
   ngOnInit(): void {
@@ -263,8 +263,13 @@ export class CartComponent implements OnInit {
         description: 'Checkout cart items payment',
         order_id: order.razorpay_order_id,
         handler: (response: any) => {
-          this.paymentService.verifyCartPaymentOrder(response).subscribe(() => {
-            this.toastrService.success('Payment successful!', 'Success');
+          this.paymentService.verifyCartPaymentOrder(response).subscribe({
+            next: (res) => {
+              this.router.navigate(['/payment-status'], { queryParams: { status: 'success', orderId } });
+            },
+            error: (err) => {
+              this.router.navigate(['/payment-status'], { queryParams: { status: 'failed', orderId } });
+            }
           });
         }
       };

@@ -1,0 +1,22 @@
+<div class="d-flex justify-content-center align-items-center vh-100">
+  <div class="card shadow-lg text-center p-5 rounded-4" style="max-width: 450px;">
+    
+    <!-- Success -->
+    <div *ngIf="status === 'success'">
+      <h2 class="text-success mb-3">✅ Payment Successful!</h2>
+      <p>Your payment has been completed successfully.</p>
+      <p class="text-muted">Redirecting to your order summary in {{countdown}} seconds...</p>
+      <button class="btn btn-primary mt-3" (click)="redirectOrderSummaryPage()">
+        Go to Order Summary Now
+      </button>
+    </div>
+
+    <!-- Failed -->
+    <div *ngIf="status === 'failed'">
+      <h2 class="text-danger mb-3">❌ Payment Failed!</h2>
+      <p>Something went wrong with your payment.</p>
+      <button class="btn btn-danger mt-3" (click)="retryPayment()">Retry Payment</button>
+    </div>
+
+  </div>
+</div>
