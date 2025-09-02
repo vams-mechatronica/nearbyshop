@@ -10,5 +10,8 @@ export const serverRoutes: ServerRoute[] = [
   },{
     path: 'order-summary/:orderId',
     renderMode: RenderMode.Server
+  },{
+    path: 'product/:id',
+    renderMode: RenderMode.Server
   }
 ];

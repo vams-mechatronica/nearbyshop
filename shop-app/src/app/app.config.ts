@@ -1,22 +1,19 @@
 import { ApplicationConfig, inject, PLATFORM_ID, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
+import { HttpInterceptorFn, provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { routes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { isPlatformBrowser } from '@angular/common';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideToastr } from 'ngx-toastr';
+import { StorageService } from './services/storage.service';
 
+export const authInterceptor: HttpInterceptorFn = (req, next) => {
+  const storage = inject(StorageService);
 
-export const authInterceptor = (req: any, next: any) => {
-  const platformId = inject(PLATFORM_ID);
-  let token: string | null = null;
+  const token = storage.getItem('access_token');
 
-  if (isPlatformBrowser(platformId)) {
-    token = sessionStorage.getItem('access_token');
-  }
-
-  if (token && token !== '') {
+  if (token) {
     const cloned = req.clone({
       setHeaders: {
         Authorization: `Bearer ${token}`,

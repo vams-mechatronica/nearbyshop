@@ -13,6 +13,9 @@
   }
 
   .thumbnail-strip {
+    display: flex;
+    margin-top: 0.5rem;
+
     img {
       width: 70px;
       height: 70px;
@@ -20,6 +23,7 @@
       border: 2px solid transparent;
       border-radius: 6px;
       cursor: pointer;
+      margin-right: 0.5rem;
 
       &.active,
       &:hover {
@@ -31,28 +35,65 @@
   .product-name {
     font-size: 1.8rem;
     font-weight: 600;
+    margin-bottom: 0.5rem;
   }
 
   .price-section {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+
     .price {
       font-size: 1.5rem;
       color: #28a745;
+      font-weight: 600;
     }
+
     .old-price {
       text-decoration: line-through;
+      color: #6c757d;
     }
+
+    .discount {
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+    }
+  }
+
+  .description {
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 1rem;
   }
 
   .seller-info {
     background: #f9f9f9;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
   }
 
-  .action-buttons .btn {
-    padding: 0.6rem 1.2rem;
-    font-size: 1rem;
+  .action-buttons {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+
+    .btn {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
   }
 
   .related-products {
+    margin-top: 2rem;
+
     .product-card {
       min-width: 150px;
       cursor: pointer;
@@ -67,6 +108,118 @@
         object-fit: cover;
         border-radius: 8px 8px 0 0;
       }
+
+      .card-body {
+        padding: 0.5rem;
+
+        .btn {
+          margin-top: 0.3rem;
+        }
+      }
     }
   }
 }
+  // Quantity input
+.quantity-box,
+.quantity-box-sub {
+  display: flex;
+  align-items: center;
+  border: 1px solid #10832b;
+  background-color: #10832b;
+  border-radius: 6px;
+  overflow: hidden;
+  height: 2rem;
+  width: fit-content;
+  max-width: 100%;
+
+  .qty-btn {
+    background: none;
+    color: #fff;
+    border: none;
+    padding: 0 0.75rem;
+    font-size: 1rem;
+    font-weight: bold;
+    height: 100%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+  }
+
+  .qty-input {
+    border: none;
+    width: 3.8rem;
+    text-align: center;
+    background-color: transparent;
+    color: #fff;
+    font-weight: 500;
+    height: 100%;
+
+    &:focus {
+      outline: none;
+    }
+
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+  }
+}
+
+
+.quantity-box-2,
+.quantity-box-sub-2 {
+  display: flex;
+  align-items: center;
+  border: 1px solid #10832b;
+  background-color: #10832b;
+  border-radius: 6px;
+  overflow: hidden;
+  height: 2.5rem;
+  width: fit-content;
+  max-width: 100%;
+
+  .qty-btn-2 {
+    background: none;
+    color: #fff;
+    border: none;
+    padding: 0 0.75rem;
+    font-size: 1rem;
+    font-weight: bold;
+    height: 100%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+  }
+
+  .qty-input-2 {
+    border: none;
+    width: 2rem;
+    text-align: center;
+    background-color: transparent;
+    color: #fff;
+    font-weight: 500;
+    height: 100%;
+
+    &:focus {
+      outline: none;
+    }
+
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+  }
+}
+

@@ -1,53 +1,35 @@
-export const API_BASE_URL = 'http://localhost:8000';
-// export const API_BASE_URL = 'https://api.vamsmechatronica.in';
+import { environment } from '../../../environments/environment';
+
+export const API_BASE_URL = environment.apiUrl;
 
 export const API_ENDPOINTS = {
   CATEGORIES: `${API_BASE_URL}/api/v1/categories/?page_size=20`,
   PRODUCTS: `${API_BASE_URL}/api/v1/products/`,
   PRODUCT_DETAIL: `${API_BASE_URL}/api/v1/product/`,
   RELATED_PRODUCT: `${API_BASE_URL}/api/v1/products/`,
-  SEARCH: API_BASE_URL + '/api/v1/products/?search=',
+  SEARCH: `${API_BASE_URL}/api/v1/products/?search=`,
   GET_SUBSCRIBE: `${API_BASE_URL}/api/v1/subscriptions/`,
   POST_SUBSCRIBE: `${API_BASE_URL}/api/v1/subscriptions/create/`,
-
-  // Auth
   GET_LOGIN_OTP: `${API_BASE_URL}/api/v1/login/request-otp`,
   VERIFY_OTP: `${API_BASE_URL}/api/v1/login/verify-otp`,
-
-  // Cart
-
-  GET_CART : API_BASE_URL + '/api/v1/cart/',
-  ADD_TO_CART: API_BASE_URL + '/api/v1/cart/add/',
-  UPDATE_CART_ITEM: API_BASE_URL + '/api/v1/cart/update/',
-  DELETE_CART_ITEM: API_BASE_URL + '/api/v1/cart/delete',
-
-  // Subscription
-  GET_SUBSCRIPTION: API_BASE_URL + '/api/v1/subscriptions/',
-  UPDATE_SUBSCRIPTION: API_BASE_URL + '/api/v1/subscriptions',
-  PATCH_SUBSCRIPTION: API_BASE_URL + '/api/v1/subscriptions/',
-  DELETE_SUBSCRIPTION: API_BASE_URL + '/api/v1/subscriptions/',
-  ADD_SUBSCRIPTION: API_BASE_URL + '/api/v1/subscriptions/create/',
-
-  //
-  GET_BANNERS: API_BASE_URL + '/api/v1/banners/',
-
-  // User Related
-  GET_USERINFO: API_BASE_URL + '/api/v1/user/',
-  GET_USERADDRESS: API_BASE_URL + '/api/v1/user/addresses/',
-  ADD_USERADDRESS: API_BASE_URL + '/api/v1/user/addresses/',
-  GET_USERWALLET: API_BASE_URL + '/api/v1/wallet/balance/',
-
-  // Waller
-  CREATE_WALLET_RECHARGE_RAZORPAY_ORDER: API_BASE_URL + '/api/v1/wallet/recharge/initiate/',
-  VERIFY_WALLET_RECHARGE_RAZORPAY_ORDER: API_BASE_URL + '/api/v1/wallet/recharge/verify/',
-
-  // Cart Checkout Payment
-  CREATE_CART_PAYMENT_RAZORPAY_ORDER: API_BASE_URL + '/api/v1/payment/initiate/',
-  VERIFY_CART_PAYMENT_RAZORPAY_ORDER: API_BASE_URL + '/api/v1/payment/verify/',
-
-  // Create Order 
-  CREATE_ORDER: API_BASE_URL + '/api/v1/orders/create/',
-  GET_ORDERSUMMARY: API_BASE_URL + '/api/v1/order',
-
+  GET_CART: `${API_BASE_URL}/api/v1/cart/`,
+  ADD_TO_CART: `${API_BASE_URL}/api/v1/cart/add/`,
+  UPDATE_CART_ITEM: `${API_BASE_URL}/api/v1/cart/update/`,
+  DELETE_CART_ITEM: `${API_BASE_URL}/api/v1/cart/delete`,
+  GET_SUBSCRIPTION: `${API_BASE_URL}/api/v1/subscriptions/`,
+  UPDATE_SUBSCRIPTION: `${API_BASE_URL}/api/v1/subscriptions`,
+  PATCH_SUBSCRIPTION: `${API_BASE_URL}/api/v1/subscriptions/`,
+  DELETE_SUBSCRIPTION: `${API_BASE_URL}/api/v1/subscriptions/`,
+  ADD_SUBSCRIPTION: `${API_BASE_URL}/api/v1/subscriptions/create/`,
+  GET_BANNERS: `${API_BASE_URL}/api/v1/banners/`,
+  GET_USERINFO: `${API_BASE_URL}/api/v1/user/`,
+  GET_USERADDRESS: `${API_BASE_URL}/api/v1/user/addresses/`,
+  ADD_USERADDRESS: `${API_BASE_URL}/api/v1/user/addresses/`,
+  GET_USERWALLET: `${API_BASE_URL}/api/v1/wallet/balance/`,
+  CREATE_WALLET_RECHARGE_RAZORPAY_ORDER: `${API_BASE_URL}/api/v1/wallet/recharge/initiate/`,
+  VERIFY_WALLET_RECHARGE_RAZORPAY_ORDER: `${API_BASE_URL}/api/v1/wallet/recharge/verify/`,
+  CREATE_CART_PAYMENT_RAZORPAY_ORDER: `${API_BASE_URL}/api/v1/payment/initiate/`,
+  VERIFY_CART_PAYMENT_RAZORPAY_ORDER: `${API_BASE_URL}/api/v1/payment/verify/`,
+  CREATE_ORDER: `${API_BASE_URL}/api/v1/orders/create/`,
+  GET_ORDERSUMMARY: `${API_BASE_URL}/api/v1/order`,
 };
- 

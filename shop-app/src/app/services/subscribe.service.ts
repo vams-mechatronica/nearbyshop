@@ -4,11 +4,12 @@ import { Observable, of } from 'rxjs';
 import { API_ENDPOINTS } from '../shared/constants/api.constants';
 import { SubscriptionResponse } from '../models/subscribe.model';
 import { hasToken } from '../shared/utility/utils.common';
+import { StorageService } from './storage.service';
 
 @Injectable({ providedIn: 'root' })
 export class SubscriptionService {
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private storage: StorageService) { }
 
   getSubscriptions(): Observable<SubscriptionResponse> {
     return this.http.get<SubscriptionResponse>(API_ENDPOINTS.GET_SUBSCRIPTION);
@@ -26,9 +27,9 @@ export class SubscriptionService {
       return this.http.post<any>(API_ENDPOINTS.ADD_SUBSCRIPTION, body);
     } else {
       // Fallback: store in localStorage for guest users
-      let subs = JSON.parse(localStorage.getItem('subscriptions') || '[]');
+      let subs = JSON.parse(this.storage.getItem('subscriptions') || '[]');
       subs.push({ product, frequency, startDate });
-      localStorage.setItem('subscriptions', JSON.stringify(subs));
+      this.storage.setItem('subscriptions', JSON.stringify(subs));
       return of(subs);
     }
   }

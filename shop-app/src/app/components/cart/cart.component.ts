@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Injectable, OnInit } from '@angular/core';
 import { CartService } from '../../services/cart.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -10,6 +10,7 @@ import { AddDeliveryAddress } from '../../models/user.model';
 import { InitiatePayment, InitiatePaymentOrder } from '../../models/payment.model';
 import { PaymentService } from '../../services/payment.service';
 import { Order } from '../../models/order.model';
+import { StorageService } from '../../services/storage.service';
 
 declare var Razorpay: any;
 
@@ -20,6 +21,10 @@ declare var Razorpay: any;
   templateUrl: './cart.component.html',
   styleUrls: ['./cart.component.scss'],
   imports: [CommonModule, FormsModule, RouterLink]
+})
+
+@Injectable({
+  providedIn: 'root'
 })
 export class CartComponent implements OnInit {
   cartItems: any[] = [];
@@ -44,6 +49,7 @@ export class CartComponent implements OnInit {
   constructor(private cartService: CartService,
     private userService: UserService,
     private toastrService: ToastrService,
+    private storage: StorageService,
     private paymentService: PaymentService,private router: Router,
   ) { }
 
@@ -148,7 +154,7 @@ export class CartComponent implements OnInit {
           this.addresses = res?.results || [];
 
           // Try to restore selectedAddress from localStorage
-          const stored = localStorage.getItem('selectedAddress');
+          const stored = this.storage.getItem('selectedAddress');
           if (stored) {
             const saved = JSON.parse(stored);
             // Match with current API addresses (by id)
@@ -165,12 +171,12 @@ export class CartComponent implements OnInit {
         }
       });
     } else {
-      const stored = localStorage.getItem('addresses');
+      const stored = this.storage.getItem('addresses');
       if (stored) {
         this.addresses = JSON.parse(stored);
       }
 
-      const selected = localStorage.getItem('selectedAddress');
+      const selected = this.storage.getItem('selectedAddress');
       if (selected) {
         this.selectedAddress = JSON.parse(selected);
       }
@@ -184,7 +190,7 @@ export class CartComponent implements OnInit {
 
   setSelectedAddress(address: any) {
     this.selectedAddress = address;
-    localStorage.setItem('selectedAddress', JSON.stringify(address));
+    this.storage.setItem('selectedAddress', JSON.stringify(address));
   }
 
   addAddress() {
@@ -225,7 +231,7 @@ export class CartComponent implements OnInit {
       // Guest user: store in localStorage
       this.addresses.push(addressPayload);
 
-      localStorage.setItem('addresses', JSON.stringify(this.addresses));
+      this.storage.setItem('addresses', JSON.stringify(this.addresses));
       this.setSelectedAddress(addressPayload);
 
       this.toastrService.info('Address saved locally', 'Guest Mode');
@@ -239,7 +245,7 @@ export class CartComponent implements OnInit {
 
   selectAddress(index: number) {
     this.selectedAddress = this.addresses[index];
-    localStorage.setItem('selectedAddress', JSON.stringify(this.selectedAddress));
+    this.storage.setItem('selectedAddress', JSON.stringify(this.selectedAddress));
   }
 
   checkout(address: any) {

@@ -1,4 +1,4 @@
-import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, Injectable, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CartService } from '../../services/cart.service';
 import { ProductsService } from '../../services/products.service';
@@ -10,6 +10,7 @@ import { FormsModule } from '@angular/forms';
 import { hasToken } from '../../shared/utility/utils.common';
 import { ToastrService } from 'ngx-toastr';
 import { SubscriptionService } from '../../services/subscribe.service';
+import { StorageService } from '../../services/storage.service';
 
 @Component({
   standalone: true,
@@ -17,6 +18,9 @@ import { SubscriptionService } from '../../services/subscribe.service';
   templateUrl: './products.component.html',
   styleUrls: ['./products.component.scss'],
   imports: [CommonModule, FormsModule, RouterLink],
+})
+@Injectable({
+  providedIn: 'root'
 })
 export class ProductsComponent implements OnInit {
   products: any[] = [];
@@ -36,6 +40,7 @@ export class ProductsComponent implements OnInit {
     private modal: NgbModal,
     private categoryService: CategoryService,
     private subscribeService: SubscriptionService,
+    private storage: StorageService,
     private toastr: ToastrService,
   ) { }
 
@@ -64,7 +69,7 @@ export class ProductsComponent implements OnInit {
 
   addToCart(product: any) {
     // initialize cart structure if not present
-    let cart = JSON.parse(localStorage.getItem('cart') || '{"items": [], "total": 0}');
+    let cart = JSON.parse(this.storage.getItem('cart') || '{"items": [], "total": 0}');
 
     // check if product already exists
     const existingItem = cart.items.find((item: any) => item.product.id === product.id);
@@ -90,7 +95,7 @@ export class ProductsComponent implements OnInit {
     cart.total = cart.items.reduce((sum: number, item: any) => sum + parseFloat(item.price), 0);
 
     // save back to localStorage
-    localStorage.setItem('cart', JSON.stringify(cart));
+    this.storage.setItem('cart', JSON.stringify(cart));
 
     this.toastr.success(`${product.name} added to cart`, 'Cart Updated');
 

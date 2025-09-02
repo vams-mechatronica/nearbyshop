@@ -1,4 +1,4 @@
-import { Component, OnInit, TemplateRef } from '@angular/core';
+import { Component, Injectable, OnInit, TemplateRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
@@ -11,6 +11,7 @@ import { PaymentService } from '../../services/payment.service';
 import { Subscription } from '../../models/subscribe.model';
 import { InitiatePayment } from '../../models/payment.model';
 import { SubFilterPipe } from '../../shared/utility/subfilter.pipe';
+import { StorageService } from '../../services/storage.service';
 
 declare var Razorpay: any;
 
@@ -20,6 +21,9 @@ declare var Razorpay: any;
   templateUrl: './subscribe.component.html',
   styleUrls: ['./subscribe.component.scss'],
   imports: [CommonModule, FormsModule, SubFilterPipe]
+})
+@Injectable({
+  providedIn: 'root'
 })
 export class SubscriptionsComponent implements OnInit {
   subscriptions: Subscription[] = [];
@@ -44,6 +48,7 @@ export class SubscriptionsComponent implements OnInit {
     private walletService: WalletService,
     private paymentService: PaymentService,
     private toast: ToastrService,
+    private storage: StorageService,
     private modalService: NgbModal
   ) {}
 
@@ -69,7 +74,7 @@ export class SubscriptionsComponent implements OnInit {
   }
 
   loadSelectedAddress() {
-    const selected = localStorage.getItem('selectedAddress');
+    const selected = this.storage.getItem('selectedAddress');
     if (selected) {
       this.selectedAddress = JSON.parse(selected);
     }

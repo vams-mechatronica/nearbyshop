@@ -1,10 +1,11 @@
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { Component, EventEmitter, Output, OnInit } from '@angular/core';
+import { Component, EventEmitter, Output, OnInit, Injectable } from '@angular/core';
 import { RouterModule, ActivatedRoute, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { ToastrService } from 'ngx-toastr';
+import { StorageService } from '../../services/storage.service';
 
 
 @Component({
@@ -13,6 +14,10 @@ import { ToastrService } from 'ngx-toastr';
   imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './auth.component.html',
   styleUrl: './auth.component.scss'
+})
+
+@Injectable({
+  providedIn: 'root'
 })
 export class AuthComponent implements OnInit {
   phone: string = '';
@@ -26,6 +31,7 @@ export class AuthComponent implements OnInit {
     private router: Router,
     public activeModal: NgbActiveModal,
     private toastrService: ToastrService,
+    private storage: StorageService
   ) { }
 
   ngOnInit(): void {
@@ -59,9 +65,9 @@ export class AuthComponent implements OnInit {
         const { access, refresh } = res?.token || {};
 
         if (access && refresh) {
-          sessionStorage.setItem('access_token', access);
-          sessionStorage.setItem('refresh_token', refresh);
-          sessionStorage.setItem('phone', this.phone);
+          this.storage.setItem('access_token', access);
+          this.storage.setItem('refresh_token', refresh);
+          this.storage.setItem('phone', this.phone);
         }
 
         // ✅ Close the modal after login

@@ -1,11 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, Injectable, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-payment-status',
   templateUrl: './payment-status.component.html',
   imports: [CommonModule]
+})
+@Injectable({
+  providedIn: 'root'
 })
 export class PaymentStatusComponent implements OnInit {
   status: 'success' | 'failed' | null = null;

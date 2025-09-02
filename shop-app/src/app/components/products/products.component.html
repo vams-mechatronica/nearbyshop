@@ -1,125 +1,94 @@
 <div class="container mt-4">
   <!-- Category Name Header -->
-  <h4 class="mb-4 fw-bold text-left text-uppercase">
-    {{ categoryName }}
-  </h4>
+  <h4 class="mb-4 fw-bold text-left text-uppercase">{{ categoryName }}</h4>
+
   <div class="row">
-    <div class="col-md-3">
+    <!-- Sidebar -->
+    <div class="col-md-3 mb-4">
       <div class="bg-light p-3 rounded shadow-sm">
         <h5 class="fw-bold">Categories</h5>
-        <div *ngFor="let category of categories">
+        <div *ngFor="let category of categories" class="mb-2">
           <div class="form-check">
-            <input class="form-check-input" type="checkbox" [value]="category.slug"
-              (change)="onCategoryChange($event)" />
+            <input class="form-check-input" type="checkbox" [value]="category.slug" (change)="onCategoryChange($event)" />
             <label class="form-check-label">{{ category.name }} ({{ category.count }})</label>
           </div>
         </div>
-
-        <hr />
-
-        <!-- <h5 class="fw-bold">Location</h5> -->
-        <!-- <input type="text" class="form-control mb-2" placeholder="Search for a location" [(ngModel)]="locationSearch" />
-        <div *ngFor="let group of locationsGroupedByCity">
-          <div class="mt-2 fw-semibold text-danger">{{ group.city }}</div>
-          <div *ngFor="let loc of group.locations | locationFilter:locationSearch">
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" [value]="loc.id" (change)="onLocationChange($event)" />
-              <label class="form-check-label">{{ loc.name }} ({{ loc.count }})</label>
-            </div>
-          </div>
-        </div> -->
       </div>
     </div>
+
+    <!-- Products -->
     <div class="col-md-9">
-      <div *ngIf="products.length > 0; else noProducts">
-        <div class="col-6 col-sm-4 col-lg-2-4 mb-4" *ngFor="let product of products">
-          <div class="card product-card shadow-sm rounded border-0 h-100">
+      <div *ngIf="products.length > 0; else noProducts" class="product-grid">
+        <div class="product-card" *ngFor="let product of products">
+          <a [routerLink]="['/product', product.id]">
+            <!-- Discount Badge -->
+            <div *ngIf="product.discount_value > 0" class="discount-badge">
+              <ng-container *ngIf="product.discount_type === 'percentage'; else flatDiscount">
+                {{ product.discount_value | number:'1.0-0' }}% OFF
+              </ng-container>
+              <ng-template #flatDiscount>
+                ₹{{ product.discount_value | number:'1.0-0' }} OFF
+              </ng-template>
+            </div>
 
-            <a [routerLink]="['/product', product.id]">
-
-              <!-- Discount Badge -->
-              <div *ngIf="product.discount_value > 0" class="discount-badge">
-                <ng-container *ngIf="product.discount_type === 'percentage'; else flatDiscount">
-                  {{ product.discount_value | number:'1.0-0' }}% OFF
-                </ng-container>
-
-                <ng-template #flatDiscount>
-                  ₹{{ product.discount_value | number:'1.0-0' }} OFF
-                </ng-template>
-              </div>
-
-
-
-              <!-- Image / Carousel -->
-              <div id="carousel-{{ product.id }}" class="carousel slide" data-bs-ride="carousel">
-                <div class="carousel-inner rounded-top">
-                  <div *ngIf="!product.images.length" class="carousel-item active">
-                    <img [src]="product.image" class="d-block w-100 product-img" alt="{{ product.name }}" />
-                  </div>
-                  <div *ngFor="let img of product.images; let i = index" class="carousel-item" [class.active]="i === 0">
-                    <img [src]="img" class="d-block w-100 product-img img-thumbnail border"
-                      style="object-fit: cover; height: 150px;" alt="{{ product.name }}" />
-                  </div>
+            <!-- Carousel / Image -->
+            <div id="carousel-{{ product.id }}" class="carousel slide" data-bs-ride="carousel">
+              <div class="carousel-inner rounded-top">
+                <div *ngIf="!product.images.length" class="carousel-item active">
+                  <img [src]="product.image" class="d-block w-100 product-img" alt="{{ product.name }}" />
+                </div>
+                <div *ngFor="let img of product.images; let i = index" class="carousel-item" [class.active]="i === 0">
+                  <img [src]="img" class="d-block w-100 product-img img-thumbnail border"
+                       style="object-fit: cover; height: 150px;" alt="{{ product.name }}" />
                 </div>
               </div>
+            </div>
 
-              <!-- Card Body -->
-              <div class="card-body d-flex flex-column justify-content-between">
-                <!-- Product Name -->
-                <h6 class="card-title fw-bold text-truncate">{{ product.name }}</h6>
+            <!-- Card Body -->
+            <div class="card-body d-flex flex-column justify-content-between">
+              <!-- Product Name -->
+              <h6 class="card-title fw-bold text-truncate">{{ product.name }}</h6>
 
-                <!-- Description -->
-                <p class="card-text small text-muted mb-1 text-truncate" title="{{ product.description }}">
-                  {{ product.description || 'No description available' }}
+              <!-- Description -->
+              <p class="card-text small text-muted mb-1 text-truncate" title="{{ product.description }}">
+                {{ product.description || 'No description available' }}
+              </p>
+
+              <!-- Unit -->
+              <p class="card-text small mb-2">
+                <span class="badge bg-light text-dark">Unit: {{ product.unit.code || 'N/A' }}</span>
+              </p>
+
+              <!-- Price Row: Final & Original -->
+              <div class="d-flex align-items-center gap-2 mb-2">
+                <p class="fw-bold text-success mb-0">₹{{ product.final_price }}</p>
+                <p *ngIf="product.discount_value > 0" class="text-muted text-decoration-line-through mb-0">
+                  ₹{{ product.price }}
                 </p>
-
-                <!-- Unit -->
-                <p class="card-text small mb-2">
-                  <span class="badge bg-light text-dark">Unit: {{ product.unit.code || 'N/A' }}</span>
-                </p>
-
-                <!-- Price -->
-                <div>
-                  <p class="card-text fw-bold mb-1">₹{{ product.final_price }}</p>
-                  <p *ngIf="product.discount_value > 0" class="text-decoration-line-through text-muted small mb-1">
-                    ₹{{ product.price }}
-                  </p>
-                </div>
-
-                <!-- Actions -->
-                <div class="d-flex align-items-center justify-content-between gap-2 mt-2">
-                  <!-- ADD Button -->
-                  <div *ngIf="!product.qty" class="add-btn-wrapper w-50">
-                    <button class="btn btn-sm buy-now w-100" (click)="addToCart(product)">ADD</button>
-                  </div>
-
-                  <!-- Quantity Box -->
-                  <div *ngIf="product.qty" class="quantity-box d-flex align-items-center w-50">
-                    <button class="qty-btn" (click)="decreaseQty(product)">−</button>
-                    <input type="number" [(ngModel)]="product.qty" class="qty-input text-center" min="1" />
-                    <button class="qty-btn" (click)="increaseQty(product)">+</button>
-                  </div>
-
-                  <!-- Subscribe Button -->
-                  <div class="subscribe-btn-wrapper w-50">
-                    <button class="btn btn-sm w-100 text-white subscribe-btn" (click)="openSubscribeModal(product)">
-                      Subscribe
-                    </button>
-                  </div>
-                </div>
               </div>
-            </a>
+            </div>
+          </a>
+
+          <!-- Actions -->
+          <div class="d-flex align-items-center justify-content-between gap-2 mb-2 p-2">
+            <div *ngIf="!product.qty" class="add-btn-wrapper w-50">
+              <button class="btn btn-sm buy-now w-100" (click)="addToCart(product)">ADD</button>
+            </div>
+
+            <div *ngIf="product.qty" class="quantity-box d-flex align-items-center w-50">
+              <button class="qty-btn" (click)="decreaseQty(product)">−</button>
+              <input type="number" [(ngModel)]="product.qty" class="qty-input text-center" min="1" />
+              <button class="qty-btn" (click)="increaseQty(product)">+</button>
+            </div>
+
+            <div class="subscribe-btn-wrapper w-50">
+              <button class="btn btn-sm w-100 text-white subscribe-btn" (click)="openSubscribeModal(product)">
+                Subscribe
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-
-    <!-- No Products Template -->
-    <ng-template #noProducts>
-      <p class="text-center text-muted">No products available.</p>
-    </ng-template>
-
-  </div>
 
   <!-- No Products Template -->
   <ng-template #noProducts>
@@ -143,7 +112,7 @@
 
       <div class="flex-grow-1">
         <div class="fw-bold">{{ selectedProduct?.name }}</div>
-        <div class="text-muted small">₹{{ selectedProduct?.price }}</div>
+        <div class="text-muted small">₹{{ selectedProduct?.final_price }}</div>
       </div>
 
       <!-- Qty Controls -->

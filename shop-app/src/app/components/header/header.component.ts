@@ -8,6 +8,7 @@ import { UserService } from '../../services/user.service';
 import { Subject, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { API_ENDPOINTS } from '../../shared/constants/api.constants';
+import { StorageService } from '../../services/storage.service';
 
 @Component({
   selector: 'app-header',
@@ -28,13 +29,14 @@ export class HeaderComponent implements OnInit {
     private router: Router,
     private modalService: NgbModal,
     private userService: UserService,
+    private storage: StorageService,
     private http: HttpClient,   // for search API calls
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
   get isLoggedIn(): boolean {
     if (isPlatformBrowser(this.platformId)) {
-      return !!sessionStorage.getItem('access_token');
+      return !!this.storage.getItem('access_token');
     }
     return false;
   }
@@ -109,7 +111,7 @@ export class HeaderComponent implements OnInit {
   }
 
   logout(): void {
-    sessionStorage.removeItem('access_token');
+    this.storage.removeItem('access_token');
     this.showProfileDropdown = false;
     this.router.navigate(['/']);
   }

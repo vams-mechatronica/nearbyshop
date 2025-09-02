@@ -1,14 +1,20 @@
 .card{
   width: 70%;
 }
+
+.product-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: flex-start;
+}
+
 .product-card {
   position: relative;
+  flex: 1 1 calc(33.333% - 20px); // 3 cards per row by default
+  max-width: calc(33.333% - 20px);
   height: 100%;
   border-radius: 14px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 calc(20% - 16px); // 5 in a row by default
   background: #fff;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
   transition: all 0.25s ease-in-out;
@@ -17,6 +23,23 @@
     transform: translateY(-6px);
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
   }
+}
+
+.product-card {
+  position: relative;
+  flex: 1 1 calc(33.333% - 20px); // 3 cards per row by default
+  max-width: calc(33.333% - 20px);
+  height: 100%;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition: all 0.25s ease-in-out;
+
+  &:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+  }
+
 
   .product-img {
     object-fit: contain;
@@ -49,6 +72,7 @@
       color: #10832b;
       margin-bottom: 10px;
     }
+    
 
     .btn {
       font-size: 0.85rem;
@@ -58,6 +82,8 @@
     }
   }
 }
+
+
 
 // Primary actions
 .buy-now {
@@ -82,7 +108,7 @@
   font-size: 0.8rem;
   font-weight: 600;
   padding: 0.4rem 0.6rem;
-  width: 100%;
+  width: 100%;  
   border-radius: 6px;
   transition: all 0.2s ease-in-out;
 
@@ -124,7 +150,7 @@
 
   .qty-input {
     border: none;
-    width: 1.8rem;
+    width: 3.8rem;
     text-align: center;
     background-color: transparent;
     color: #fff;

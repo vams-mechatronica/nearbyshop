@@ -1,5 +1,5 @@
 import { CommonModule, TitleCasePipe } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, Injectable, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { UserService } from '../../services/user.service';
@@ -20,6 +20,9 @@ declare var Razorpay: any;
   imports: [CommonModule, FormsModule, AgGridAngular],
   styleUrls: ['./user-info.component.scss'],
   templateUrl: './user-info.component.html'
+})
+@Injectable({
+  providedIn: 'root'
 })
 export class UserProfileComponent implements OnInit {
   activeTab: string = 'profile';
