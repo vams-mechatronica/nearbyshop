@@ -165,6 +165,135 @@ nav.navbar {
   }
 }
 
+.search-bar {
+  position: relative;
+  flex: 1;
+  max-width: 500px;
+  margin: 0 20px;
+
+  input {
+    width: 100%;
+    padding: 10px 14px;
+    border: none;
+    border-radius: 25px;
+    outline: none;
+    font-size: 14px;
+  }
+
+  .search-btn {
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    transform: translateY(-50%);
+    background: #38bdf8;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 50%;
+    cursor: pointer;
+    color: white;
+    font-size: 16px;
+
+    &:hover {
+      background: #0ea5e9;
+    }
+  }
+
+  .suggestions {
+    position: absolute;
+    top: 110%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    color: #333;
+    border-radius: 6px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    list-style: none;
+    margin: 0;
+    padding: 6px 0;
+    max-height: 250px;
+    overflow-y: auto;
+    z-index: 999;
+
+    li {
+      padding: 10px 14px;
+      cursor: pointer;
+
+      &:hover {
+        background: #f1f5f9;
+      }
+    }
+  }
+}
+
+.search-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: 350px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-top: 5px;
+  padding: 0;
+  list-style: none;
+  z-index: 9999;
+  box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
+
+  li {
+    border-bottom: 1px solid #f1f1f1;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    a.search-result-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px;
+      text-decoration: none;
+      color: #333;
+      transition: background 0.2s ease;
+
+      &:hover {
+        background: #f9f9f9;
+      }
+
+      .search-result-image {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 6px;
+        border: 1px solid #eee;
+      }
+
+      .search-result-details {
+        flex: 1;
+
+        .product-name {
+          font-size: 14px;
+          font-weight: 600;
+          margin: 0;
+        }
+
+        .product-category {
+          font-size: 12px;
+          color: #666;
+          margin: 2px 0;
+        }
+
+        .product-price {
+          font-size: 13px;
+          font-weight: 500;
+          color: #28a745;
+        }
+      }
+    }
+  }
+}
+
 // ==============================
 // Animations
 // ==============================

@@ -1,0 +1,77 @@
+<div class="container product-detail-page my-4">
+  <div class="row">
+    <!-- Left side: Product Images -->
+    <div class="col-md-6">
+      <div class="main-image">
+        <img [src]="selectedImage" alt="{{ product.name }}" class="img-fluid zoom-image" />
+      </div>
+      <div class="thumbnail-strip d-flex mt-3">
+        <img *ngFor="let img of product.images" [src]="img.image" alt="img.alt_text" class="thumbnail me-2"
+          [class.active]="img.image === selectedImage" (click)="selectedImage = img.image" />
+      </div>
+    </div>
+
+    <!-- Right side: Product Information -->
+    <div class="col-md-6">
+      <h2 class="product-name">{{ product.name }}</h2>
+      <p class="category text-muted">{{ product.category_name }}</p>
+
+      <div class="price-section mb-3">
+        <span class="price fw-bold">₹{{ product.final_price }}</span>
+        <span class="old-price text-muted ms-2">₹{{ product.price }}</span>
+        <span *ngIf="product.discount_value > 0" class="discount badge bg-success ms-2">
+          {{ product.discount_type === 'percentage'
+          ? (product.discount_value | number:'1.0-0') + '%'
+          : '₹' + (product.discount_value | number:'1.0-0') }} OFF
+        </span>
+      </div>
+
+      <p class="description">{{ product.description }}</p>
+
+      <!-- Seller Info -->
+      <div class="seller-info mt-3 p-3 border rounded">
+        <h6 class="fw-bold">Seller: {{ product.vendor.shop_name }}</h6>
+        <p class="mb-0"><strong>Rating:</strong> ⭐ 5</p>
+        <p class="mb-0"><strong>Location:</strong> {{ product.vendor.shop_address }}</p>
+      </div>
+
+      <!-- Buttons -->
+      <div class="action-buttons mt-4">
+        <button class="btn btn-success me-2" (click)="addToCart(product)">
+          <i class="fas fa-shopping-cart me-1"></i> Add to Cart
+        </button>
+        <button class="btn btn-outline-primary" (click)="subscribeProduct(product)">
+          <i class="fas fa-bell me-1"></i> Subscribe
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Related Products Strip -->
+  <div class="related-products mt-5">
+    <h4>Related Products</h4>
+    <div class="d-flex overflow-auto py-3">
+      <div *ngFor="let item of relatedProducts" class="card product-card me-3 shadow-sm"
+        style="min-width: 220px; cursor: pointer;">
+        <!-- Product Image -->
+        <img [src]="item.image" class="card-img-top" alt="{{ item.name }}" (click)="viewProduct(item.id)"
+          style="height: 180px; object-fit: contain;" />
+
+        <!-- Product Details -->
+        <div class="card-body p-2">
+          <h6 class="card-title text-truncate mb-1" (click)="viewProduct(item.id)">
+            {{ item.name }}
+          </h6>
+          <p class="text-muted small mb-1">{{ item.category_name }}</p>
+          <p class="card-text fw-bold text-success mb-2">₹{{ item.price }}</p>
+
+          <!-- Add to Cart Button -->
+          <button class="btn btn-sm btn-primary w-100" (click)="addToCart(item); $event.stopPropagation()">
+            <i class="fas fa-shopping-cart me-1"></i> Add to Cart
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

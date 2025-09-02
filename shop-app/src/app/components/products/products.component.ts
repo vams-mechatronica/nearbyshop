@@ -1,5 +1,5 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CartService } from '../../services/cart.service';
 import { ProductsService } from '../../services/products.service';
 import { CategoryService } from '../../services/category.service';
@@ -16,7 +16,7 @@ import { SubscriptionService } from '../../services/subscribe.service';
   selector: 'app-products',
   templateUrl: './products.component.html',
   styleUrls: ['./products.component.scss'],
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
 })
 export class ProductsComponent implements OnInit {
   products: any[] = [];

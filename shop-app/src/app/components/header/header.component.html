@@ -29,11 +29,7 @@
         <i class="fas fa-user-circle"></i>
       </div>
 
-      <div
-        class="profile-dropdown-card"
-        *ngIf="showProfileDropdown"
-        (mouseleave)="showProfileDropdown = false"
-      >
+      <div class="profile-dropdown-card" *ngIf="showProfileDropdown" (mouseleave)="showProfileDropdown = false">
         <div class="profile-header">
           <i class="fas fa-user-circle me-2"></i>
           <span>{{ userName }}</span>
@@ -49,16 +45,28 @@
 <nav class="secondary-navbar navbar navbar-light bg-light px-3 border-top">
   <a class="navbar-brand" routerLink="/">NearByShop</a>
 
-  <form class="d-flex ms-auto" (submit)="onSearch()">
-    <input
-      type="search"
-      class="form-control form-control-sm me-2 search-box"
-      placeholder="Search products..."
-      [(ngModel)]="searchQuery"
-      name="search"
-    />
-    <button class="btn btn-sm btn-outline-success" type="submit">
-      Search
-    </button>
-  </form>
+  <!-- <form class="d-flex ms-auto" (submit)="onSearch()"> -->
+  <div class="search-bar">
+    <input type="text" [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange($event)" (keyup.enter)="onSearch()"
+      placeholder="Search..." />
+
+    <!-- <button (click)="onSearch()">Search</button> -->
+
+    <!-- Suggestions Dropdown -->
+    <ul class="search-results" *ngIf="searchResults.length > 0">
+      <li *ngFor="let item of searchResults" (click)="selectResult(item)">
+        <a [routerLink]="['/product', item.id]" class="search-result-item">
+          <img [src]="item.image" alt="{{ item.name }}" class="search-result-image" />
+          <div class="search-result-details">
+            <h6 class="product-name">{{ item.name }}<span class="product-category sm"> ({{ item.sku }})</span></h6>
+            <p class="product-category">{{ item.category_name }}</p>
+            <span class="product-price">₹{{ item.price }} per {{item.unit.code}}</span>
+          </div>
+        </a>
+      </li>
+    </ul>
+
+  </div>
+
+  <!-- </form> -->
 </nav>
