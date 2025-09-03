@@ -1,6 +1,6 @@
-import { Component, OnInit, ViewChild, ElementRef, Injectable, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, Injectable, AfterViewInit, OnDestroy, PLATFORM_ID, Inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { CategoryService } from '../../services/category.service';
 import { BannerService } from '../../services/banner.service';
 
@@ -30,7 +30,7 @@ export class HomeComponent implements OnInit,AfterViewInit, OnDestroy {
     private router: Router,
     private categoryService: CategoryService,
     private bannerService: BannerService,
-    
+    @Inject(PLATFORM_ID) private platformId: Object
   ) { }
 
   ngOnInit(): void {
@@ -62,17 +62,19 @@ export class HomeComponent implements OnInit,AfterViewInit, OnDestroy {
 
 
   ngAfterViewInit() {
-    // Lazy load banners when component enters viewport
-    this.observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          this.loadBanners();
-          this.observer.disconnect();
-        }
-      });
-    }, { threshold: 0.1 });
+    // Only run in browser
+    if (isPlatformBrowser(this.platformId)) {
+      this.observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            this.loadBanners();
+            this.observer?.disconnect();
+          }
+        });
+      }, { threshold: 0.1 });
 
-    this.observer.observe(this.bannerContainer.nativeElement);
+      this.observer.observe(this.bannerContainer.nativeElement);
+    }
   }
 
   ngOnDestroy() {
