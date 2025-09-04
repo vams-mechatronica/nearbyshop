@@ -52,7 +52,7 @@
         </div>
 
         <!-- Subscribe button -->
-        <button class="btn subscribe-btn flex-grow-1">
+        <button class="btn subscribe-btn flex-grow-1" (click)="openSubscribeModal(product)">
           <i class="fas fa-bell me-1"></i> Subscribe
         </button>
       </div>
@@ -66,6 +66,17 @@
     <div class="d-flex overflow-auto py-3">
       <div *ngFor="let item of relatedProducts" class="card product-card me-3 shadow-sm"
         style="min-width: 220px; cursor: pointer;">
+
+        <!-- ✅ Discount Badge -->
+        <div *ngIf="item.discount_value > 0" class="discount-badge position-absolute m-2">
+          <ng-container *ngIf="item.discount_type === 'percentage'; else flatDiscount">
+            {{ item.discount_value | number:'1.0-0' }}% OFF
+          </ng-container>
+          <ng-template #flatDiscount>
+            ₹{{ item.discount_value | number:'1.0-0' }} OFF
+          </ng-template>
+        </div>
+
         <!-- Product Image -->
         <a [routerLink]="['/product', item.id]">
           <img [src]="item.image" class="card-img-top" alt="{{ item.name }}" />
@@ -73,31 +84,54 @@
 
         <!-- Product Details -->
         <div class="card-body p-2">
+          <!-- Product Name -->
           <h6 class="card-title text-truncate mb-1">
             <a [routerLink]="['/product', item.id]">{{ item.name }}</a>
           </h6>
+
+          <!-- Category -->
           <p class="text-muted small mb-1">{{ item.category_name }}</p>
-          <p class="card-text fw-bold text-success mb-2">₹{{ item.price }}</p>
+
+          <!-- ✅ Price Row -->
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <p class="fw-bold text-success mb-0">₹{{ item.final_price }}</p>
+            <p *ngIf="item.discount_value > 0" class="text-muted text-decoration-line-through mb-0">
+              ₹{{ item.price }}
+            </p>
+            <!-- ✅ Unit Badge -->
+            <span class="badge bg-light text-dark">Unit: {{ item.unit?.code || 'N/A' }}</span>
+          </div>
+        </div>
+
+        <!-- ✅ Actions (Same as main product card) -->
+        <div class="d-flex align-items-center justify-content-between gap-2 mb-2 p-2">
 
           <!-- Show ADD button if qty is 0 -->
-          <div *ngIf="!item.qty">
-            <button class="btn btn-sm btn-primary w-100"
-              (click)="item.qty = 1; addToCart(item); $event.stopPropagation()">
-              <i class="fas fa-shopping-cart me-1"></i> Add to Cart
+          <div *ngIf="!item.qty" class="add-btn-wrapper w-50">
+            <button class="btn btn-sm buy-now w-100" (click)="addToCart(item); item.qty = 1; $event.stopPropagation()">
+              ADD
             </button>
           </div>
 
           <!-- Show quantity box if qty > 0 -->
-          <div *ngIf="item.qty" class="d-flex align-items-center gap-2 quantity-box-sub">
-            <button class="btn btn-sm btn-outline-secondary qty-btn" (click)="decreaseQty(item)">−</button>
-            <input type="number" [(ngModel)]="item.qty" class="form-control text-center qty-input" style="width: 60px;"
-              min="1" />
-            <button class="btn btn-sm btn-outline-secondary qty-btn" (click)="increaseQty(item)">+</button>
+          <div *ngIf="item.qty" class="quantity-box d-flex align-items-center w-50">
+            <button class="qty-btn" (click)="decreaseQty(item)">−</button>
+            <input type="number" [(ngModel)]="item.qty" class="qty-input text-center" min="1" />
+            <button class="qty-btn" (click)="increaseQty(item)">+</button>
+          </div>
+
+          <!-- Subscribe button -->
+          <div class="subscribe-btn-wrapper w-50">
+            <button class="btn btn-sm w-100 text-white subscribe-btn" (click)="openSubscribeModal(item)">
+              Subscribe
+            </button>
           </div>
         </div>
       </div>
     </div>
   </div>
+
+
 </div>
 
 
