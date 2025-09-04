@@ -116,41 +116,98 @@
 
 
           <!-- Bank -->
-          <div *ngIf="activeTab === 'bank'">
-            <h4 class="mb-3">Bank Details</h4>
-            <p><strong>Bank:</strong> {{bank.bankName}}</p>
-            <p><strong>Account No:</strong> {{bank.accountNumber}}</p>
-            <p><strong>IFSC:</strong> {{bank.ifsc}}</p>
+          <div *ngIf="activeTab === 'bank'" class="position-relative">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h4 class="mb-0">Bank Details</h4>
+              <button class="btn btn-sm btn-outline-primary" (click)="openBankModal()">
+                {{ bank?.bank_name ? 'Edit' : 'Add' }} Bank
+              </button>
+            </div>
+            <ng-container *ngIf="bank?.bank_name; else noBank">
+              <p><strong>Bank:</strong> {{bank.bank_name}}</p>
+              <p><strong>Account No:</strong> {{bank.account_number}}</p>
+              <p><strong>IFSC:</strong> {{bank.ifsc_code}}</p>
+            </ng-container>
+            <ng-template #noBank>
+              <p class="text-muted">No bank details added yet.</p>
+            </ng-template>
           </div>
 
-          <!-- Refunds -->
-          <div *ngIf="activeTab === 'refunds'">
-            <h4 class="mb-3">Refund History</h4>
-            <table class="table table-bordered">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Amount</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let refund of refunds">
-                  <td>{{refund.date}}</td>
-                  <td>₹{{refund.amount}}</td>
-                  <td>{{refund.status}}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <!-- Tracking -->
-          <div *ngIf="activeTab === 'tracking'">
-            <h4 class="mb-3">Order Tracking</h4>
-            <div *ngFor="let track of tracking" class="mb-2">
-              <div class="p-2 border rounded">
-                <strong>Order #{{track.orderId}}</strong> - {{track.status}} ({{track.updated}})
+          <!-- Bank Modal -->
+          <div class="modal fade show" tabindex="-1" *ngIf="showBankModal"
+            style="display:block; background: rgba(0,0,0,0.6);" (click)="closeBankModal()">
+            <div class="modal-dialog modal-dialog-centered" (click)="$event.stopPropagation()">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">{{ bank?.bankName ? 'Edit' : 'Add' }} Bank Details</h5>
+                  <button type="button" class="btn-close" (click)="closeBankModal()"></button>
+                </div>
+                <div class="modal-body">
+                  <form>
+                    <div class="mb-3">
+                      <label for="bankName" class="form-label">Bank Name</label>
+                      <input id="bankName" type="text" class="form-control" [(ngModel)]="bankForm.bank_name"
+                        name="bankName" placeholder="Enter bank name">
+                    </div>
+                    <div class="mb-3">
+                      <label for="accountHolderName" class="form-label">Account Holder Name</label>
+                      <input id="accountHolderName" type="text" class="form-control" [(ngModel)]="bankForm.account_holder_name"
+                        name="accountHolderName" placeholder="Enter account holder name">
+                    </div>
+                    <div class="mb-3">
+                      <label for="accountNumber" class="form-label">Account Number</label>
+                      <input id="accountNumber" type="text" class="form-control" [(ngModel)]="bankForm.account_number"
+                        name="accountNumber" placeholder="Enter account number">
+                    </div>
+                    <div class="mb-3">
+                      <label for="ifsc" class="form-label">IFSC Code</label>
+                      <input id="ifsc" type="text" class="form-control" [(ngModel)]="bankForm.ifsc_code" name="ifsc"
+                        placeholder="Enter IFSC code">
+                    </div>
+                  </form>
+                </div>
+                <div class="modal-footer">
+                  <button class="btn btn-secondary" (click)="closeBankModal()">Cancel</button>
+                  <button class="btn btn-success" (click)="saveBankDetails()">Save</button>
+                </div>
               </div>
+            </div>
+          </div>
+        </div>
+        <!-- <div *ngIf="activeTab === 'bank'">
+          <h4 class="mb-3">Bank Details</h4>
+          <p><strong>Bank:</strong> {{bank.bankName}}</p>
+          <p><strong>Account No:</strong> {{bank.accountNumber}}</p>
+          <p><strong>IFSC:</strong> {{bank.ifsc}}</p>
+        </div> -->
+
+        <!-- Refunds -->
+        <div *ngIf="activeTab === 'refunds'">
+          <h4 class="mb-3">Refund History</h4>
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Amount</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let refund of refunds">
+                <td>{{refund.date}}</td>
+                <td>₹{{refund.amount}}</td>
+                <td>{{refund.status}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Tracking -->
+        <div *ngIf="activeTab === 'tracking'">
+          <h4 class="mb-3">Order Tracking</h4>
+          <div *ngFor="let track of tracking" class="mb-2">
+            <div class="p-2 border rounded">
+              <strong>Order #{{track.orderId}}</strong> - {{track.status}} ({{track.updated}})
             </div>
           </div>
         </div>
@@ -158,6 +215,7 @@
     </div>
   </div>
 </div>
+
 <!-- Add Funds Modal -->
 <div class="modal fade show" tabindex="-1" *ngIf="showAddFundsModal" style="display:block; background: rgba(0,0,0,0.6);"
   (click)="closeAddFundsModal()">

@@ -12,8 +12,12 @@ export class OrderService {
         private http: HttpClient,
         @Inject(PLATFORM_ID) private platformId: Object
     ) { }
-    
+
     getOrderSummary(orderId: string): Observable<Order> {
         return this.http.get<Order>(`${API_ENDPOINTS.GET_ORDERSUMMARY}/${orderId}/`);
+    }
+
+    getOrderHistory(): Observable<any> {
+        return this.http.get<any>(API_ENDPOINTS.GET_ORDERHISTORY);
     }
 }

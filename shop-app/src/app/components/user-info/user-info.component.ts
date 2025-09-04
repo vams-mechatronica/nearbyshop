@@ -13,7 +13,19 @@ import { Subscription, SubscriptionResponse } from '../../models/subscribe.model
 import { SubscriptionService } from '../../services/subscribe.service';
 import { PaymentService } from '../../services/payment.service';
 import { InitiatePayment } from '../../models/payment.model';
+import { OrderService } from '../../services/order.service';
+import { Order } from '../../models/order.model';
+import { CartService } from '../../services/cart.service';
+import { BankService } from '../../services/bank.service';
 declare var Razorpay: any;
+
+interface BankForm {
+  account_holder_name: string;
+  bank_name: string;
+  account_number: string;
+  ifsc_code: string;
+}
+
 @Component({
   selector: 'app-user-info',
   standalone: true,
@@ -27,6 +39,7 @@ declare var Razorpay: any;
 export class UserProfileComponent implements OnInit {
   activeTab: string = 'profile';
   showAddFundsModal = false;
+  showBankModal = false;
   amount = 0;
   user: UserInfo = {
     id: 0,
@@ -45,13 +58,27 @@ export class UserProfileComponent implements OnInit {
     balance: 0
   }
   subscriptions: Subscription[] = [];
+  orders: Order[] = [];
+  bank: any = {};
+  cart: any[] = [];
+
+  // Form model
+  bankForm: BankForm = {
+    account_holder_name: '',
+    bank_name: '',
+    account_number: '',
+    ifsc_code: ''
+  };
 
 
   constructor(private userService: UserService,
     private toast: ToastrService,
     private walletService: WalletService,
     private subscribeService: SubscriptionService,
-    private paymentService: PaymentService
+    private orderService: OrderService,
+    private paymentService: PaymentService,
+    private cartService: CartService,
+    private bankService: BankService,
   ) { }
 
 
@@ -59,6 +86,9 @@ export class UserProfileComponent implements OnInit {
     this.getUserInfo();
     this.getWalletBalance();
     this.getSubscriptions();
+    this.getOrderHistory();
+    this.getBankDetails();
+    this.getCartItems();
   }
 
   getUserInfo() {
@@ -103,6 +133,90 @@ export class UserProfileComponent implements OnInit {
       }
     })
   }
+
+  getOrderHistory() {
+    this.orderService.getOrderHistory().subscribe({
+      next: (res: any) => {
+        this.orders = res?.results;
+      },
+      error: (err) => {
+        const errorMsg =
+          err?.error?.message || err?.error?.detail || err?.message || 'Something went wrong';
+        this.toast.error(errorMsg, 'Failed');
+      }
+    })
+  }
+  getBankDetails() {
+    this.userService.getUserBankDetails().subscribe({
+      next: (res: any) => {
+        this.bank = res?.results;
+      },
+      error: (err) => {
+        const errorMsg =
+          err?.error?.message || err?.error?.detail || err?.message || 'Something went wrong';
+        this.toast.error(errorMsg, 'Failed');
+      }
+    })
+  }
+
+  getCartItems() {
+    this.cartService.getCart().subscribe({
+      next: (res: any) => {
+        this.cart = res?.results;
+      },
+      error: (err) => {
+        const errorMsg =
+          err?.error?.message || err?.error?.detail || err?.message || 'Something went wrong';
+        this.toast.error(errorMsg, 'Failed');
+      }
+    })
+  }
+  // Bank Details Modal
+   // For editing an existing bank (optional)
+  // bank: BankForm | null = null;
+
+  // Open modal (optionally with existing data)
+  openBankModal(bank?: BankForm) {
+    this.showBankModal = true;
+
+    if (bank) {
+      this.bank = bank;
+      this.bankForm = { ...bank }; // pre-fill form for editing
+    } else {
+      this.bank = null;
+      this.bankForm = { account_holder_name: '', bank_name: '', account_number: '', ifsc_code: '' }; // reset form
+    }
+  }
+  closeBankModal() {
+    this.showBankModal = false;
+  }
+
+  // Save data (you can replace with API call)
+  saveBankDetails() {
+    if (!this.bankForm.account_holder_name || !this.bankForm.bank_name || !this.bankForm.account_number || !this.bankForm.ifsc_code) {
+      alert('All fields are required!');
+      return;
+    }
+
+    if (this.bank) {
+      this.bankService.addBankDetail(this.bankForm).subscribe({
+        next: (res) => {
+          this.toast.success('Bank details updated successfully!', 'Success');
+        },
+        error: (err) => {
+          const errorMsg =
+            err?.error?.message || err?.error?.detail || err?.message || 'Something went wrong';
+          this.toast.error(errorMsg, 'Failed');
+        }
+      });
+    } else {
+      console.log('Adding new bank:', this.bankForm);
+      // 🔹 call API to save
+    }
+
+    this.closeBankModal();
+  }
+
   // -------- Wallet ----------
   openAddFundsModal() {
     this.showAddFundsModal = true;
@@ -141,29 +255,24 @@ export class UserProfileComponent implements OnInit {
     });
   }
 
-
-  orders = [
-    { date: '2025-08-10', items: 'Milk, Bread', status: 'Delivered', total: 350 },
-    { date: '2025-08-15', items: 'Eggs, Butter', status: 'Pending', total: 220 },
-  ];
-
   transactions = [
     { date: '2025-08-01', amount: 500, type: 'Credit' },
     { date: '2025-08-05', amount: 300, type: 'Debit' },
   ];
 
-  cart = [
-    { name: 'Apples', qty: 2, price: 150 },
-    { name: 'Rice', qty: 1, price: 500 },
-  ];
+  // cart = [
+  //   { name: 'Apples', qty: 2, price: 150 },
+  //   { name: 'Rice', qty: 1, price: 500 },
+  // ];
 
   // Column definitions
   orderCols: ColDef[] = [
     { headerName: '#', valueGetter: (p) => (p.node?.rowIndex ?? 0) + 1 },
-    { headerName: 'Date', field: 'date' },
+    { headerName: 'Date', field: 'created_at' },
     { headerName: 'Items', field: 'items' },
+    { headerName: 'PaymentMethod', field: 'payment_method' },
     { headerName: 'Status', field: 'status' },
-    { headerName: 'Total (₹)', field: 'total' },
+    { headerName: 'Total (₹)', field: 'total_price' },
   ];
 
   txnCols: ColDef[] = [
@@ -224,11 +333,11 @@ export class UserProfileComponent implements OnInit {
     domLayout: 'normal',
   };
 
-  bank = {
-    bankName: 'HDFC Bank',
-    accountNumber: 'XXXX1234',
-    ifsc: 'HDFC0001234'
-  };
+  // bank = {
+  //   // bankName: 'HDFC Bank',
+  //   // accountNumber: 'XXXX1234',
+  //   // ifsc: 'HDFC0001234'
+  // };
 
   refunds = [
     { date: '2025-08-12', amount: 300, status: 'Processed' }

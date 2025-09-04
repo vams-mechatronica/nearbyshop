@@ -11,6 +11,7 @@ import { hasToken } from '../../shared/utility/utils.common';
 import { ToastrService } from 'ngx-toastr';
 import { SubscriptionService } from '../../services/subscribe.service';
 import { StorageService } from '../../services/storage.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   standalone: true,
@@ -41,6 +42,7 @@ export class ProductsComponent implements OnInit {
     private categoryService: CategoryService,
     private subscribeService: SubscriptionService,
     private storage: StorageService,
+    private authService: AuthService,
     private toastr: ToastrService,
   ) { }
 
@@ -100,7 +102,7 @@ export class ProductsComponent implements OnInit {
     this.toastr.success(`${product.name} added to cart`, 'Cart Updated');
 
     product.qty = 1;
-    if (hasToken()) {
+    if (this.authService.hasToken()) {
     this.cartService.addToCart(product).subscribe({
       next: (res: any) => console.log('Added to cart:', res),
       error: (err: HttpErrorResponse) => console.error('Add to cart failed:', err),

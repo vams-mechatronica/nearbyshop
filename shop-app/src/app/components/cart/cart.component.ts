@@ -12,6 +12,7 @@ import { PaymentService } from '../../services/payment.service';
 import { Order } from '../../models/order.model';
 import { StorageService } from '../../services/storage.service';
 import { isPlatformBrowser } from '@angular/common';
+import { AuthService } from '../../services/auth.service';
 
 declare var Razorpay: any;
 
@@ -49,6 +50,7 @@ export class CartComponent implements OnInit {
     private toastrService: ToastrService,
     private storage: StorageService,
     private paymentService: PaymentService,
+    private authService: AuthService,
     private router: Router,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
@@ -80,7 +82,7 @@ export class CartComponent implements OnInit {
   }
 
   removeItem(item: any) {
-    if (hasToken()) {
+    if (this.authService.hasToken()) {
       this.cartService.deleteCartItem(item.product.id).subscribe({
         next: () => this.loadCart(),
         error: (err) => console.log('Error Deleting the Cart Item', err)
@@ -124,7 +126,7 @@ export class CartComponent implements OnInit {
   loadAddresses() {
     if (!isPlatformBrowser(this.platformId)) return;
 
-    if (hasToken()) {
+    if (this.authService.hasToken()) {
       this.userService.getUserAddress().subscribe({
         next: (res: any) => {
           this.addresses = res?.results || [];
@@ -168,7 +170,7 @@ export class CartComponent implements OnInit {
 
     if (!isPlatformBrowser(this.platformId)) return;
 
-    if (hasToken()) {
+    if (this.authService.hasToken()) {
       this.userService.addUserAddress(addressPayload).subscribe({
         next: (res) => {
           this.addresses.push(res);

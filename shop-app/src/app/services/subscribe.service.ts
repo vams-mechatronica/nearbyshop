@@ -5,18 +5,19 @@ import { API_ENDPOINTS } from '../shared/constants/api.constants';
 import { SubscriptionResponse } from '../models/subscribe.model';
 import { hasToken } from '../shared/utility/utils.common';
 import { StorageService } from './storage.service';
+import { AuthService } from './auth.service';
 
 @Injectable({ providedIn: 'root' })
 export class SubscriptionService {
 
-  constructor(private http: HttpClient, private storage: StorageService) { }
+  constructor(private http: HttpClient, private storage: StorageService, private authService: AuthService) { }
 
   getSubscriptions(): Observable<SubscriptionResponse> {
     return this.http.get<SubscriptionResponse>(API_ENDPOINTS.GET_SUBSCRIPTION);
   }
 
   addSubscription(product: any, frequency: string, startDate: string, quantity: number) {
-    if (hasToken()) {
+    if (this.authService.hasToken()) {
 
       const body = {
         product_id: product.id,

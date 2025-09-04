@@ -32,4 +32,7 @@ export const API_ENDPOINTS = {
   VERIFY_CART_PAYMENT_RAZORPAY_ORDER: `${API_BASE_URL}/api/v1/payment/verify/`,
   CREATE_ORDER: `${API_BASE_URL}/api/v1/orders/create/`,
   GET_ORDERSUMMARY: `${API_BASE_URL}/api/v1/order`,
+  GET_ORDERHISTORY: `${API_BASE_URL}/api/v1/orders/`,
+  GET_USERBANKDETAILS: `${API_BASE_URL}/api/v1/bank-details/`,
+  ADD_USERBANKDETAILS: `${API_BASE_URL}/api/v1/bank-details/`,
 };

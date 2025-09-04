@@ -4,6 +4,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
 import { StorageService } from './storage.service';
+import { AuthService } from './auth.service';
 
 @Injectable({ providedIn: 'root' })
 export class CartService {
@@ -11,10 +12,11 @@ export class CartService {
   constructor(
     private http: HttpClient,
     private storage: StorageService,
+    private authService: AuthService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) { }
   addToCart(product: any) {
-    if (this.hasToken()) {
+    if (this.authService.hasToken()) {
 
       const body = {
         product_id: product.id,
@@ -44,7 +46,7 @@ export class CartService {
 
   getCart(): Observable<any> {
 
-    if (this.hasToken()) {
+    if (this.authService.hasToken()) {
       return this.http.get<any>(API_ENDPOINTS.GET_CART);
     } else {
       // Fallback: return cart from localStorage for guest users
@@ -62,7 +64,7 @@ export class CartService {
 
   /** ✅ Update quantity */
   updateCartItem(productId: number, quantity: number): Observable<any> {
-    if (this.hasToken()) {
+    if (this.authService.hasToken()) {
       // Logged-in user → API call (interceptor adds headers)
       const body = { product_id: productId, quantity: quantity };
       return this.http.put<any>(`${API_ENDPOINTS.UPDATE_CART_ITEM}`, body);
@@ -87,7 +89,7 @@ export class CartService {
 
   /** ✅ Delete item */
   deleteCartItem(productId: number): Observable<any> {
-    if (this.hasToken()) {
+    if (this.authService.hasToken()) {
       // Logged-in user → API call
       return this.http.delete<any>(`${API_ENDPOINTS.DELETE_CART_ITEM}/${productId}/`);
     } else {

@@ -24,4 +24,8 @@ export class UserService {
     return this.http.get(API_ENDPOINTS.GET_USERWALLET);
   }
 
+  getUserBankDetails(){
+    return this.http.get(API_ENDPOINTS.GET_USERBANKDETAILS);
+  }
+
 }
