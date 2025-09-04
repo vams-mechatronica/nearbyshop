@@ -78,18 +78,82 @@
 
   .action-buttons {
     display: flex;
-    align-items: center;
+    align-items: stretch; // ✅ makes all children same height
     gap: 0.5rem;
-    flex-wrap: wrap;
 
-    .btn {
-      padding: 0.5rem 1rem;
-      font-size: 1rem;
+    .btn,
+    .quantity-box {
+      height: 40px; // ✅ uniform height
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 600;
       display: flex;
       align-items: center;
       justify-content: center;
     }
+
+    .buy-now {
+      background-color: #10832b;
+      color: #fff;
+      transition: 0.2s;
+      min-width: 150px;
+
+      &:hover {
+        background-color: #0c6b23;
+      }
+    }
+
+    .subscribe-btn {
+      background-color: #c23c3c;
+      color: #fff;
+      transition: 0.2s;
+
+      &:hover {
+        background-color: #a22f2f;
+      }
+    }
+
+    .quantity-box {
+      display: flex;
+      align-items: stretch;
+      border: 1px solid #10832b;
+      background-color: #10832b;
+      overflow: hidden;
+      min-width: 150px;
+
+      .qty-btn {
+        flex: 0 0 30%;
+        background: transparent;
+        border: none;
+        color: #fff;
+        font-size: 1rem;
+        cursor: pointer;
+
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.15);
+        }
+      }
+
+      .qty-input {
+        flex: 1;
+        border: none;
+        background: transparent;
+        color: #fff;
+        text-align: center;
+        font-weight: 500;
+
+        &:focus {
+          outline: none;
+        }
+
+        &::-webkit-inner-spin-button,
+        &::-webkit-outer-spin-button {
+          -webkit-appearance: none;
+        }
+      }
+    }
   }
+
 
   .related-products {
     margin-top: 2rem;
@@ -118,8 +182,11 @@
       }
     }
   }
+
+
 }
-  // Quantity input
+
+// Quantity input
 .quantity-box,
 .quantity-box-sub {
   display: flex;
@@ -222,4 +289,3 @@
     }
   }
 }
-

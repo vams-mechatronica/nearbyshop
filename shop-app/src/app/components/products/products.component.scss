@@ -1,4 +1,4 @@
-.card{
+.card {
   width: 70%;
 }
 
@@ -11,25 +11,8 @@
 
 .product-card {
   position: relative;
-  flex: 1 1 calc(33.333% - 20px); // 3 cards per row by default
-  max-width: calc(33.333% - 20px);
-  height: 100%;
-  border-radius: 14px;
-  background: #fff;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  transition: all 0.25s ease-in-out;
-
-  &:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
-  }
-}
-
-.product-card {
-  position: relative;
-  flex: 1 1 calc(33.333% - 20px); // 3 cards per row by default
-  max-width: calc(33.333% - 20px);
-  height: 100%;
+  flex: 1 1 calc(33.333% - 20px);
+  max-width: 200px; // ✅ card width capped at 300px
   border-radius: 14px;
   background: #fff;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
@@ -41,19 +24,16 @@
   }
 
 
-  .product-img {
-    object-fit: contain;
-    height: 180px;
-    width: 90%;
-    border-radius: 14px 14px 0 0;
-  }
 
   .card-body {
     padding: 14px 12px;
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+
+    .product-img {
+      object-fit: contain;
+      height: 180px;
+      width: 100%;
+      border-radius: 14px 14px 0 0;
+    }
 
     .product-title {
       font-size: 1rem;
@@ -66,35 +46,54 @@
       white-space: nowrap;
     }
 
+    .seller-info {
+      background-color: #f6f4f4;
+      border-radius: 5%;
+      // margin: 1px;
+      // margin-bottom: 1px;
+      // outline: 2px solid rgb(116, 28, 28);
+      // outline-offset: 1px;
+
+      .seller-name {
+        font-size: 0.85rem;
+        font-weight: 400;
+        color: #444;
+        margin: 0;
+        margin-left: 5px;
+      }
+
+      .seller-address {
+        font-size: 0.75rem;
+        color: #777;
+        margin: 0;
+        margin-left: 5px;
+
+      }
+    }
+
     .product-price {
       font-size: 0.95rem;
       font-weight: bold;
       color: #10832b;
       margin-bottom: 10px;
     }
-    
-
-    .btn {
-      font-size: 0.85rem;
-      font-weight: 600;
-      border-radius: 6px;
-      transition: 0.2s ease-in-out;
-    }
   }
 }
 
+// Buttons
+.buy-now,
+.subscribe-btn {
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.35rem 0.6rem;
+  border-radius: 6px;
+  transition: all 0.2s ease-in-out;
+}
 
-
-// Primary actions
 .buy-now {
   border: 1px solid #10832b;
   background-color: #fff;
-  border-radius: 6px;
   color: #10832b;
-  font-size: 0.8rem;
-  font-weight: 600;
-  padding: 0.4rem 0.6rem;
-  transition: all 0.2s ease-in-out;
 
   &:hover {
     background-color: #10832b;
@@ -105,43 +104,35 @@
 .subscribe-btn {
   background-color: #c23c3c;
   color: #fff;
-  font-size: 0.8rem;
-  font-weight: 600;
-  padding: 0.4rem 0.6rem;
-  width: 100%;  
-  border-radius: 6px;
-  transition: all 0.2s ease-in-out;
 
   &:hover {
     background-color: #a22f2f;
   }
 }
 
-// Quantity input
-.quantity-box,
-.quantity-box-sub {
+.quantity-box {
   display: flex;
-  align-items: center;
+  align-items: stretch;
+  justify-content: space-between;
   border: 1px solid #10832b;
   background-color: #10832b;
   border-radius: 6px;
   overflow: hidden;
-  height: 2rem;
-  width: fit-content;
-  max-width: 100%;
+  height: 100%;
+  width: 100%; // ✅ takes full width like buy-now
+  min-height: 2rem;
 
   .qty-btn {
-    background: none;
-    color: #fff;
-    border: none;
-    padding: 0 0.75rem;
-    font-size: 1rem;
-    font-weight: bold;
-    height: 100%;
-    cursor: pointer;
+    flex: 0 0 25%; // ✅ each button takes 25% width
     display: flex;
     align-items: center;
     justify-content: center;
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border: none;
+    background: transparent;
+    height: 100%;
 
     &:hover {
       background-color: rgba(255, 255, 255, 0.15);
@@ -149,13 +140,14 @@
   }
 
   .qty-input {
-    border: none;
-    width: 3.8rem;
+    flex: 1; // ✅ input stretches in remaining space
     text-align: center;
-    background-color: transparent;
+    background: transparent;
     color: #fff;
     font-weight: 500;
+    border: none;
     height: 100%;
+    min-width: 0; // ✅ allows shrinking without breaking
 
     &:focus {
       outline: none;
@@ -169,7 +161,8 @@
   }
 }
 
-/* Discount badge */
+
+// Discount badge
 .discount-badge {
   position: absolute;
   top: 10px;
@@ -183,6 +176,7 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
   z-index: 2;
 }
+
 
 
 // Grid layout
@@ -206,56 +200,56 @@
   }
 
   // Quantity input
-.quantity-box,
-.quantity-box-sub {
-  display: flex;
-  align-items: center;
-  border: 1px solid #10832b;
-  background-color: #10832b;
-  border-radius: 6px;
-  overflow: hidden;
-  height: 2rem;
-  width: fit-content;
-  max-width: 60%;
-
-  .qty-btn {
-    background: none;
-    color: #fff;
-    border: none;
-    padding: 0 0.75rem;
-    font-size: 0.75rem;
-    font-weight: bold;
-    height: 100%;
-    cursor: pointer;
+  .quantity-box,
+  .quantity-box-sub {
     display: flex;
     align-items: center;
-    justify-content: center;
+    border: 1px solid #10832b;
+    background-color: #10832b;
+    border-radius: 6px;
+    overflow: hidden;
+    height: 2rem;
+    width: fit-content;
+    max-width: 60%;
 
-    &:hover {
-      background-color: rgba(255, 255, 255, 0.15);
+    .qty-btn {
+      background: none;
+      color: #fff;
+      border: none;
+      padding: 0 0.75rem;
+      font-size: 0.75rem;
+      font-weight: bold;
+      height: 100%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.15);
+      }
+    }
+
+    .qty-input {
+      border: none;
+      width: 2rem;
+      text-align: center;
+      background-color: transparent;
+      color: #fff;
+      font-weight: 500;
+      height: 100%;
+
+      &:focus {
+        outline: none;
+      }
+
+      &::-webkit-inner-spin-button,
+      &::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
     }
   }
-
-  .qty-input {
-    border: none;
-    width: 2rem;
-    text-align: center;
-    background-color: transparent;
-    color: #fff;
-    font-weight: 500;
-    height: 100%;
-
-    &:focus {
-      outline: none;
-    }
-
-    &::-webkit-inner-spin-button,
-    &::-webkit-outer-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
-  }
-}
 }
 
 @media (max-width: 768px) {

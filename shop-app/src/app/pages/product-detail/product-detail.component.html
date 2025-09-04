@@ -36,26 +36,27 @@
       </div>
 
       <!-- Action Buttons -->
-      <div class="action-buttons mt-4">
+      <div class="col-md-3 action-buttons mt-4 d-flex align-items-stretch gap-2">
         <!-- Show ADD button if qty is 0 -->
-        <div *ngIf="!product.qty">
-          <button class="btn btn-success me-2" (click)="product.qty = 1; addToCart(product)">
+        <div *ngIf="!product.qty" class="flex-grow-1">
+          <button class="btn buy-now w-100" (click)="product.qty = 1; addToCart(product)">
             <i class="fas fa-shopping-cart me-1"></i> Add to Cart
           </button>
         </div>
 
         <!-- Show quantity box if qty > 0 -->
-        <div *ngIf="product.qty" class="d-flex align-items-center gap-2 quantity-box-sub-2">
-          <button class="btn btn-outline-secondary qty-btn-2" (click)="decreaseQty(product)">−</button>
-          <input type="number" [(ngModel)]="product.qty" class="form-control text-center qty-input-2" style="width: 70px;" min="1" />
-          <button class="btn btn-outline-secondary qty-btn-2" (click)="increaseQty(product)">+</button>
+        <div *ngIf="product.qty" class="quantity-box flex-grow-1">
+          <button class="qty-btn" (click)="decreaseQty(product)">−</button>
+          <input type="number" [(ngModel)]="product.qty" class="qty-input text-center" min="1" />
+          <button class="qty-btn" (click)="increaseQty(product)">+</button>
         </div>
 
         <!-- Subscribe button -->
-        <button class="btn btn-outline-primary ms-2" (click)="openSubscribeModal(product)">
+        <button class="btn subscribe-btn flex-grow-1">
           <i class="fas fa-bell me-1"></i> Subscribe
         </button>
       </div>
+
     </div>
   </div>
 
@@ -80,7 +81,8 @@
 
           <!-- Show ADD button if qty is 0 -->
           <div *ngIf="!item.qty">
-            <button class="btn btn-sm btn-primary w-100" (click)="item.qty = 1; addToCart(item); $event.stopPropagation()">
+            <button class="btn btn-sm btn-primary w-100"
+              (click)="item.qty = 1; addToCart(item); $event.stopPropagation()">
               <i class="fas fa-shopping-cart me-1"></i> Add to Cart
             </button>
           </div>
@@ -88,7 +90,8 @@
           <!-- Show quantity box if qty > 0 -->
           <div *ngIf="item.qty" class="d-flex align-items-center gap-2 quantity-box-sub">
             <button class="btn btn-sm btn-outline-secondary qty-btn" (click)="decreaseQty(item)">−</button>
-            <input type="number" [(ngModel)]="item.qty" class="form-control text-center qty-input" style="width: 60px;" min="1" />
+            <input type="number" [(ngModel)]="item.qty" class="form-control text-center qty-input" style="width: 60px;"
+              min="1" />
             <button class="btn btn-sm btn-outline-secondary qty-btn" (click)="increaseQty(item)">+</button>
           </div>
         </div>
