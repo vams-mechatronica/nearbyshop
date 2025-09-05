@@ -98,6 +98,14 @@
             ],
             "scripts": []
           }
+        },
+        "deploy": {
+          "builder": "@netlify-builder/deploy:deploy",
+          "options": {
+            "outputPath": "dist/shop-app",
+            "netlifyToken": "nfp_bsbucTbTH6NVt676BSwBZ32ywnBeSrmT545f",
+            "siteId": "d1fc616a-946f-4932-90ac-1ab2d4435d4e"
+          }
         }
       }
     }
