@@ -23,7 +23,7 @@ export class AuthComponent implements OnInit {
   phone: string = '';
   otp: string = '';
   showOtpInput = false;
-  redirectTo: string = '/';
+  redirectTo: string |null= null;
 
   constructor(
     private route: ActivatedRoute,
@@ -35,7 +35,7 @@ export class AuthComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.redirectTo = this.route.snapshot.queryParamMap.get('redirectTo') || '/';
+    this.redirectTo = this.route.snapshot.queryParamMap.get('redirectTo');
   }
 
   sendOtp() {

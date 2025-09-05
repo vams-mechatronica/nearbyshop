@@ -13,6 +13,9 @@ import { Order } from '../../models/order.model';
 import { StorageService } from '../../services/storage.service';
 import { isPlatformBrowser } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { AuthComponent } from '../auth/auth.component';
+import { LoaderService } from '../../services/loader.service';
 
 declare var Razorpay: any;
 
@@ -52,8 +55,10 @@ export class CartComponent implements OnInit {
     private paymentService: PaymentService,
     private authService: AuthService,
     private router: Router,
+    private modalService: NgbModal,
+    private loaderService: LoaderService,
     @Inject(PLATFORM_ID) private platformId: Object
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadCart();
@@ -82,12 +87,12 @@ export class CartComponent implements OnInit {
   }
 
   removeItem(item: any) {
-    if (this.authService.hasToken()) {
-      this.cartService.deleteCartItem(item.product.id).subscribe({
-        next: () => this.loadCart(),
-        error: (err) => console.log('Error Deleting the Cart Item', err)
-      });
-    }
+    // if (this.authService.hasToken()) {
+    this.cartService.deleteCartItem(item.product.id).subscribe({
+      next: () => this.loadCart(),
+      error: (err) => console.log('Error Deleting the Cart Item', err)
+    });
+    // }
   }
 
   increaseQuantity(item: any) {
@@ -198,13 +203,38 @@ export class CartComponent implements OnInit {
   }
 
   checkout(address: any) {
+    // this.loaderService.show();
+    if (!this.authService.hasToken()) {
+      // 🔑 User not logged in → show login modal
+      const modalRef = this.modalService.open(AuthComponent, { backdrop: 'static', keyboard: false });
+
+      // ⏳ When modal closes, retry checkout if login was successful
+      modalRef.closed.subscribe((result) => {
+        if (result === 'logged-in') {
+          this.cartService.syncGuestCart().subscribe();
+          // this.loaderService.hide();
+          this.checkout(address); // 🔁 Retry with same address
+        }
+      });
+
+      return;
+    }
+
+    if (!address){
+      this.toastrService.error('Please Enter delivery address','Failed');
+      return;
+    }
+    // ✅ Logged in → proceed with order
     this.cartService.createOrder(this.cartId, address.id, 'razorpay', null).subscribe({
       next: (res: Order) => this.paymentRazorpay(res.total_price, res.id),
       error: () => {
-        if (isPlatformBrowser(this.platformId)) this.toastrService.error('Failed to order', 'Error');
+        if (isPlatformBrowser(this.platformId)) {
+          this.toastrService.error('Failed to order', 'Error');
+        }
       }
     });
   }
+
 
   paymentRazorpay(amount: any, orderId: number) {
     if (!isPlatformBrowser(this.platformId)) return;

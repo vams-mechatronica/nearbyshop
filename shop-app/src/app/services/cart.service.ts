@@ -1,14 +1,17 @@
 import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import { API_ENDPOINTS } from '../shared/constants/api.constants';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import { forkJoin, Observable, of, tap } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
 import { StorageService } from './storage.service';
 import { AuthService } from './auth.service';
+import { CartItem, CartResponse } from '../models/cart.model';
 
 @Injectable({ providedIn: 'root' })
 export class CartService {
+  cartItems!: CartResponse;
 
+  cart: any = null;
   constructor(
     private http: HttpClient,
     private storage: StorageService,
@@ -38,7 +41,7 @@ export class CartService {
 
       this.storage.setItem('cart', JSON.stringify(cart));
 
-      return cart;
+      return of(cart);
     }
   }
 
@@ -49,57 +52,68 @@ export class CartService {
     if (this.authService.hasToken()) {
       return this.http.get<any>(API_ENDPOINTS.GET_CART);
     } else {
-      // Fallback: return cart from localStorage for guest users
       const cart = JSON.parse(this.storage.getItem('cart') || '[]');
-      return of(cart); // ✅ wrap in Observable so return type matches
+      return of(cart);
     }
-  }
-
-
-  private hasToken(): boolean {
-    const token = this.storage.getItem('access_token');
-    return !!token && token !== '';
   }
 
 
   /** ✅ Update quantity */
-  updateCartItem(productId: number, quantity: number): Observable<any> {
+  updateCartItem(productId: number, quantity: number): Observable<CartResponse> {
     if (this.authService.hasToken()) {
       // Logged-in user → API call (interceptor adds headers)
       const body = { product_id: productId, quantity: quantity };
-      return this.http.put<any>(`${API_ENDPOINTS.UPDATE_CART_ITEM}`, body);
+      return this.http.put<CartResponse>(`${API_ENDPOINTS.UPDATE_CART_ITEM}`, body);
     } else {
       // Guest user → update localStorage
-      let cart = JSON.parse(this.storage.getItem('cart') || '[]');
-      const item = cart.find((p: any) => p.product_id === productId);
+      this.cart = this.storage.getItem('cart');
+      this.cartItems = this.cart ? JSON.parse(this.cart) as CartResponse : { items: [], total: 0 };
+
+      const item = this.cartItems.items.find((p: CartItem) => p.product.id === productId);
 
       if (item) {
         if (quantity > 0) {
           item.quantity = quantity;
+          // also update the price for that item
+          item.price = (Number(item.product.price) * quantity).toFixed(2);
         } else {
-          // remove if qty becomes 0
-          cart = cart.filter((p: any) => p.product_id !== productId);
+          // ✅ correctly reassign the filtered array
+          this.cartItems.items = this.cartItems.items.filter((p: CartItem) => p.product.id !== productId);
         }
       }
 
-      this.storage.setItem('cart', JSON.stringify(cart));
-      return of(cart); // wrap in Observable to keep consistent return type
+      // ✅ recalculate total
+      this.cartItems.total = this.cartItems.items.reduce(
+        (sum, i) => sum + Number(i.price),
+        0
+      );
+
+      this.storage.setItem('cart', JSON.stringify(this.cartItems));
+      return of(this.cartItems);
     }
   }
 
   /** ✅ Delete item */
-  deleteCartItem(productId: number): Observable<any> {
+  deleteCartItem(productId: number): Observable<CartResponse> {
     if (this.authService.hasToken()) {
       // Logged-in user → API call
-      return this.http.delete<any>(`${API_ENDPOINTS.DELETE_CART_ITEM}/${productId}/`);
+      return this.http.delete<CartResponse>(`${API_ENDPOINTS.DELETE_CART_ITEM}/${productId}/`);
     } else {
       // Guest user → remove from localStorage
-      let cart = JSON.parse(this.storage.getItem('cart') || '[]');
-      cart = cart.filter((p: any) => p.product_id !== productId);
+      const stored = this.storage.getItem('cart');
+      let cart: CartResponse = stored ? JSON.parse(stored) as CartResponse : { items: [], total: 0 };
+
+      // filter out product
+      cart.items = cart.items.filter((p: CartItem) => p.product.id !== productId);
+
+      // recalc total
+      cart.total = cart.items.reduce((sum, i) => sum + Number(i.price), 0);
+
       this.storage.setItem('cart', JSON.stringify(cart));
       return of(cart);
     }
   }
+
 
   createOrder(cartId: number, addressId: number, paymentMethod: string, coupon: string | null) {
     const body = {
@@ -110,4 +124,34 @@ export class CartService {
     }
     return this.http.post<any>(API_ENDPOINTS.CREATE_ORDER, body);
   }
+
+  syncGuestCart(): Observable<any> {
+    const stored = this.storage.getItem('cart');
+    if (!stored) {
+      return of(null); // nothing to sync
+    }
+
+    const guestCart: CartResponse = JSON.parse(stored);
+
+    if (!guestCart.items.length) {
+      return of(null);
+    }
+
+    // Send items to API (depends on your backend)
+    const syncCalls = guestCart.items.map((item: CartItem) => {
+      return this.http.post(`${API_ENDPOINTS.ADD_TO_CART}`, {
+        product_id: item.product.id,
+        quantity: item.quantity
+      });
+    });
+
+    // run all calls in parallel
+    return forkJoin(syncCalls).pipe(
+      tap(() => {
+        // clear guest cart after sync
+        this.storage.removeItem('cart');
+      })
+    );
+  }
+
 }

@@ -1,7 +1,7 @@
 <app-header></app-header>
 
 <!-- Loader -->
-<div *ngIf="loaderService.isLoading | async" class="global-loader">
+<div *ngIf="isLoading$ | async" class="global-loader">
   <div class="spinner-border text-primary"></div>
 </div>
 
