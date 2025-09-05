@@ -3,7 +3,7 @@ import { environment } from '../../../environments/environment';
 export const API_BASE_URL = environment.apiUrl;
 
 export const API_ENDPOINTS = {
-  CATEGORIES: `${API_BASE_URL}/api/v1/categories/?page_size=20`,
+  CATEGORIES: `${API_BASE_URL}/api/v1/categories/?is_active=true&page_size=20`,
   PRODUCTS: `${API_BASE_URL}/api/v1/products/`,
   PRODUCT_DETAIL: `${API_BASE_URL}/api/v1/product/`,
   RELATED_PRODUCT: `${API_BASE_URL}/api/v1/products/`,
