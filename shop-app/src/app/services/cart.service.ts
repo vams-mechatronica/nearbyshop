@@ -113,7 +113,12 @@ export class CartService {
       return of(cart);
     }
   }
-
+  applyCoupon(code: string): Observable<any> {
+    const body = {
+      code: code
+    }
+    return this.http.post(`${API_ENDPOINTS.APLLY_COUPON}`, body);
+  }
 
   createOrder(cartId: number, addressId: number, paymentMethod: string, coupon: string | null) {
     const body = {

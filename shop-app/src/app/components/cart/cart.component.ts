@@ -31,6 +31,9 @@ export class CartComponent implements OnInit {
   cartItems: any[] = [];
   gTotal: number = 0;
   cartId: number = 0;
+  totaldiscount: number = 0;
+  couponCode: string = '';
+  message: string = '';
 
   user = { mobile: '', otp: '', address: '' };
   addresses: any[] = [];
@@ -73,7 +76,8 @@ export class CartComponent implements OnInit {
     this.cartService.getCart().subscribe({
       next: (data) => {
         this.cartItems = data.items || data;
-        this.gTotal = data.total ? parseFloat(data.total) : this.getTotal();
+        this.totaldiscount = data.total_discount;
+        this.gTotal = data.total_price_after_discount; //? parseFloat(data.total_price_after_discount) : this.getTotal();
         this.cartId = data.id;
       },
       error: (err) => {
@@ -84,6 +88,14 @@ export class CartComponent implements OnInit {
 
   getTotal() {
     return this.cartItems.reduce((sum, item) => sum + (Number(item.price) || 0), 0);
+  }
+
+  getTotalDiscount() {
+    return this.totaldiscount;
+  }
+
+  getFinalAmount(){
+    return this.gTotal;
   }
 
   removeItem(item: any) {
@@ -225,7 +237,7 @@ export class CartComponent implements OnInit {
       return;
     }
     // ✅ Logged in → proceed with order
-    this.cartService.createOrder(this.cartId, address.id, 'razorpay', null).subscribe({
+    this.cartService.createOrder(this.cartId, address.id, 'razorpay', this.couponCode).subscribe({
       next: (res: Order) => this.paymentRazorpay(res.total_price, res.id),
       error: () => {
         if (isPlatformBrowser(this.platformId)) {
@@ -234,6 +246,27 @@ export class CartComponent implements OnInit {
       }
     });
   }
+
+  applyCoupon() {
+    if (!this.couponCode) {
+      this.message = 'Please enter a coupon code';
+      return;
+    }
+
+    this.cartService.applyCoupon(this.couponCode).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.gTotal = res.discounted_total;
+          this.message = `Coupon ${res.coupon} applied successfully!`;
+        }
+      },
+      error: (err) => {
+        this.message = err.error.error || 'Invalid coupon';
+        this.gTotal = this.gTotal;
+      }
+    });
+  }
+
 
 
   paymentRazorpay(amount: any, orderId: number) {

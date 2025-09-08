@@ -14,6 +14,7 @@ export const API_ENDPOINTS = {
   VERIFY_OTP: `${API_BASE_URL}/api/v1/login/verify-otp`,
   GET_CART: `${API_BASE_URL}/api/v1/cart/`,
   ADD_TO_CART: `${API_BASE_URL}/api/v1/cart/add/`,
+  APLLY_COUPON: `${API_BASE_URL}/api/v1/apply-coupon/`,
   UPDATE_CART_ITEM: `${API_BASE_URL}/api/v1/cart/update/`,
   DELETE_CART_ITEM: `${API_BASE_URL}/api/v1/cart/delete`,
   GET_SUBSCRIPTION: `${API_BASE_URL}/api/v1/subscriptions/`,

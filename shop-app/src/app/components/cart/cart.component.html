@@ -13,41 +13,61 @@
           <ng-container *ngIf="cartItems && cartItems.length > 0; else emptyCart">
             <ul class="list-group list-group-flush">
               <li class="list-group-item" *ngFor="let item of cartItems">
-                <div class="row align-items-center border-bottom py-2">
+                <div class="row align-items-center border-bottom py-3 cart-item">
                   <!-- Product image -->
-                  <div class="col-2">
+                  <div class="col-3 col-md-2 text-center">
                     <img [src]="item.product.image" alt="{{ item.product.name }}" class="rounded img-fluid"
                       style="width: 80px; height: 80px; object-fit: cover;">
                   </div>
 
                   <!-- Product details -->
-                  <div class="col-4">
+                  <div class="col-9 col-md-4 text-start">
                     <h6 class="mb-1 fw-semibold">{{ item.product.name }}</h6>
-                    <small class="text-muted">₹{{ item.product.price }} each</small>
+
+                    <div class="price-section mb-1">
+                      <span *ngIf="item.product.final_price < item.product.price"
+                        class="text-muted text-decoration-line-through me-2 small">
+                        ₹{{ item.product.price }}
+                      </span>
+
+                      <span class="fw-bold text-success">
+                        ₹{{ item.product.final_price }}
+                      </span>
+
+                      <span *ngIf="item.product.final_price < item.product.price" class="badge bg-danger ms-2">
+                        -{{ (((item.product.price - item.product.final_price) / item.product.price) * 100) |
+                        number:'1.0-0' }}%
+                      </span>
+                    </div>
+
+                    <small class="text-muted">per unit</small>
                   </div>
 
-                  <!-- Quantity Selector -->
-                  <div class="col-3">
-                    <div class="quantity-control d-flex align-items-center">
-                      <button class="btn btn-sm btn-outline-secondary" (click)="decreaseQuantity(item)">−</button>
-                      <input type="text" [value]="item.quantity" class="form-control form-control-sm mx-2 text-center"
-                        style="width: 50px;" readonly>
-                      <button class="btn btn-sm btn-outline-secondary" (click)="increaseQuantity(item)">+</button>
+                  <!-- Controls (Quantity, Subtotal, Delete) -->
+                  <div class="col-12 col-md-6 mt-3 mt-md-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <!-- Quantity Selector -->
+                      <div class="quantity-control">
+                        <button class="btn btn-sm btn-outline-secondary" (click)="decreaseQuantity(item)">−</button>
+                        <input type="text" [value]="item.quantity" class="form-control form-control-sm text-center"
+                          readonly>
+                        <button class="btn btn-sm btn-outline-secondary" (click)="increaseQuantity(item)">+</button>
+                      </div>
+
+                      <!-- Subtotal -->
+                      <div class="fw-semibold text-success">
+                        ₹{{ item.price }}
+                      </div>
+
+                      <!-- Delete -->
+                      <button class="btn btn-sm btn-outline-danger" (click)="removeItem(item)">
+                        <i class="fa-solid fa-trash"></i>
+                      </button>
                     </div>
                   </div>
-
-                  <!-- Subtotal -->
-                  <div class="col-2 text-end fw-semibold">
-                    ₹{{ item.price }}
-                  </div>
-
-                  <!-- Actions -->
-                  <div class="col-1 text-end">
-                    <button class="btn btn-sm btn-outline-danger" (click)="removeItem(item)">
-                      <i class="fa-solid fa-trash"></i>
-                    </button>
-                  </div>
                 </div>
+
+
               </li>
             </ul>
           </ng-container>
@@ -101,10 +121,13 @@
             <span>Shipping</span>
             <span class="text-success fw-semibold">FREE</span>
           </div>
-          <div class="d-flex justify-content-between mb-3">
+          <div class="d-flex justify-content-between align-items-center mb-3">
             <span>Discount</span>
-            <span>-</span>
+            <span class="badge bg-danger fs-6">
+              - ₹{{ getTotalDiscount() }}
+            </span>
           </div>
+
           <hr>
           <div class="d-flex justify-content-between mb-4">
             <strong>Total</strong>
@@ -112,9 +135,27 @@
           </div>
 
           <!-- Discount code -->
-          <div class="input-group mb-3">
-            <input type="text" class="form-control" placeholder="Discount code">
-            <button class="btn btn-outline-secondary">Apply</button>
+          <div class="card p-3 shadow-sm my-2">
+            <h6 class="mb-3">Have a Discount Code?</h6>
+
+            <div class="input-group mb-2">
+              <input type="text" class="form-control" placeholder="Enter discount code" [(ngModel)]="couponCode">
+              <button class="btn btn-outline-primary" (click)="applyCoupon()">
+                Apply
+              </button>
+            </div>
+
+            <!-- Message -->
+            <div *ngIf="message" class="mt-1">
+              <small class="text-success" *ngIf="totaldiscount">{{ message }}</small>
+              <small class="text-danger" *ngIf="!totaldiscount">{{ message }}</small>
+            </div>
+
+            <!-- Discounted total -->
+            <div *ngIf="totaldiscount !== null" class="mt-2 d-flex justify-content-between">
+              <span class="fw-semibold">Discounted Total:</span>
+              <span class="badge bg-success fs-6">₹{{ getFinalAmount() }}</span>
+            </div>
           </div>
 
           <!-- Checkout -->

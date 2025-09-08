@@ -135,3 +135,42 @@
         background-color: var(--success-dark);
     }
 }
+
+.cart-item {
+  .quantity-control {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--neutral-mid);
+    border-radius: 6px;
+    overflow: hidden;
+    width: 120px;
+
+    button {
+      flex: 0 0 35px;
+      border: none;
+      background: var(--neutral-light);
+      font-size: 1rem;
+      cursor: pointer;
+
+      &:hover {
+        background: var(--primary);
+        color: white;
+      }
+    }
+
+    input {
+      flex: 1;
+      border: none;
+      text-align: center;
+      background: white;
+      font-size: 0.9rem;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .d-flex {
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+  }
+}
