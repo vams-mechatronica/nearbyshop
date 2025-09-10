@@ -9,10 +9,12 @@
 
 
 :root {
-  --primary: #C0392B;        /* Logo red */
+  --primary: #B45253;        /* Logo red */
   --primary-dark: #A93226;
-  --secondary: #3EAED7;      /* Accent blue */
-  --secondary-dark: #2C8BAF;
+  --secondary: #FFE797;      /* Accent blue */
+  --secondary-dark: #FCB53B;
+  --button-primary: #84994F;
+  --button-primary-hover: #7c904a;
   
   --neutral-light: #F9F9F9;
   --neutral-mid: #EDEDED;
@@ -99,7 +101,17 @@ button.primary {
 
 button.primary:hover {
   background-color: var(--primary-dark);
+  color: white;
 }
+
+button.secondary {
+  background-color: var(--secondary-dark);
+  // color: white;
+}
+button.secondary:hover{
+  background-color: var(--secondary-dark);
+}
+
 
 .global-loader {
   position: fixed;

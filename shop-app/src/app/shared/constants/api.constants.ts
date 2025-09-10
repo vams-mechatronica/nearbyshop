@@ -36,4 +36,5 @@ export const API_ENDPOINTS = {
   GET_ORDERHISTORY: `${API_BASE_URL}/api/v1/orders/`,
   GET_USERBANKDETAILS: `${API_BASE_URL}/api/v1/bank-details/`,
   ADD_USERBANKDETAILS: `${API_BASE_URL}/api/v1/bank-details/`,
+  REFRESH_TOKEN: `${API_BASE_URL}/api/v1/token/refresh/`,
 };

@@ -51,3 +51,14 @@
   background: #f9f9f9;
 }
 
+.nav-link {
+  color: var(--button-primary);         /* gray */
+  font-weight: normal;
+  text-decoration: none;
+}
+.nav-link.active {
+  color: var(--primary) !important;   /* green */
+  font-weight: bold;          /* optional */
+}
+
+

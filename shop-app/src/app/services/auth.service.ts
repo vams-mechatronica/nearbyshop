@@ -1,16 +1,15 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
 import { API_ENDPOINTS } from '../shared/constants/api.constants';
 import { StorageService } from './storage.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  constructor(private http: HttpClient,private storage: StorageService) { }
+  constructor(private http: HttpClient, private storage: StorageService) {}
 
   sendLoginOtp(phone: string) {
     return this.http.post(API_ENDPOINTS.GET_LOGIN_OTP, {
-      phone_number: phone  // <-- change the key here
+      phone_number: phone
     });
   }
 
@@ -20,8 +19,23 @@ export class AuthService {
       otp: otp
     });
   }
+
+  // ✅ Access token helpers
+  getAccessToken(): string | null {
+    return this.storage.getItem('access_token');
+  }
+
+  saveAccessToken(token: string): void {
+    this.storage.setItem('access_token', token);
+  }
+
+  clearTokens(): void {
+    this.storage.removeItem('access_token');
+    this.storage.removeItem('refresh_token');
+  }
+
   hasToken(): boolean {
-    const token = this.storage.getItem('access_token');
+    const token = this.getAccessToken();
     if (!token) return false;
 
     try {
@@ -33,4 +47,14 @@ export class AuthService {
     }
   }
 
+  // ✅ If backend supports refresh
+  refreshToken() {
+    const refresh = this.storage.getItem('refresh_token');
+    return this.http.post(API_ENDPOINTS.REFRESH_TOKEN, { refresh });
+  }
+
+  logout() {
+    this.clearTokens();
+    // optionally redirect to login
+  }
 }

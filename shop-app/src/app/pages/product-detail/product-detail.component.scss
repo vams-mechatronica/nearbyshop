@@ -93,18 +93,18 @@
     }
 
     .buy-now {
-      background-color: #10832b;
+      background-color: var(--button-primary);
       color: #fff;
       transition: 0.2s;
       min-width: 150px;
 
       &:hover {
-        background-color: #0c6b23;
+        background-color: var(--button-primary-hover);
       }
     }
 
     .subscribe-btn {
-      background-color: #c23c3c;
+      background-color: var(--primary);
       color: #fff;
       transition: 0.2s;
 
@@ -116,8 +116,8 @@
     .quantity-box {
       display: flex;
       align-items: stretch;
-      border: 1px solid #10832b;
-      background-color: #10832b;
+      border: 1px solid var(--button-primary);
+      background-color: var(--button-primary);
       overflow: hidden;
       min-width: 150px;
 
@@ -193,12 +193,12 @@
     }
 
     .buy-now {
-      border: 1px solid #10832b;
+      border: 1px solid var(--button-primary);
       background-color: #fff;
-      color: #10832b;
+      color: var(--button-primary);
 
       &:hover {
-        background-color: #10832b;
+        background-color: var(--button-primary);
         color: #fff;
       }
     }
@@ -216,8 +216,8 @@
       display: flex;
       align-items: stretch;
       justify-content: space-between;
-      border: 1px solid #10832b;
-      background-color: #10832b;
+      border: 1px solid var(--button-primary);
+      background-color: var(--button-primary);
       border-radius: 6px;
       overflow: hidden;
       height: 100%;
@@ -291,8 +291,8 @@
 .quantity-box-sub {
   display: flex;
   align-items: center;
-  border: 1px solid #10832b;
-  background-color: #10832b;
+  border: 1px solid var(--button-primary);
+  background-color: var(--button-primary);
   border-radius: 6px;
   overflow: hidden;
   height: 2rem;
@@ -343,8 +343,8 @@
 .quantity-box-sub-2 {
   display: flex;
   align-items: center;
-  border: 1px solid #10832b;
-  background-color: #10832b;
+  border: 1px solid var(--button-primary);
+  background-color: var(--button-primary);
   border-radius: 6px;
   overflow: hidden;
   height: 2.5rem;

@@ -77,7 +77,7 @@
             <div class="text-center py-5">
               <i class="fa-solid fa-cart-shopping fa-3x text-muted mb-3"></i>
               <h5 class="text-muted">Your cart is empty</h5>
-              <button class="btn btn-primary mt-3" routerLink="/">
+              <button class="btn primary mt-3" routerLink="/">
                 Continue Shopping
               </button>
             </div>
@@ -98,7 +98,7 @@
           <p class="mb-1">{{ selectedAddress.address_line }}</p>
           <p class="mb-1">{{ selectedAddress.city }}, {{ selectedAddress.state }} - {{ selectedAddress.zip_code }}</p>
           <p class="mb-1">Ph: {{ selectedAddress.phone_number }}</p>
-          <button class="btn btn-sm btn-outline-primary mt-2" (click)="openAddressModal()">
+          <button class="btn btn-sm primary mt-2" (click)="openAddressModal()">
             Change Address
           </button>
         </div>
@@ -140,7 +140,7 @@
 
             <div class="input-group mb-2">
               <input type="text" class="form-control" placeholder="Enter discount code" [(ngModel)]="couponCode">
-              <button class="btn btn-outline-primary" (click)="applyCoupon()">
+              <button class="btn secondary" (click)="applyCoupon()">
                 Apply
               </button>
             </div>

@@ -100,12 +100,12 @@ nav.navbar {
 
   .profile-icon {
     font-size: 1.8rem;
-    color: #007bff;
+    color: var(--primary);
     cursor: pointer;
     transition: color 0.2s ease-in-out;
 
     &:hover {
-      color: #0056b3;
+      color: var(--primary-dark);
     }
   }
 
