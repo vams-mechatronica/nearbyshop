@@ -52,7 +52,7 @@
                 <p *ngIf="product.discount_value > 0" class="text-muted text-decoration-line-through mb-0">
                   ₹{{ product.price }}
                 </p>
-                <span class="badge bg-light text-dark">Unit: {{ product.unit.code || 'N/A' }}</span>
+                <span class="badge bg-light text-dark product-unit">{{ product.unit.code || 'N/A' }}</span>
 
               </div>
               <!-- Unit
@@ -117,7 +117,7 @@
             style="width: 100px; height: 60px; object-fit: cover; border-radius: 4px; margin-right: 10px;" />
 
           <div class="flex-grow-1">
-            <div class="fw-bold">{{ selectedProduct?.name }}</div>
+            <div class="fw-bold">{{ selectedProduct?.name }} <span>({{selectedProduct?.unit.code}})</span></div>
             <div class="text-muted small">₹{{ selectedProduct?.final_price }}</div>
           </div>
 
