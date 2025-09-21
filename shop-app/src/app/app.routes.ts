@@ -17,7 +17,7 @@ export const routes: Routes = [
   { path: 'auth', component: AuthComponent },
   { path: 'cart', component: CartComponent },
   { path: 'products/:slug', component: ProductsComponent},
-  { path: 'product/:id', component: ProductDetailComponent },
+  { path: 'product/:slug', component: ProductDetailComponent },
   { path: 'subscribe', component: SubscriptionsComponent },
   { path: 'profile', component: UserProfileComponent },
   { path: 'payment-status', component: PaymentStatusComponent },

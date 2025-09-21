@@ -22,7 +22,13 @@ export class ProductsService {
   getProductDetailById(productId: string): Observable<any> {
     return this.http.get(`${API_ENDPOINTS.PRODUCT_DETAIL}${productId}/`);
   }
+  getProductDetailBySlug(productSlug: string): Observable<any> {
+    return this.http.get(`${API_ENDPOINTS.PRODUCT_DETAIL}${productSlug}/`);
+  }
   getRelatedProductById(productId: string): Observable<any> {
     return this.http.get(`${API_ENDPOINTS.RELATED_PRODUCT}${productId}/related/`);
+  }
+  getRelatedProductBySlug(productSlug: string): Observable<any> {
+    return this.http.get(`${API_ENDPOINTS.RELATED_PRODUCT}${productSlug}/related/`);
   }
 }

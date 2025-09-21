@@ -45,10 +45,10 @@ export class ProductDetailComponent {
   ngOnInit(): void {
     // Subscribe to route params changes
     this.route.params.subscribe(params => {
-      const productId = params['id'];
-      if (productId) {
-        this.loadProduct(productId);
-        this.loadRelatedProducts(productId);
+      const productSlug = params['slug'];
+      if (productSlug) {
+        this.loadProductSlug(productSlug);
+        this.loadRelatedProductsSlug(productSlug);
       }
     });
   }
@@ -64,9 +64,29 @@ export class ProductDetailComponent {
       error: (err) => console.error(err),
     });
   }
+  private loadProductSlug(productSlug: string) {
+    this.productService.getProductDetailBySlug(productSlug).subscribe({
+      next: (res) => {
+        this.product = res;
+        const primary = this.product.images?.find((img: any) => img.is_primary);
+        this.selectedImage = primary ? primary.image : this.product.image;
+        this.cdRef.detectChanges(); // update view
+      },
+      error: (err) => console.error(err),
+    });
+  }
 
   private loadRelatedProducts(productId: string) {
     this.productService.getRelatedProductById(productId).subscribe({
+      next: (res) => {
+        this.relatedProducts = res.results;
+      },
+      error: (err) => console.error(err),
+    });
+  }
+
+  private loadRelatedProductsSlug(productSlug: string) {
+    this.productService.getRelatedProductBySlug(productSlug).subscribe({
       next: (res) => {
         this.relatedProducts = res.results;
       },
