@@ -18,7 +18,7 @@
     </div>
 
     <!-- Products -->
-    <div class="col-md-9">
+    <div class="col-md-9 mb-2">
       <div *ngIf="products.length > 0; else noProducts" class="product-grid">
         <div class="product-card" *ngFor="let product of products">
           <a [routerLink]="['/product', product.id]">
