@@ -86,7 +86,10 @@ export class ProductsComponent implements OnInit {
           id: product.id,
           name: product.name,
           price: product.price,
-          image: product.image
+          final_price:product.final_price,
+          image: product.image,
+          discount_type: product.discount_type,
+          discount_value: product.discount_value
         },
         quantity: 1,
         price: product.price

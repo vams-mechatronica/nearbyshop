@@ -1,5 +1,5 @@
 import { Component, Injectable, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Order } from '../../models/order.model';
 import { OrderService } from '../../services/order.service';
 import { CommonModule } from '@angular/common';
@@ -7,7 +7,7 @@ import { CommonModule } from '@angular/common';
 @Component({
   selector: 'app-order-summary',
   templateUrl: './order-summary.component.html',
-  imports: [CommonModule]
+  imports: [CommonModule, RouterLink]
 })
 @Injectable({
   providedIn: 'root'
