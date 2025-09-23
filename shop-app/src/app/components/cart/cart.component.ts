@@ -16,6 +16,7 @@ import { AuthService } from '../../services/auth.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { AuthComponent } from '../auth/auth.component';
 import { LoaderService } from '../../services/loader.service';
+import { HeaderCountService } from '../../services/header.service';
 
 declare var Razorpay: any;
 
@@ -63,6 +64,7 @@ export class CartComponent implements OnInit {
     private router: Router,
     private modalService: NgbModal,
     private loaderService: LoaderService,
+    public headerService: HeaderCountService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) { }
 
@@ -74,6 +76,10 @@ export class CartComponent implements OnInit {
     }
   }
 
+  get hasDiscount(): boolean {
+    return this.totaldiscount > 0;
+  }
+
   // ========== CART ==========
   loadCart() {
     this.cartService.getCart().subscribe({
@@ -82,6 +88,7 @@ export class CartComponent implements OnInit {
         this.totaldiscount = data.total_discount;
         this.gTotal = data.total_price_after_discount; //? parseFloat(data.total_price_after_discount) : this.getTotal();
         this.cartId = data.id;
+        this.headerService.fetchCounts();
       },
       error: (err) => {
         console.error('Error fetching cart:', err);

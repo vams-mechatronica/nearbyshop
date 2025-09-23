@@ -28,4 +28,8 @@ export class UserService {
     return this.http.get(API_ENDPOINTS.GET_USERBANKDETAILS);
   }
 
+  getUserWalletTransactions(){
+    return this.http.get(API_ENDPOINTS.GET_WALLET_TRANSACTION);
+  }
+
 }

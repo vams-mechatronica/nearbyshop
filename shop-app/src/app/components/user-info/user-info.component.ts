@@ -1,5 +1,5 @@
 import { CommonModule, TitleCasePipe } from '@angular/common';
-import { Component, Injectable, OnInit } from '@angular/core';
+import { Component, Injectable, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { UserService } from '../../services/user.service';
@@ -17,6 +17,7 @@ import { OrderService } from '../../services/order.service';
 import { Order } from '../../models/order.model';
 import { CartService } from '../../services/cart.service';
 import { BankService } from '../../services/bank.service';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 declare var Razorpay: any;
 
 interface BankForm {
@@ -36,6 +37,7 @@ interface BankForm {
 @Injectable({
   providedIn: 'root'
 })
+
 export class UserProfileComponent implements OnInit {
   activeTab: string = 'profile';
   showAddFundsModal = false;
@@ -61,6 +63,9 @@ export class UserProfileComponent implements OnInit {
   orders: Order[] = [];
   bank: any = {};
   cart: any[] = [];
+  selectedOrder: any;
+  transactions: any[] = [];
+  loading = false;
 
   // Form model
   bankForm: BankForm = {
@@ -79,7 +84,10 @@ export class UserProfileComponent implements OnInit {
     private paymentService: PaymentService,
     private cartService: CartService,
     private bankService: BankService,
+    private modalService: NgbModal,
   ) { }
+  @ViewChild('orderItemsModal') orderItemsModal!: TemplateRef<any>;
+
 
 
   ngOnInit(): void {
@@ -89,7 +97,29 @@ export class UserProfileComponent implements OnInit {
     this.getOrderHistory();
     this.getBankDetails();
     this.getCartItems();
+    this.getWalletTransactions();
   }
+
+
+  getStatusBadgeClass(status: string) {
+    switch (status.toLowerCase()) {
+      case 'completed': return 'bg-success text-white';
+      case 'pending': return 'bg-warning text-dark';
+      case 'cancelled': return 'bg-danger text-white';
+      case 'processing': return 'bg-primary text-white';
+      default: return 'bg-secondary text-white';
+    }
+  }
+
+  getSubscriptionBadgeClass(status: string) {
+    switch (status.toLowerCase()) {
+      case 'active': return 'bg-success text-white';
+      case 'pending': return 'bg-warning text-dark';
+      case 'expired': return 'bg-danger text-white';
+      default: return 'bg-secondary text-white';
+    }
+  }
+
 
   getUserInfo() {
     this.userService.getUserInfo().subscribe({
@@ -106,6 +136,11 @@ export class UserProfileComponent implements OnInit {
         });
       },
     });
+  }
+
+  openOrderItems(order: any) {
+    this.selectedOrder = order;
+    this.modalService.open(this.orderItemsModal, { centered: true, size: 'lg' });
   }
 
   getWalletBalance() {
@@ -171,8 +206,23 @@ export class UserProfileComponent implements OnInit {
       }
     })
   }
+
+  getWalletTransactions() {
+    this.userService.getUserWalletTransactions().subscribe(
+      {
+        next: (res: any) => {
+          this.transactions = res?.results;
+        },
+        error: (err) => {
+          const errorMsg =
+            err?.error?.message || err?.error?.detail || err?.message || 'Something went wrong';
+          this.toast.error(errorMsg, 'Failed');
+        }
+      }
+    )
+  }
   // Bank Details Modal
-   // For editing an existing bank (optional)
+  // For editing an existing bank (optional)
   // bank: BankForm | null = null;
 
   // Open modal (optionally with existing data)
@@ -229,8 +279,10 @@ export class UserProfileComponent implements OnInit {
     this.amount = amount;
   }
   rechargeNow() {
+    this.loading = true;
     if (!this.amount || this.amount < 100) {
       this.toast.error('Minimum recharge is ₹100');
+      this.loading = false;
       return;
     }
 
@@ -244,6 +296,7 @@ export class UserProfileComponent implements OnInit {
         order_id: order.order_id,
         handler: (response: any) => {
           this.paymentService.verifyPayment(response).subscribe(() => {
+            this.loading = false;
             this.toast.success('Wallet recharged successfully!', 'Recharge Success');
             this.getWalletBalance();
             this.closeAddFundsModal();
@@ -253,17 +306,8 @@ export class UserProfileComponent implements OnInit {
       const rzp = new Razorpay(options);
       rzp.open();
     });
+    this.loading = false;
   }
-
-  transactions = [
-    { date: '2025-08-01', amount: 500, type: 'Credit' },
-    { date: '2025-08-05', amount: 300, type: 'Debit' },
-  ];
-
-  // cart = [
-  //   { name: 'Apples', qty: 2, price: 150 },
-  //   { name: 'Rice', qty: 1, price: 500 },
-  // ];
 
   // Column definitions
   orderCols: ColDef[] = [
@@ -276,10 +320,29 @@ export class UserProfileComponent implements OnInit {
   ];
 
   txnCols: ColDef[] = [
-    { headerName: '#', valueGetter: (p) => (p.node?.rowIndex ?? 0) + 1 },
-    { headerName: 'Date', field: 'date' },
-    { headerName: 'Amount (₹)', field: 'amount' },
-    { headerName: 'Type', field: 'type' },
+    { headerName: '#', valueGetter: (p) => (p.node?.rowIndex ?? 0) + 1, width: 100 },
+    {
+      headerName: 'Date',
+      field: 'timestamp',
+      width: 250,
+      valueFormatter: (params) => {
+        if (!params.value) return '';
+        // Convert to Date object
+        const date = new Date(params.value);
+        // Format using toLocaleString including timezone
+        return date.toLocaleString('en-IN', {
+          year: 'numeric',
+          month: 'short',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          timeZoneName: 'short'
+        });
+      }
+    },
+    { headerName: 'Amount (₹)', field: 'amount', width: 150 },
+    { headerName: 'Type', field: 'transaction_type', width: 100 },
   ];
 
   subCols: ColDef[] = [
@@ -296,9 +359,9 @@ export class UserProfileComponent implements OnInit {
       width: 80, // adjust to fit image properly
     },
     { headerName: 'Name', field: 'product.name' },
-    { headerName: 'Qty', field: 'quantity' ,width: 60},
+    { headerName: 'Qty', field: 'quantity', width: 60 },
     { headerName: 'Frequency', field: 'frequency' },
-    { headerName: 'Price', field: 'price' ,width:100},
+    { headerName: 'Price', field: 'price', width: 100 },
     {
       headerName: 'Status',
       field: 'status',
@@ -321,8 +384,8 @@ export class UserProfileComponent implements OnInit {
 
   cartCols: ColDef[] = [
     { headerName: '#', valueGetter: (p) => (p.node?.rowIndex ?? 0) + 1 },
-    { headerName: 'Name', field: 'name' },
-    { headerName: 'Qty', field: 'qty' },
+    { headerName: 'Name', field: 'product.name' },
+    { headerName: 'Qty', field: 'quantity' },
     { headerName: 'Price (₹)', field: 'price' },
   ];
 
@@ -338,10 +401,16 @@ export class UserProfileComponent implements OnInit {
   //   // accountNumber: 'XXXX1234',
   //   // ifsc: 'HDFC0001234'
   // };
-
+  refundCols: ColDef[] = [
+    { headerName: '#', valueGetter: (p) => (p.node?.rowIndex ?? 0) + 1, width: 100 },
+    { headerName: 'Date Refunded', field: 'date', width: 300 },
+    { headerName: 'Amount (₹)', field: 'amount', width: 200 },
+    { headerName: 'Status', field: 'status', width: 200 },
+  ];
   refunds = [
     { date: '2025-08-12', amount: 300, status: 'Processed' }
   ];
+
 
   tracking = [
     { orderId: 101, status: 'Shipped', updated: '2025-08-27' },

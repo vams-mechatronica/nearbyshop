@@ -25,10 +25,10 @@
               <i class="fa-solid fa-file-contract me-2"></i> Subscriptions
             </button>
 
-            <button class="list-group-item list-group-item-action" [class.active]="activeTab === 'cart'"
+            <!-- <button class="list-group-item list-group-item-action" [class.active]="activeTab === 'cart'"
               (click)="setActiveTab('cart')">
               <i class="fa-solid fa-cart-shopping me-2"></i> Cart
-            </button>
+            </button> -->
 
             <button class="list-group-item list-group-item-action" [class.active]="activeTab === 'wallet'"
               (click)="setActiveTab('wallet')">
@@ -45,10 +45,10 @@
               <i class="fa-solid fa-rotate-left me-2"></i> Refund History
             </button>
 
-            <button class="list-group-item list-group-item-action" [class.active]="activeTab === 'tracking'"
+            <!-- <button class="list-group-item list-group-item-action" [class.active]="activeTab === 'tracking'"
               (click)="setActiveTab('tracking')">
               <i class="fa-solid fa-truck me-2"></i> Order Tracking
-            </button>
+            </button> -->
           </div>
 
         </div>
@@ -73,10 +73,26 @@
           <!-- Orders -->
           <div *ngIf="activeTab === 'orders'">
             <h4 class="mb-3">Order History</h4>
-            <ag-grid-angular class="ag-theme-alpine w-100" [rowData]="orders" [columnDefs]="orderCols"
-              rowSelection="single" style="height: 400px">
-            </ag-grid-angular>
+
+            <div class="row g-3">
+              <div class="col-md-4" *ngFor="let order of orders">
+                <div class="card h-100 shadow-sm" (click)="openOrderItems(order)">
+                  <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                      <h5 class="card-title mb-0">Order #{{ order.id }}</h5>
+                      <span class="badge" [ngClass]="getStatusBadgeClass(order.status)">
+                        {{ order.status }}
+                      </span>
+                    </div>
+                    <p class="card-text mb-1">Date: {{ order.created_at | date }}</p>
+                    <p class="card-text mb-1">Total: ₹{{ order.total_price }}</p>
+                  </div>
+                </div>
+              </div>
+
+            </div>
           </div>
+
 
           <!-- Transactions -->
           <div *ngIf="activeTab === 'transactions'">
@@ -89,25 +105,32 @@
           <!-- Subscriptions -->
           <div *ngIf="activeTab === 'subscriptions'">
             <h4 class="mb-3">Subscriptions</h4>
-            <ag-grid-angular class="ag-theme-alpine w-100" [rowData]="subscriptions" [columnDefs]="subCols"
-              style="height: 400px">
-            </ag-grid-angular>
-          </div>
 
-          <!-- Cart -->
-          <div *ngIf="activeTab === 'cart'">
-            <h4 class="mb-3">Cart</h4>
-            <ag-grid-angular class="ag-theme-alpine w-100" [rowData]="cart" [columnDefs]="cartCols"
-              style="height: 400px">
-            </ag-grid-angular>
-          </div>
+            <div class="row g-3">
+              <div class="col-md-4" *ngFor="let sub of subscriptions">
+                <div class="card h-100 shadow-sm position-relative">
+                  <!-- Badge in top-right corner -->
+                  <span class="badge position-absolute top-0 end-0 m-2"
+                    [ngClass]="getSubscriptionBadgeClass(sub.status)">
+                    {{ sub.status }}
+                  </span>
 
+                  <div class="card-body">
+                    <h5 class="card-title">{{ sub.product.name }}</h5>
+                    <p class="card-text mb-1">Start: {{ sub.start_date | date }}</p>
+                    <p class="card-text mb-1">End: {{ sub.end_date | date }}</p>
+                    <p class="card-text mb-1">Price: ₹{{ sub.price }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <!-- Wallet -->
           <div *ngIf="activeTab === 'wallet'">
             <div class="d-flex justify-content-between align-items-center mb-3">
               <h4 class="mb-0">Wallet</h4>
-              <button class="btn btn-sm btn-outline-primary" (click)="openAddFundsModal()">
+              <button class="btn btn-sm primary" (click)="openAddFundsModal()">
                 Add Funds
               </button>
             </div>
@@ -119,7 +142,7 @@
           <div *ngIf="activeTab === 'bank'" class="position-relative">
             <div class="d-flex justify-content-between align-items-center mb-3">
               <h4 class="mb-0">Bank Details</h4>
-              <button class="btn btn-sm btn-outline-primary" (click)="openBankModal()">
+              <button class="btn btn-sm primary" (click)="openBankModal()">
                 {{ bank?.bank_name ? 'Edit' : 'Add' }} Bank
               </button>
             </div>
@@ -151,8 +174,9 @@
                     </div>
                     <div class="mb-3">
                       <label for="accountHolderName" class="form-label">Account Holder Name</label>
-                      <input id="accountHolderName" type="text" class="form-control" [(ngModel)]="bankForm.account_holder_name"
-                        name="accountHolderName" placeholder="Enter account holder name">
+                      <input id="accountHolderName" type="text" class="form-control"
+                        [(ngModel)]="bankForm.account_holder_name" name="accountHolderName"
+                        placeholder="Enter account holder name">
                     </div>
                     <div class="mb-3">
                       <label for="accountNumber" class="form-label">Account Number</label>
@@ -173,6 +197,13 @@
               </div>
             </div>
           </div>
+
+          <div *ngIf="activeTab === 'refunds'">
+            <h4 class="mb-3">Refund History</h4>
+            <ag-grid-angular class="ag-theme-alpine w-100" [rowData]="refunds" [columnDefs]="refundCols"
+              style="height: 400px">
+            </ag-grid-angular>
+          </div>
         </div>
         <!-- <div *ngIf="activeTab === 'bank'">
           <h4 class="mb-3">Bank Details</h4>
@@ -182,35 +213,17 @@
         </div> -->
 
         <!-- Refunds -->
-        <div *ngIf="activeTab === 'refunds'">
-          <h4 class="mb-3">Refund History</h4>
-          <table class="table table-bordered">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Amount</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let refund of refunds">
-                <td>{{refund.date}}</td>
-                <td>₹{{refund.amount}}</td>
-                <td>{{refund.status}}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+
 
         <!-- Tracking -->
-        <div *ngIf="activeTab === 'tracking'">
+        <!-- <div *ngIf="activeTab === 'tracking'">
           <h4 class="mb-3">Order Tracking</h4>
           <div *ngFor="let track of tracking" class="mb-2">
             <div class="p-2 border rounded">
               <strong>Order #{{track.orderId}}</strong> - {{track.status}} ({{track.updated}})
             </div>
           </div>
-        </div>
+        </div> -->
       </div>
     </div>
   </div>
@@ -237,8 +250,41 @@
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" (click)="closeAddFundsModal()">Cancel</button>
-        <button class="btn btn-success" (click)="rechargeNow()">Recharge Now</button>
+        <button class="btn btn-success" (click)="rechargeNow()" [disabled]="loading">
+          <span *ngIf="loading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+          {{ loading ? 'Processing...' : 'Recharge Now' }}
+        </button>
+
       </div>
     </div>
   </div>
 </div>
+
+<ng-template #orderItemsModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">Order #{{ selectedOrder?.id }} Items</h5>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <ul class="list-group">
+      <li class="list-group-item" *ngFor="let item of selectedOrder?.items">
+        <div class="d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center">
+            <!-- Product image -->
+            <img [src]="item.image" alt="{{ item.product }}" width="30" height="30" class="me-2 rounded">
+
+            <!-- Product name and quantity -->
+            <div>
+              <strong>{{ item.product }}</strong>
+              <div class="text-muted small">Qty: {{ item.quantity }}</div>
+            </div>
+          </div>
+
+          <!-- Price -->
+          <span>₹{{ item.price }}</span>
+        </div>
+
+      </li>
+    </ul>
+  </div>
+</ng-template>

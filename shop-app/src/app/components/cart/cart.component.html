@@ -154,7 +154,10 @@
             <!-- Discounted total -->
             <div *ngIf="totaldiscount !== null" class="mt-2 d-flex justify-content-between">
               <span class="fw-semibold">Discounted Total:</span>
-              <span class="badge bg-success fs-6">₹{{ getFinalAmount() }}</span>
+              <ng-container *ngIf="hasDiscount; else noDiscount">
+                <span class="badge bg-success fs-6">₹{{ getFinalAmount() }}</span>
+              </ng-container>
+              <ng-template #noDiscount>-</ng-template>
             </div>
           </div>
 

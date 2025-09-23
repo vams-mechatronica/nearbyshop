@@ -39,4 +39,5 @@ export const API_ENDPOINTS = {
   REFRESH_TOKEN: `${API_BASE_URL}/api/v1/token/refresh/`,
   GET_HEADERS_COUNT: `${API_BASE_URL}/api/v1/header-counts/`,
   VERIFY_PINCODE: `${API_BASE_URL}/api/v1/check-delivery`,
+  GET_WALLET_TRANSACTION: `${API_BASE_URL}/api/v1/wallet/transactions/`,
 };
