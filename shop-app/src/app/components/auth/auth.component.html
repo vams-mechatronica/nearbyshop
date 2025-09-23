@@ -10,36 +10,31 @@
       <label for="phone" class="form-label">Phone Number</label>
       <div class="input-group mb-3">
         <span class="input-group-text"><i class="fas fa-phone"></i></span>
-        <input
-          type="tel"
-          class="form-control"
-          id="phone"
-          [(ngModel)]="phone"
-          name="phone"
-          placeholder="Enter phone number"
-          required
-        />
+        <input type="tel" class="form-control" id="phone" [(ngModel)]="phone" name="phone"
+          placeholder="Enter phone number" required />
       </div>
-      <button type="submit" class="btn btn-primary w-100">Send OTP</button>
+      <div class="d-flex justify-content-center">
+      <button type="submit" class="btn btn-primary" [disabled]="isSendingOtp" (click)="sendOtp()">
+        <span *ngIf="!isSendingOtp">Send OTP</span>
+        <span *ngIf="isSendingOtp">
+          <span class="spinner-border spinner-border-sm me-2"></span>
+          Sending...
+        </span>
+      </button>
+      </div>
+
     </div>
 
     <!-- OTP input -->
     <div *ngIf="showOtpInput">
       <label for="otp" class="form-label">OTP</label>
-      <div class="input-group mb-3">
-        <span class="input-group-text"><i class="fas fa-key"></i></span>
-        <input
-          type="text"
-          class="form-control"
-          id="otp"
-          [(ngModel)]="otp"
-          name="otp"
-          maxlength="4"
-          placeholder="Enter OTP"
-          required
-        />
+      <div class="d-flex justify-content-center gap-2 mb-3">
+        <input *ngFor="let ctrl of otpControls; let i = index" type="text" class="form-control otp-input" maxlength="1"
+          (input)="onOtpInput($event, i)" (keydown.backspace)="onOtpBackspace($event, i)" #otpInput />
       </div>
-      <button type="submit" class="btn btn-success w-100">Login</button>
+      <div class="d-flex justify-content-center">
+      <button type="submit" class="btn primary">Login</button>
+      </div>
 
       <div class="text-center mt-3">
         <small class="text-muted">

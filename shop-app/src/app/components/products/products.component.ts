@@ -12,6 +12,8 @@ import { ToastrService } from 'ngx-toastr';
 import { SubscriptionService } from '../../services/subscribe.service';
 import { StorageService } from '../../services/storage.service';
 import { AuthService } from '../../services/auth.service';
+import { HeaderCountService } from '../../services/header.service';
+import { LoaderService } from '../../services/loader.service';
 
 @Component({
   standalone: true,
@@ -35,19 +37,22 @@ export class ProductsComponent implements OnInit {
   private subscribeModalRef!: NgbModalRef;
 
   constructor(
-    private cartService: CartService,
-    private productService: ProductsService,
+    private headerService: HeaderCountService,
     private route: ActivatedRoute,
     private modal: NgbModal,
+    private cartService: CartService,
+    private productService: ProductsService,
     private categoryService: CategoryService,
     private subscribeService: SubscriptionService,
     private storage: StorageService,
     private authService: AuthService,
+    private loaderService: LoaderService,
     private toastr: ToastrService,
   ) { }
 
   ngOnInit(): void {
     const categorySlug = this.route.snapshot.paramMap.get('slug');
+    this.loaderService.show();
     this.getCategory();
     if (categorySlug) {
       this.categoryName = categorySlug;
@@ -61,6 +66,7 @@ export class ProductsComponent implements OnInit {
         error: (err) => console.error('Error fetching products:', err),
       });
     }
+    this.loaderService.hide();
   }
   getCategory() {
     this.categoryService.getCategories().subscribe({
@@ -110,6 +116,8 @@ export class ProductsComponent implements OnInit {
       next: (res: any) => console.log('Added to cart:', res),
       error: (err: HttpErrorResponse) => console.error('Add to cart failed:', err),
     }); }
+
+    this.headerService.fetchCounts();
   }
 
   openSubscribeModal(product: any) {
@@ -139,14 +147,19 @@ export class ProductsComponent implements OnInit {
           this.toastr.error(err.error.message,'Subscription Failed');
         },
       });
+    
+    this.headerService.fetchCounts();
+
   }
 
   increaseQty(product: any): void {
     product.qty = (product.qty || 0) + 1;
     this.cartService.updateCartItem(product.id, product.qty).subscribe({
-      next: (res) => console.log('Cart updated:', res),
+      next: (res) => this.headerService.fetchCounts(),
       error: (err) => console.error('Cart update failed:', err),
     });
+
+    
   }
 
   decreaseQty(product: any): void {
@@ -163,6 +176,8 @@ export class ProductsComponent implements OnInit {
         error: (err) => console.error('Cart delete failed:', err),
       });
     }
+    this.headerService.fetchCounts();
+
   }
 
   onCategoryChange(event: Event): void {

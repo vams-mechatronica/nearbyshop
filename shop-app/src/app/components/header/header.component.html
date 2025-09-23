@@ -9,17 +9,31 @@
   </div>
 
   <ul class="navbar-nav ms-auto align-items-center">
-    <li class="nav-item">
-      <a class="nav-link" routerLink="/cart" routerLinkActive="active">Cart</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" routerLink="/subscribe" routerLinkActive="active">Subscriptions</a>
-    </li>
+  <li class="nav-item position-relative me-3">
+    <a class="nav-link" routerLink="/cart" routerLinkActive="active">
+      <i class="fas fa-shopping-cart"></i>
+      <span class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle">
+        {{ cartCount }}
+      </span>
+      Cart
+    </a>
+  </li>
+
+  <!-- Subscriptions -->
+  <li class="nav-item position-relative me-3">
+    <a class="nav-link" routerLink="/subscribe" routerLinkActive="active">
+      <i class="fas fa-box-open"></i>
+      <span class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle">
+        {{ subscriptionCount }}
+      </span>
+      Subscriptions
+    </a>
+  </li>
 
     <!-- Show login button if not logged in -->
     <li class="nav-item" *ngIf="!isLoggedIn">
-      <button class="btn btn-outline-primary ms-2" (click)="loginSignup()">
-        Login / Signup
+      <button class="btn primary ms-2" (click)="loginSignup()">
+        Login
       </button>
     </li>
 

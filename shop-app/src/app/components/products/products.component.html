@@ -47,28 +47,26 @@
               <h6 class="product-title">{{ product.name }}</h6>
 
               <!-- Price Row -->
-              <div class="d-flex align-items-center gap-2 mb-2">
+              <div class="d-flex align-items-center gap-2">
                 <p class="fw-bold text-success mb-0">₹{{ product.final_price }}</p>
                 <p *ngIf="product.discount_value > 0" class="text-muted text-decoration-line-through mb-0">
                   ₹{{ product.price }}
                 </p>
                 <span class="badge bg-light text-dark product-unit">{{ product.unit.code || 'N/A' }}</span>
-
               </div>
               <!-- Unit
               <p class="card-text small mb-2">
                 <span class="badge bg-light text-dark">Unit: {{ product.unit.code || 'N/A' }}</span>
               </p> -->
               <!-- Description -->
-              <p class="card-text small text-muted mb-1 text-truncate" title="{{ product.description }}">
+              <!-- <p class="card-text small text-muted mb-1 text-truncate" title="{{ product.description }}">
                 {{ product.description || 'No description available' }}
               </p>
 
-              <!-- ✅ Seller Info -->
               <div class="seller-info">
                 <p class="seller-name">{{ product.vendor?.shop_name || 'Unknown Seller' }}</p>
                 <p class="seller-address text-muted">{{ product.vendor?.shop_address || 'Address not available' }}</p>
-              </div>
+              </div> -->
 
 
             </div>

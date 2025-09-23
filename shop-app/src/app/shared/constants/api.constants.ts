@@ -37,4 +37,6 @@ export const API_ENDPOINTS = {
   GET_USERBANKDETAILS: `${API_BASE_URL}/api/v1/bank-details/`,
   ADD_USERBANKDETAILS: `${API_BASE_URL}/api/v1/bank-details/`,
   REFRESH_TOKEN: `${API_BASE_URL}/api/v1/token/refresh/`,
+  GET_HEADERS_COUNT: `${API_BASE_URL}/api/v1/header-counts/`,
+  VERIFY_PINCODE: `${API_BASE_URL}/api/v1/check-delivery`,
 };

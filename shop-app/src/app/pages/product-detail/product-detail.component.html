@@ -84,7 +84,7 @@
         </a>
 
         <!-- Product Details -->
-        <div class="card-body p-2">
+        <div class="card-body">
           <!-- Product Name -->
           <h6 class="card-title text-truncate mb-1">
             <a [routerLink]="['/product', item.id]">{{ item.name }}</a>
@@ -100,12 +100,12 @@
               ₹{{ item.price }}
             </p>
             <!-- ✅ Unit Badge -->
-            <span class="badge bg-light text-dark">Unit: {{ item.unit?.code || 'N/A' }}</span>
+            <span class="badge bg-light text-dark">{{ item.unit?.code || 'N/A' }}</span>
           </div>
         </div>
 
         <!-- ✅ Actions (Same as main product card) -->
-        <div class="d-flex align-items-center justify-content-between gap-2 mb-2 p-2">
+        <div class="d-flex align-items-center justify-content-between gap-2 p-2">
 
           <!-- Show ADD button if qty is 0 -->
           <div *ngIf="!item.qty" class="add-btn-wrapper w-50">

@@ -5,10 +5,11 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { AuthComponent } from '../auth/auth.component';
 import { UserService } from '../../services/user.service';
-import { Subject, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
+import { BehaviorSubject, Subject, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { API_ENDPOINTS } from '../../shared/constants/api.constants';
 import { StorageService } from '../../services/storage.service';
+import { HeaderCountService } from '../../services/header.service';
 
 @Component({
   selector: 'app-header',
@@ -24,6 +25,8 @@ export class HeaderComponent implements OnInit {
 
   userName = 'John Doe';
   showProfileDropdown = false;
+  cartCount = 0;
+  subscriptionCount = 0;
 
   constructor(
     private router: Router,
@@ -31,6 +34,7 @@ export class HeaderComponent implements OnInit {
     private userService: UserService,
     private storage: StorageService,
     private http: HttpClient,   // for search API calls
+    private headerService: HeaderCountService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -45,6 +49,13 @@ export class HeaderComponent implements OnInit {
     if (this.isLoggedIn) {
       this.getUserInfo();
     }
+
+    this.headerService.counts$.subscribe(counts => {
+      this.cartCount = counts.cart_count;
+      this.subscriptionCount = counts.subscription_count;
+    });
+
+    this.headerService.fetchCounts();
 
     // 🔹 setup live search stream
     this.searchSubject.pipe(
@@ -63,6 +74,8 @@ export class HeaderComponent implements OnInit {
       }
     });
   }
+
+
 
   getUserInfo() {
     this.userService.getUserInfo().subscribe({
@@ -114,14 +127,6 @@ export class HeaderComponent implements OnInit {
     this.storage.removeItem('access_token');
     this.showProfileDropdown = false;
     this.router.navigate(['/']);
-  }
-
-  get subscriptionCount(): number {
-    return 0;
-  }
-
-  get cartCount(): number {
-    return 0;
   }
 
   @HostListener('document:click', ['$event'])

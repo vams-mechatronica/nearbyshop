@@ -6,6 +6,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { StorageService } from './storage.service';
 import { AuthService } from './auth.service';
 import { CartItem, CartResponse } from '../models/cart.model';
+import { HeaderCount, HeaderCountService } from './header.service';
 
 @Injectable({ providedIn: 'root' })
 export class CartService {
@@ -157,6 +158,10 @@ export class CartService {
         this.storage.removeItem('cart');
       })
     );
+  }
+
+  checkDeliveryAddress(zip: any){
+    return this.http.get<any>(API_ENDPOINTS.VERIFY_PINCODE,{params: {pincode: zip}});
   }
 
 }

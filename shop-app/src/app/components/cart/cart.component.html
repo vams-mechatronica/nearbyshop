@@ -213,13 +213,21 @@
           <div class="col-md-4">
             <input type="text" [(ngModel)]="newAddress.state" class="form-control" placeholder="State">
           </div>
+
+          <!-- ZIP -->
           <div class="col-md-4">
-            <input type="text" [(ngModel)]="newAddress.zip" class="form-control" placeholder="Zip Code">
+            <input type="text" [(ngModel)]="newAddress.zip" class="form-control" placeholder="Zip Code"
+              (blur)="checkDelivery()">
+            <small *ngIf="deliveryMessage" [ngClass]="deliveryAvailable ? 'text-success' : 'text-danger'">
+              {{ deliveryMessage }}
+            </small>
           </div>
+
           <div class="col-md-12">
             <input type="text" [(ngModel)]="newAddress.phone" class="form-control" placeholder="Phone Number">
           </div>
         </div>
+
       </div>
 
       <div class="modal-footer">

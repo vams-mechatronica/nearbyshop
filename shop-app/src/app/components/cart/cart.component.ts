@@ -39,6 +39,9 @@ export class CartComponent implements OnInit {
   addresses: any[] = [];
   selectedAddress: any = null;
 
+  deliveryMessage = '';
+  deliveryAvailable = false;
+
   newAddress = {
     name: '',
     address: '',
@@ -171,6 +174,25 @@ export class CartComponent implements OnInit {
     if (!isPlatformBrowser(this.platformId)) return;
     this.selectedAddress = address;
     this.storage.setItem('selectedAddress', JSON.stringify(address));
+  }
+
+  checkDelivery() {
+    const zip = this.newAddress.zip;
+    if (!zip) { 
+      this.deliveryMessage = '';
+      return;
+    }
+
+    this.cartService.checkDeliveryAddress(zip).subscribe({
+        next: (res: any) => {
+          this.deliveryAvailable = res.available;
+          this.deliveryMessage = res.message || (res.available ? 'Delivery available!' : 'Delivery not available at this location.');
+        },
+        error: () => {
+          this.deliveryAvailable = false;
+          this.deliveryMessage = 'Could not check delivery at this time.';
+        }
+      });
   }
 
   addAddress() {

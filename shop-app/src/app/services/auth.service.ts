@@ -2,10 +2,14 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { API_ENDPOINTS } from '../shared/constants/api.constants';
 import { StorageService } from './storage.service';
+import { HeaderCountService } from './header.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  constructor(private http: HttpClient, private storage: StorageService) {}
+  constructor(
+    private http: HttpClient,
+    private storage: StorageService,
+    private headerService: HeaderCountService) {}
 
   sendLoginOtp(phone: string) {
     return this.http.post(API_ENDPOINTS.GET_LOGIN_OTP, {
@@ -55,6 +59,7 @@ export class AuthService {
 
   logout() {
     this.clearTokens();
+    this.headerService.updateCountsManually({cart_count:0, subscription_count:0});
     // optionally redirect to login
   }
 }

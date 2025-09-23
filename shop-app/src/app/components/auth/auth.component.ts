@@ -6,6 +6,7 @@ import { RouterModule, ActivatedRoute, Router, RouterLink, RouterLinkActive } fr
 import { AuthService } from '../../services/auth.service';
 import { ToastrService } from 'ngx-toastr';
 import { StorageService } from '../../services/storage.service';
+import { LoaderService } from '../../services/loader.service';
 
 
 @Component({
@@ -24,12 +25,14 @@ export class AuthComponent implements OnInit {
   otp: string = '';
   showOtpInput = false;
   redirectTo: string |null= null;
+  isSendingOtp = false;
 
   constructor(
     private route: ActivatedRoute,
     private authService: AuthService,
     private router: Router,
     public activeModal: NgbActiveModal,
+    private loaderService:LoaderService,
     private toastrService: ToastrService,
     private storage: StorageService
   ) { }
@@ -39,23 +42,58 @@ export class AuthComponent implements OnInit {
   }
 
   sendOtp() {
+    this.isSendingOtp = true;
     const fullPhone = `91${this.phone}`;
 
     if (!this.phone || this.phone.length !== 10 || !/^\d{10}$/.test(this.phone)) {
       alert('Please enter a valid 10-digit phone number.');
+      this.isSendingOtp = false;
       return;
     }
-
+    // this.loaderService.show();
     this.authService.sendLoginOtp(fullPhone).subscribe({
       next: (res) => {
+        this.isSendingOtp = false;
         this.showOtpInput = true;
-        console.log('OTP sent successfully', res);
+        // this.loaderService.hide();
       },
       error: (err) => {
-        console.error('Failed to send OTP:', err);
+        // this.loaderService.hide();
+        this.isSendingOtp = false;
         alert('Failed to send OTP. Please try again later.');
       }
     });
+  }
+
+  otpControls = Array(4).fill(''); // just for *ngFor
+  otpValues: string[] = ['', '', '', ''];
+
+  onOtpInput(event: any, index: number) {
+    const input = event.target as HTMLInputElement;
+    const value = input.value.replace(/[^0-9]/g, ''); // allow digits only
+    input.value = value;
+    this.otpValues[index] = value;
+
+    if (value && index < this.otpControls.length - 1) {
+      // focus next input
+      const next = input.nextElementSibling as HTMLInputElement;
+      next?.focus();
+    }
+
+    this.emitOtp();
+  }
+
+  onOtpBackspace(event: any, index: number) {
+  const input = event.target as HTMLInputElement;
+  if (!input.value && index > 0 && event.key === 'Backspace') {
+    const prev = input.previousElementSibling as HTMLInputElement;
+    prev?.focus();
+  }
+}
+
+
+  emitOtp() {
+    this.otp = this.otpValues.join('');
   }
 
 
