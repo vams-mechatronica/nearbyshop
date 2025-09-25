@@ -37,52 +37,53 @@ export const AuthInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: 
   }
 
   return next(authReq).pipe(
-    catchError((error: HttpErrorResponse) => {
-      if (error.status === 401) {
-        if (!isRefreshing) {
-          isRefreshing = true;
-          refreshTokenSubject.next(null);
+  catchError((error: HttpErrorResponse) => {
+    // only attempt refresh on the browser
+    if (error.status === 401 && isPlatformBrowser(platformId)) {
+      if (!isRefreshing) {
+        isRefreshing = true;
+        refreshTokenSubject.next(null);
 
-          return authService.refreshToken().pipe(
-            switchMap((res: any) => {
-              isRefreshing = false;
-              storage.setItem('access_token', res.access);
-              refreshTokenSubject.next(res.access);
+        return authService.refreshToken().pipe(
+          switchMap((res: any) => {
+            isRefreshing = false;
+            storage.setItem('access_token', res.access);
+            refreshTokenSubject.next(res.access);
 
-              const newReq = authReq.clone({
-                setHeaders: { Authorization: `Bearer ${res.access}` },
-              });
-              return next(newReq);
-            }),
-            catchError((err) => {
-              isRefreshing = false;
-              storage.removeItem('access_token');
-              storage.removeItem('refresh_token');
+            const newReq = authReq.clone({
+              setHeaders: { Authorization: `Bearer ${res.access}` },
+            });
+            return next(newReq);
+          }),
+          catchError((err) => {
+            isRefreshing = false;
+            storage.removeItem('access_token');
+            storage.removeItem('refresh_token');
 
-              // ✅ only open modal on the browser
-              if (isPlatformBrowser(platformId)) {
-                modalService.open(AuthComponent, { centered: true, size: 'sm' });
-              }
+            if (isPlatformBrowser(platformId)) {
+              modalService.open(AuthComponent, { centered: true, size: 'sm' });
+            }
 
-              return throwError(() => err);
-            })
-          );
-        } else {
-          // already refreshing → wait for new token
-          return refreshTokenSubject.pipe(
-            filter((token) => token != null),
-            take(1),
-            switchMap((token) => {
-              const newReq = authReq.clone({
-                setHeaders: { Authorization: `Bearer ${token}` },
-              });
-              return next(newReq);
-            })
-          );
-        }
+            return throwError(() => err);
+          })
+        );
+      } else {
+        // already refreshing → wait
+        return refreshTokenSubject.pipe(
+          filter((token) => token != null),
+          take(1),
+          switchMap((token) => {
+            const newReq = authReq.clone({
+              setHeaders: { Authorization: `Bearer ${token}` },
+            });
+            return next(newReq);
+          })
+        );
       }
+    }
 
-      return throwError(() => error);
-    })
-  );
+    return throwError(() => error);
+  })
+);
+
 };

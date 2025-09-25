@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { API_ENDPOINTS } from '../shared/constants/api.constants';
 import { StorageService } from './storage.service';
 import { HeaderCountService } from './header.service';
+import { throwError } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -52,10 +53,15 @@ export class AuthService {
   }
 
   // ✅ If backend supports refresh
-  refreshToken() {
-    const refresh = this.storage.getItem('refresh_token');
-    return this.http.post(API_ENDPOINTS.REFRESH_TOKEN, { refresh });
+ refreshToken() {
+  const refresh = this.storage.getItem('refresh_token');
+  // you could also check here
+  if (!refresh) {
+    return throwError(() => new Error('No refresh token'));
   }
+  return this.http.post(API_ENDPOINTS.REFRESH_TOKEN, { refresh });
+}
+
 
   logout() {
     this.clearTokens();
