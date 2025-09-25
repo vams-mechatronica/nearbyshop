@@ -1,11 +1,12 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, PLATFORM_ID } from '@angular/core';
 import {
   HttpInterceptor,
   HttpRequest,
   HttpHandler,
   HttpEvent,
   HttpErrorResponse,
-  HttpInterceptorFn
+  HttpInterceptorFn,
+  HttpHandlerFn
 } from '@angular/common/http';
 import { Observable, throwError, BehaviorSubject } from 'rxjs';
 import { catchError, switchMap, filter, take } from 'rxjs/operators';
@@ -13,16 +14,19 @@ import { StorageService } from '../services/storage.service';
 import { AuthService } from '../services/auth.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { AuthComponent } from '../components/auth/auth.component';
+import { isPlatformBrowser } from '@angular/common';
 
 // shared state for refresh
 let isRefreshing = false;
 const refreshTokenSubject = new BehaviorSubject<string | null>(null);
 
-export const AuthInterceptor: HttpInterceptorFn = (req, next) => {
+export const AuthInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: HttpHandlerFn) => {
   const storage = inject(StorageService);
   const authService = inject(AuthService);
   const modalService = inject(NgbModal);
+  const platformId = inject(PLATFORM_ID);
 
+  // SSR-safe token retrieval
   const token = storage.getItem('access_token');
   let authReq = req;
 
@@ -54,12 +58,17 @@ export const AuthInterceptor: HttpInterceptorFn = (req, next) => {
               isRefreshing = false;
               storage.removeItem('access_token');
               storage.removeItem('refresh_token');
-              modalService.open(AuthComponent, { centered: true, size: 'sm' });
+
+              // ✅ only open modal on the browser
+              if (isPlatformBrowser(platformId)) {
+                modalService.open(AuthComponent, { centered: true, size: 'sm' });
+              }
+
               return throwError(() => err);
             })
           );
         } else {
-          // already refreshing → wait
+          // already refreshing → wait for new token
           return refreshTokenSubject.pipe(
             filter((token) => token != null),
             take(1),
