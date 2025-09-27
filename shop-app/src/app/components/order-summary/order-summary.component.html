@@ -3,7 +3,7 @@
   <div class="card shadow rounded-3 p-4">
 
     <!-- Payment Status -->
-    <div *ngIf="orderSummary.status === 'completed'; else failedBlock">
+    <div *ngIf="orderSummary.status === 'Completed'; else failedBlock">
       <h3 class="text-success mb-3">✅ Payment Successful!</h3>
       <p>Your order has been placed successfully.</p>
     </div>
@@ -23,14 +23,14 @@
     <h5>Order Details</h5>
     <p><strong>Order ID:</strong> {{ orderSummary.id }}</p>
     <p><strong>Date:</strong> {{ orderSummary.created_at | date:'medium' }}</p>
-    <p><strong>Payment Method:</strong> {{ orderSummary.payment_method }}</p>
+    <p><strong>Payment Method:</strong> {{ orderSummary.payment_method | titlecase }}</p>
     <p><strong>Status:</strong> 
       <span class="badge"
             [ngClass]="{
-              'bg-success': orderSummary.status === 'completed',
-              'bg-danger': orderSummary.status === 'payment-failed',
-              'bg-warning text-dark': orderSummary.status === 'pending'
-            }">
+              'bg-success': orderSummary.status === 'Completed',
+              'bg-danger': orderSummary.status === 'Payment Failed',
+              'bg-warning text-dark': orderSummary.status === 'Pending'
+            }" style="margin-left: 3px;">
         {{ orderSummary.status | titlecase }}
       </span>
     </p>
@@ -64,7 +64,7 @@
     </div>
 
     <!-- Show "Continue Shopping" only if success -->
-    <div class="mt-4 text-center" *ngIf="orderSummary.status === 'completed'">
+    <div class="mt-4 text-center" *ngIf="orderSummary.status === 'Completed'">
       <a routerLink="/" class="btn btn-primary">Continue Shopping</a>
     </div>
   </div>
