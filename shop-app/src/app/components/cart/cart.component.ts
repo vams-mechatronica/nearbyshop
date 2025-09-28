@@ -17,6 +17,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { AuthComponent } from '../auth/auth.component';
 import { LoaderService } from '../../services/loader.service';
 import { HeaderCountService } from '../../services/header.service';
+import { forkJoin } from 'rxjs';
 
 declare var Razorpay: any;
 
@@ -35,6 +36,7 @@ export class CartComponent implements OnInit {
   totaldiscount: number = 0;
   couponCode: string = '';
   message: string = '';
+  isloadingCheckout = false;
 
   user = { mobile: '', otp: '', address: '' };
   addresses: any[] = [];
@@ -104,7 +106,7 @@ export class CartComponent implements OnInit {
     return this.totaldiscount;
   }
 
-  getFinalAmount(){
+  getFinalAmount() {
     return this.gTotal;
   }
 
@@ -185,21 +187,21 @@ export class CartComponent implements OnInit {
 
   checkDelivery() {
     const zip = this.newAddress.zip;
-    if (!zip) { 
+    if (!zip) {
       this.deliveryMessage = '';
       return;
     }
 
     this.cartService.checkDeliveryAddress(zip).subscribe({
-        next: (res: any) => {
-          this.deliveryAvailable = res.available;
-          this.deliveryMessage = res.message || (res.available ? 'Delivery available!' : 'Delivery not available at this location.');
-        },
-        error: () => {
-          this.deliveryAvailable = false;
-          this.deliveryMessage = 'Could not check delivery at this time.';
-        }
-      });
+      next: (res: any) => {
+        this.deliveryAvailable = res.available;
+        this.deliveryMessage = res.message || (res.available ? 'Delivery available!' : 'Delivery not available at this location.');
+      },
+      error: () => {
+        this.deliveryAvailable = false;
+        this.deliveryMessage = 'Could not check delivery at this time.';
+      }
+    });
   }
 
   addAddress() {
@@ -244,6 +246,7 @@ export class CartComponent implements OnInit {
   }
 
   checkout(address: any) {
+    this.isloadingCheckout = true;
     // this.loaderService.show();
     if (!this.authService.hasToken()) {
       // 🔑 User not logged in → show login modal
@@ -252,23 +255,45 @@ export class CartComponent implements OnInit {
       // ⏳ When modal closes, retry checkout if login was successful
       modalRef.closed.subscribe((result) => {
         if (result === 'logged-in') {
-          this.cartService.syncGuestCart().subscribe();
-          // this.loaderService.hide();
-          this.checkout(address); // 🔁 Retry with same address
+          // run both sync calls in parallel and wait for both to finish
+          forkJoin({
+            cart: this.cartService.syncGuestCart(),
+            address: this.userService.syncGuestAddress()
+          }).subscribe({
+            next: ({ cart, address }) => {
+              // cart is an array of responses
+              this.cartId = cart.length > 0 ? cart[0].id : null;
+              // address is your synced address object
+              address = address;
+
+              // now that everything is synced, call checkout again
+              this.checkout(address);
+            },
+            error: () => {
+              this.isloadingCheckout = false;
+              if (isPlatformBrowser(this.platformId)) {
+                this.toastrService.error('Failed to sync guest data', 'Failed');
+              }
+            }
+          });
         }
       });
 
       return;
     }
 
-    if (!address){
-      this.toastrService.error('Please Enter delivery address','Failed');
+    if (!address) {
+      this.isloadingCheckout = false;
+
+      this.toastrService.error('Please Enter delivery address', 'Failed');
       return;
     }
     // ✅ Logged in → proceed with order
     this.cartService.createOrder(this.cartId, address.id, 'razorpay', this.couponCode).subscribe({
       next: (res: Order) => this.paymentRazorpay(res.total_price, res.id),
       error: () => {
+        this.isloadingCheckout = false;
+
         if (isPlatformBrowser(this.platformId)) {
           this.toastrService.error('Failed to order', 'Error');
         }
@@ -317,6 +342,8 @@ export class CartComponent implements OnInit {
         }
       };
       const rzp = new Razorpay(options);
+      this.isloadingCheckout = false;
+
       rzp.open();
     });
   }

@@ -40,4 +40,5 @@ export const API_ENDPOINTS = {
   GET_HEADERS_COUNT: `${API_BASE_URL}/api/v1/header-counts/`,
   VERIFY_PINCODE: `${API_BASE_URL}/api/v1/check-delivery`,
   GET_WALLET_TRANSACTION: `${API_BASE_URL}/api/v1/wallet/transactions/`,
+  USER_ADDRESS_SYNC: `${API_BASE_URL}/api/v1/user/sync-address/`,
 };

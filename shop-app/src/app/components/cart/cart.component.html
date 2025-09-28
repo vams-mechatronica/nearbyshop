@@ -162,9 +162,16 @@
           </div>
 
           <!-- Checkout -->
-          <button class="btn checkout w-100 btn-lg" (click)="checkout(selectedAddress)">
-            <i class="bi bi-bag-check"></i> Checkout
+          <button class="btn checkout w-100 btn-lg" [disabled]="isloadingCheckout" (click)="checkout(selectedAddress)">
+            <ng-container *ngIf="!isloadingCheckout">
+              <i class="bi bi-bag-check"></i> Checkout
+            </ng-container>
+            <ng-container *ngIf="isloadingCheckout">
+              <span class="spinner-border spinner-border-sm me-2"></span>
+              Processing...
+            </ng-container>
           </button>
+
         </div>
       </div>
     </div>
