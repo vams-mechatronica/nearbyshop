@@ -11,6 +11,7 @@ import { AboutUsComponent } from './pages/about-us/about-us.component';
 import { PolicyComponent } from './pages/policy/policy.component';
 import { ContactUsComponent } from './pages/contact-us/contact-us.component';
 import { ProductDetailComponent } from './pages/product-detail/product-detail.component';
+import { VendorProductsComponent } from './components/vendor-products/vendor-products.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -18,6 +19,7 @@ export const routes: Routes = [
   { path: 'cart', component: CartComponent },
   { path: 'products/:slug', component: ProductsComponent},
   { path: 'product/:slug', component: ProductDetailComponent },
+  { path: 'stores/:slug', component: VendorProductsComponent },
   { path: 'subscribe', component: SubscriptionsComponent },
   { path: 'profile', component: UserProfileComponent },
   { path: 'payment-status', component: PaymentStatusComponent },

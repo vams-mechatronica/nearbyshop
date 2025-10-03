@@ -18,6 +18,10 @@ export class ProductsService {
     const params = new HttpParams().set('category__slug', slug);
     return this.http.get(API_ENDPOINTS.PRODUCTS, { params });
   }
+  getProductsByStoreSlug(slug: string): Observable<any> {
+    // const params = new HttpParams().set('store__slug', slug);
+    return this.http.get(API_ENDPOINTS.STORE_PRODUCTS + `${slug}/products/`);
+  }
 
   getProductDetailById(productId: string): Observable<any> {
     return this.http.get(`${API_ENDPOINTS.PRODUCT_DETAIL}${productId}/`);

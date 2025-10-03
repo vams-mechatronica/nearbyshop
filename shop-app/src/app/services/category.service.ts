@@ -12,4 +12,8 @@ export class CategoryService {
   getCategories(): Observable<any> {
     return this.http.get(API_ENDPOINTS.CATEGORIES);
   }
+
+  getStores(): Observable<any> {
+    return this.http.get(API_ENDPOINTS.STORES);
+  }
 }

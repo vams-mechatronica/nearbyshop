@@ -5,6 +5,8 @@ export const API_BASE_URL = environment.apiUrl;
 export const API_ENDPOINTS = {
   CATEGORIES: `${API_BASE_URL}/api/v1/categories/?is_active=true&page_size=20`,
   PRODUCTS: `${API_BASE_URL}/api/v1/products/`,
+  STORE_PRODUCTS: `${API_BASE_URL}/api/v1/vendors/stores/`,
+  STORE_DETAILS: `${API_BASE_URL}/api/v1/vendors/stores/`,
   PRODUCT_DETAIL: `${API_BASE_URL}/api/v1/product/`,
   RELATED_PRODUCT: `${API_BASE_URL}/api/v1/products/`,
   SEARCH: `${API_BASE_URL}/api/v1/products/?search=`,
@@ -41,4 +43,5 @@ export const API_ENDPOINTS = {
   VERIFY_PINCODE: `${API_BASE_URL}/api/v1/check-delivery`,
   GET_WALLET_TRANSACTION: `${API_BASE_URL}/api/v1/wallet/transactions/`,
   USER_ADDRESS_SYNC: `${API_BASE_URL}/api/v1/user/sync-address/`,
+  STORES: `${API_BASE_URL}/api/v1/vendors/stores/`,
 };

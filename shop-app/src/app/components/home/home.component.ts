@@ -19,6 +19,7 @@ import { BannerService } from '../../services/banner.service';
 export class HomeComponent implements OnInit,AfterViewInit, OnDestroy {
   @ViewChild('bannerContainer', { static: true }) bannerContainer!: ElementRef;
   categories: any[] = [];
+  stores: any[] = [];
   banners: any[] = [];
   processedBanners: any[] = [];
   recentVisits = ['Groceries', 'Rice', 'Wheat'];
@@ -37,11 +38,17 @@ export class HomeComponent implements OnInit,AfterViewInit, OnDestroy {
     this.categoryService.getCategories().subscribe((res: any) => {
       this.categories = res.results;
     });
-    // this.loadBanners();
+    this.getStoresList();
   }
   // ngOnDestroy() {
   //   if (this.interval) clearInterval(this.interval);
   // }
+
+  getStoresList() {
+    this.categoryService.getStores().subscribe((res: any) => {
+      this.stores = res.results;
+    });
+  }
 
 
   @ViewChild('carousel') carousel!: ElementRef;
@@ -58,8 +65,9 @@ export class HomeComponent implements OnInit,AfterViewInit, OnDestroy {
     this.router.navigate(['/products', cat.slug]);
   }
 
-
-
+  selectStore(store: any) {
+    this.router.navigate(['/stores', store.slug]);
+  }
 
   ngAfterViewInit() {
     // Only run in browser

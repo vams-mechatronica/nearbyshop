@@ -1,5 +1,5 @@
 <div class="container mt-4">
-  <h4>Categories</h4>
+  <h4>Shop By Categories</h4>
 
   <div class="carousel-container">
     <button class="carousel-arrow left" (click)="scrollLeft()">
@@ -18,12 +18,34 @@
     </button>
   </div>
 
+  <h4>Shop By Store</h4>
+
+  <div class="carousel-container">
+    <button class="carousel-arrow left" (click)="scrollLeft()">
+      <span>&#10094;</span>
+    </button>
+
+    <div class="carousel-wrapper" #carousel>
+      <div class="category-card" *ngFor="let store of stores" (click)="selectStore(store)">
+        <img [src]="store.shop_image" alt="{{ store.shop_name }}">
+        <div class="label">{{ store.shop_name }}</div>
+      </div>
+    </div>
+
+    <button class="carousel-arrow right" (click)="scrollRight()">
+      <span>&#10095;</span>
+    </button>
+  </div>
+
+  <button class="carousel-arrow right" (click)="scrollRight()">
+    <span>&#10095;</span>
+  </button>
+  
+  
   <div class="banner-carousel-container">
-  <div class="banner-carousel" [style.transform]="'translateX(-' + currentIndex * (100/3) + '%)'">
-    <div class="banner-card" *ngFor="let banner of processedBanners">
+    <div class="banner-carousel" [style.transform]="'translateX(-' + currentIndex * (100/3) + '%)'">
+      <div class="banner-card" *ngFor="let banner of processedBanners">
       <img [src]="banner.image" alt="{{ banner.title }}" />
     </div>
   </div>
-</div>
-
 </div>
