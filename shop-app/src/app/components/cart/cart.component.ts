@@ -311,6 +311,7 @@ export class CartComponent implements OnInit {
       next: (res) => {
         if (res.success) {
           this.gTotal = res.discounted_total;
+          this.loadCart();
           this.message = `Coupon ${res.coupon} applied successfully!`;
         }
       },
