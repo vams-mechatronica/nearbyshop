@@ -7,6 +7,7 @@ import { AuthService } from '../../services/auth.service';
 import { ToastrService } from 'ngx-toastr';
 import { StorageService } from '../../services/storage.service';
 import { LoaderService } from '../../services/loader.service';
+import { LocationService } from '../../services/location.service';
 
 
 @Component({
@@ -33,6 +34,7 @@ export class AuthComponent implements OnInit {
     private router: Router,
     public activeModal: NgbActiveModal,
     private loaderService:LoaderService,
+    private locationService:LocationService,
     private toastrService: ToastrService,
     private storage: StorageService
   ) { }
@@ -112,6 +114,7 @@ export class AuthComponent implements OnInit {
         this.activeModal.close('logged-in');
         
         this.toastrService.success('User logged in successfully','Login Success');
+        this.onLoginSuccess();
         // ✅ Redirect only if redirectTo is provided
         if (this.redirectTo) {
           this.router.navigateByUrl(this.redirectTo);
@@ -121,6 +124,22 @@ export class AuthComponent implements OnInit {
       error: (err) => {
         this.toastrService.error('Please try again', 'OTP verification failed');
       },
+    });
+  }
+  onLoginSuccess(){
+    this.locationService.getAndValidateLocation().subscribe({
+      next: (data) => {
+        if (data) {
+          localStorage.setItem('selected_location_id', data.location_id);
+        } else {
+          alert('Delivery is not available in your area. Please choose a different location.');
+          // this.toastrService.warning('Delivery is not available in your area. Please choose a different location.', 'Warning');
+        }
+      },
+      error: (err) => {
+        console.error('Location validation failed:', err);
+        this.toastrService.error('Failed to validate location. Please set your location.', 'Error');
+      }
     });
   }
 }

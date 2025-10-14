@@ -3,8 +3,8 @@
     <label for="locationSelect" class="me-2 mb-0">
       <i class="fas fa-map-marker-alt me-2"></i>Select Location:
     </label>
-    <select id="locationSelect" class="form-select form-select-sm">
-      <option value="noida">Noida</option>
+    <select [(ngModel)]="selectedLocation" class="form-select form-select-sm" id="locationSelect" ><!-- </select>(change)="onLocationChange($event)"> -->
+      <option *ngFor="let loc of locations" [value]="loc.id">{{ loc.name }}</option>
     </select>
   </div>
 

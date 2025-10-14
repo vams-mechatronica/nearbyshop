@@ -27,6 +27,12 @@ export class HeaderComponent implements OnInit {
   showProfileDropdown = false;
   cartCount = 0;
   subscriptionCount = 0;
+  selectedLocation: string | null = null;
+  locations = [
+    { id: 1, name: 'Noida' },
+    { id: 2, name: 'Delhi' },
+    { id: 3, name: 'Gurgaon' }
+  ];
 
   constructor(
     private router: Router,
@@ -45,10 +51,18 @@ export class HeaderComponent implements OnInit {
     return false;
   }
 
+  onLocationChange(event: any): void {
+    const selectedId = event.target.value;
+    console.log('Selected location ID:', selectedId);
+    localStorage.setItem('selected_location_id', selectedId);
+  }
+
   ngOnInit(): void {
     if (this.isLoggedIn) {
       this.getUserInfo();
     }
+
+    this.selectedLocation = localStorage.getItem('selected_location_id');
 
     this.headerService.counts$.subscribe(counts => {
       this.cartCount = counts.cart_count;
