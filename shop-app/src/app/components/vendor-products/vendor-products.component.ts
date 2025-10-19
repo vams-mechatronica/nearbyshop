@@ -21,7 +21,7 @@ import { ShopService } from '../../services/shop.service';
   selector: 'app-vendor-products',
   imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './vendor-products.component.html',
-  styleUrl: './vendor-products.component.scss'
+  styleUrls: ['./vendor-products.component.scss']
 })
 export class VendorProductsComponent {
   products: any[] = [];
