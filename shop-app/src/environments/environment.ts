@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  apiUrl: "https://api.vamsmechatronica.in",
+  apiUrl: "https://api.thenearbyshop.com",
 };
