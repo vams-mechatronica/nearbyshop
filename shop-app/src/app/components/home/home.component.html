@@ -6,13 +6,19 @@
       <ng-container *ngIf="processedBanners.length; else heroLoading">
         <div class="hero-slide" *ngFor="let banner of processedBanners; let i = index"
           [class.active]="i === currentBannerIndex">
-          <img [src]="banner.cachedSrc || (banner.image + '?f_auto,q_auto,w_1600,h_600,c_fill')" 
-               alt="{{ banner.title }}" loading="lazy" />
+          <img [src]="banner.cachedSrc || (banner.image + '?f_auto,q_auto,w_1600,h_600,c_fill')"
+            alt="{{ banner.title }}" loading="lazy" />
           <div class="hero-overlay">
             <h1>{{ banner.title }}</h1>
             <p>{{ banner.subtitle }}</p>
-            <button class="cta-btn">Shop Now</button>
+            <a class="cta-btn" [href]="banner.redirect_url" target="_blank" *ngIf="banner.redirect_url; else noLink">
+              Shop Now
+            </a>
+            <ng-template #noLink>
+              <button class="cta-btn" disabled>Shop Now</button>
+            </ng-template>
           </div>
+
         </div>
       </ng-container>
 
