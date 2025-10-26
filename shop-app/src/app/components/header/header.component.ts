@@ -54,7 +54,7 @@ export class HeaderComponent implements OnInit {
   onLocationChange(event: any): void {
     const selectedId = event.target.value;
     console.log('Selected location ID:', selectedId);
-    localStorage.setItem('selected_location_id', selectedId);
+    this.storage.setItem('selected_location_id', selectedId);
   }
 
   ngOnInit(): void {
@@ -62,7 +62,7 @@ export class HeaderComponent implements OnInit {
       this.getUserInfo();
     }
 
-    this.selectedLocation = localStorage.getItem('selected_location_id');
+    this.selectedLocation = this.storage.getItem('selected_location_id');
 
     this.headerService.counts$.subscribe(counts => {
       this.cartCount = counts.cart_count;

@@ -21,7 +21,8 @@ export class AuthService {
   verifyOtp(phone: string, otp: string) {
     return this.http.post(API_ENDPOINTS.VERIFY_OTP, {
       phone_number: phone,
-      otp: otp
+      otp: otp,
+      role: 'customer'
     });
   }
 

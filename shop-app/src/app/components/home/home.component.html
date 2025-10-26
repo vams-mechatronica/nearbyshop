@@ -1,51 +1,104 @@
-<div class="container mt-4">
-  <h4>Shop By Categories</h4>
+<div class="landing-page">
 
-  <div class="carousel-container">
-    <button class="carousel-arrow left" (click)="scrollLeft()">
-      <span>&#10094;</span>
-    </button>
+  <!-- HERO BANNER SECTION -->
+  <section class="hero-section">
+    <div class="hero-carousel">
+      <ng-container *ngIf="processedBanners.length; else heroLoading">
+        <div class="hero-slide" *ngFor="let banner of processedBanners; let i = index"
+          [class.active]="i === currentBannerIndex">
+          <img [src]="banner.cachedSrc || (banner.image + '?f_auto,q_auto,w_1600,h_600,c_fill')" 
+               alt="{{ banner.title }}" loading="lazy" />
+          <div class="hero-overlay">
+            <h1>{{ banner.title }}</h1>
+            <p>{{ banner.subtitle }}</p>
+            <button class="cta-btn">Shop Now</button>
+          </div>
+        </div>
+      </ng-container>
 
-    <div class="carousel-wrapper" #carousel>
-      <div class="category-card" *ngFor="let cat of categories" (click)="selectCategory(cat)">
-        <img [src]="cat.image" alt="{{ cat.name }}">
-        <div class="label">{{ cat.name }}</div>
+      <ng-template #heroLoading>
+        <div class="hero-skeleton" *ngFor="let _ of [1,2,3]"></div>
+      </ng-template>
+    </div>
+  </section>
+
+  <!-- SHOP BY CATEGORY -->
+  <section class="category-section">
+    <div class="section-header">
+      <h2>Shop by Categories</h2>
+      <a class="view-all">View All →</a>
+    </div>
+    <div class="carousel-container">
+      <button class="carousel-arrow left" (click)="scrollLeft(categoryCarousel)">
+        <span>&#10094;</span>
+      </button>
+
+      <div class="carousel-wrapper" #categoryCarousel>
+        <ng-container *ngIf="categories.length; else categoryLoading">
+          <div class="category-card" *ngFor="let cat of categories" (click)="selectCategory(cat)">
+            <div class="image-container">
+              <img [src]="cat.image" alt="{{ cat.name }}" loading="lazy" />
+            </div>
+            <div class="label">{{ cat.name }}</div>
+          </div>
+        </ng-container>
+
+        <ng-template #categoryLoading>
+          <div class="category-card-skeleton" *ngFor="let _ of [1,2,3,4,5]"></div>
+        </ng-template>
       </div>
+
+      <button class="carousel-arrow right" (click)="scrollRight(categoryCarousel)">
+        <span>&#10095;</span>
+      </button>
     </div>
+  </section>
 
-    <button class="carousel-arrow right" (click)="scrollRight()">
-      <span>&#10095;</span>
-    </button>
-  </div>
+  <!-- SHOP BY STORE -->
+  <section class="store-section">
+    <div class="section-header">
+      <h2>Shop by Store</h2>
+      <a class="view-all">View All →</a>
+    </div>
+    <div class="carousel-container">
+      <button class="carousel-arrow left" (click)="scrollLeft(storeCarousel)">
+        <span>&#10094;</span>
+      </button>
 
-  <h4>Shop By Store</h4>
+      <div class="carousel-wrapper" #storeCarousel>
+        <ng-container *ngIf="stores.length; else storeLoading">
+          <div class="store-card" *ngFor="let store of stores" (click)="selectStore(store)">
+            <div class="image-container">
+              <img [src]="store.shop_image" alt="{{ store.shop_name }}" loading="lazy" />
+            </div>
+            <div class="label">{{ store.shop_name }}</div>
+          </div>
+        </ng-container>
 
-  <div class="carousel-container">
-    <button class="carousel-arrow left" (click)="scrollLeft()">
-      <span>&#10094;</span>
-    </button>
-
-    <div class="carousel-wrapper" #carousel>
-      <div class="category-card" *ngFor="let store of stores" (click)="selectStore(store)">
-        <img [src]="store.shop_image" alt="{{ store.shop_name }}">
-        <div class="label">{{ store.shop_name }}</div>
+        <ng-template #storeLoading>
+          <div class="store-card-skeleton" *ngFor="let _ of [1,2,3,4,5]"></div>
+        </ng-template>
       </div>
-    </div>
 
-    <button class="carousel-arrow right" (click)="scrollRight()">
-      <span>&#10095;</span>
-    </button>
-  </div>
-
-  <button class="carousel-arrow right" (click)="scrollRight()">
-    <span>&#10095;</span>
-  </button>
-  
-  
-  <div class="banner-carousel-container">
-    <div class="banner-carousel" [style.transform]="'translateX(-' + currentIndex * (100/3) + '%)'">
-      <div class="banner-card" *ngFor="let banner of processedBanners">
-      <img [src]="banner.image" alt="{{ banner.title }}" />
+      <button class="carousel-arrow right" (click)="scrollRight(storeCarousel)">
+        <span>&#10095;</span>
+      </button>
     </div>
-  </div>
+  </section>
+
+  <!-- PROMOTIONAL BANNERS -->
+  <section class="banner-section">
+    <div class="banner-carousel">
+      <ng-container *ngIf="processedBanners.length; else bannerLoading">
+        <div class="banner-card" *ngFor="let banner of processedBanners">
+          <img [src]="banner.cachedSrc || (banner.image + '?f_auto,q_auto')" alt="{{ banner.title }}" loading="lazy" />
+        </div>
+      </ng-container>
+
+      <ng-template #bannerLoading>
+        <div class="banner-card-skeleton" *ngFor="let _ of [1,2,3]"></div>
+      </ng-template>
+    </div>
+  </section>
+
 </div>

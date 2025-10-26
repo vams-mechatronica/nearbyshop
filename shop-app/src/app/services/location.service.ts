@@ -8,7 +8,7 @@ import { API_ENDPOINTS } from '../shared/constants/api.constants';
     providedIn: 'root'
 })
 export class LocationService {
-    private apiKey = 'YOUR_GOOGLE_MAPS_API_KEY';
+    private apiKey = 'AIzaSyC6k0JqOh3qzhxjiWO-ua0uRYLuR7KBzRI';
 
     constructor(private http: HttpClient) { }
 
