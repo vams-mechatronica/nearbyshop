@@ -1,4 +1,4 @@
-import { Component, HostListener, Inject, OnInit, PLATFORM_ID } from '@angular/core';
+import { Component, HostListener, Inject, OnInit, PLATFORM_ID, TemplateRef, ViewChild } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -22,7 +22,8 @@ export class HeaderComponent implements OnInit {
   searchQuery = '';
   searchResults: any[] = [];  // live search results
   searchSubject = new Subject<string>(); // input stream
-
+  locationSearch = '';
+  selectedLocationName: string | null = null;
   userName = 'John Doe';
   showProfileDropdown = false;
   cartCount = 0;
@@ -42,7 +43,7 @@ export class HeaderComponent implements OnInit {
     private http: HttpClient,   // for search API calls
     private headerService: HeaderCountService,
     @Inject(PLATFORM_ID) private platformId: Object
-  ) {}
+  ) { }
 
   get isLoggedIn(): boolean {
     if (isPlatformBrowser(this.platformId)) {
@@ -150,4 +151,90 @@ export class HeaderComponent implements OnInit {
       this.showProfileDropdown = false;
     }
   }
+
+  // ✅ Open Location Modal
+  openLocationModal(): void {
+    const modalRef = this.modalService.open(this.locationModal, {
+      centered: true,
+      size: 'md',
+      backdrop: 'static'
+    });
+  }
+
+  useCurrentLocation(modal: any): void {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          console.log('User location:', lat, lng);
+
+          const apiKey = 'AIzaSyC6k0JqOh3qzhxjiWO-ua0uRYLuR7KBzRI';
+          const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${encodeURIComponent(lat)},${encodeURIComponent(lng)}&key=${apiKey}`;
+
+          fetch(geocodeUrl)
+            .then((response) => response.json())
+            .then((data) => {
+              console.log('Google Maps Response:', data);
+
+              if (data.status === 'OK' && data.results.length > 0) {
+                const result = data.results[0];
+                const formattedAddress = result.formatted_address;
+
+                // Extract postal code and locality
+                let postalCode = '';
+                let locality = '';
+
+                result.address_components.forEach((component: any) => {
+                  if (component.types.includes('postal_code')) {
+                    postalCode = component.long_name;
+                  }
+                  if (component.types.includes('locality')) {
+                    locality = component.long_name;
+                  }
+                });
+
+                console.log('Formatted Address:', formattedAddress);
+                console.log('Postal Code:', postalCode);
+                console.log('Locality:', locality);
+
+                // ✅ Store in localStorage
+                this.storage.setItem('selected_location', formattedAddress);
+                this.storage.setItem('selected_location_id', 'current');
+                this.storage.setItem('latitude', lat.toString());
+                this.storage.setItem('longitude', lng.toString());
+                this.storage.setItem('postal_code', postalCode);
+                this.storage.setItem('locality', locality);
+
+                // ✅ Display on UI
+                this.selectedLocationName = formattedAddress;
+              } else {
+                console.warn('No address found, falling back to coordinates.');
+                this.selectedLocationName = `Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}`;
+                this.storage.setItem('selected_location', this.selectedLocationName);
+              }
+
+              modal.close();
+            })
+            .catch((error) => {
+              console.error('Error fetching location details:', error);
+              this.selectedLocationName = 'Current Location';
+              modal.close();
+            });
+        },
+        (error) => {
+          console.error('Error getting location:', error);
+          alert('Unable to retrieve your location. Please enable location access.');
+        }
+      );
+    } else {
+      alert('Geolocation is not supported on this browser.');
+    }
+  }
+
+
+
+
+  // reference to modal template
+  @ViewChild('locationModal') locationModal!: TemplateRef<any>;
 }
