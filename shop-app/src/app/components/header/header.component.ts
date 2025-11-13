@@ -1,11 +1,25 @@
-import { Component, HostListener, Inject, OnInit, PLATFORM_ID, TemplateRef, ViewChild } from '@angular/core';
+import {
+  Component,
+  HostListener,
+  Inject,
+  OnInit,
+  PLATFORM_ID,
+  TemplateRef,
+  ViewChild,
+} from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { AuthComponent } from '../auth/auth.component';
 import { UserService } from '../../services/user.service';
-import { BehaviorSubject, Subject, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
+import {
+  BehaviorSubject,
+  Subject,
+  debounceTime,
+  distinctUntilChanged,
+  switchMap,
+} from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { API_ENDPOINTS } from '../../shared/constants/api.constants';
 import { StorageService } from '../../services/storage.service';
@@ -20,7 +34,7 @@ import { HeaderCountService } from '../../services/header.service';
 })
 export class HeaderComponent implements OnInit {
   searchQuery = '';
-  searchResults: any[] = [];  // live search results
+  searchResults: any[] = []; // live search results
   searchSubject = new Subject<string>(); // input stream
   locationSearch = '';
   selectedLocationName: string | null = null;
@@ -32,7 +46,7 @@ export class HeaderComponent implements OnInit {
   locations = [
     { id: 1, name: 'Noida' },
     { id: 2, name: 'Delhi' },
-    { id: 3, name: 'Gurgaon' }
+    { id: 3, name: 'Gurgaon' },
   ];
 
   constructor(
@@ -40,10 +54,10 @@ export class HeaderComponent implements OnInit {
     private modalService: NgbModal,
     private userService: UserService,
     private storage: StorageService,
-    private http: HttpClient,   // for search API calls
+    private http: HttpClient, // for search API calls
     private headerService: HeaderCountService,
     @Inject(PLATFORM_ID) private platformId: Object
-  ) { }
+  ) {}
 
   get isLoggedIn(): boolean {
     if (isPlatformBrowser(this.platformId)) {
@@ -64,8 +78,9 @@ export class HeaderComponent implements OnInit {
     }
 
     this.selectedLocation = this.storage.getItem('selected_location_id');
+    this.selectedLocationName = this.storage.getItem('selected_location');
 
-    this.headerService.counts$.subscribe(counts => {
+    this.headerService.counts$.subscribe((counts) => {
       this.cartCount = counts.cart_count;
       this.subscriptionCount = counts.subscription_count;
     });
@@ -73,31 +88,32 @@ export class HeaderComponent implements OnInit {
     this.headerService.fetchCounts();
 
     // 🔹 setup live search stream
-    this.searchSubject.pipe(
-      debounceTime(300), // wait 300ms after typing
-      distinctUntilChanged(), // only trigger if query changes
-      switchMap((query: string) =>
-        this.http.get<any[]>(`${API_ENDPOINTS.SEARCH}${query}`) // call your backend API
+    this.searchSubject
+      .pipe(
+        debounceTime(300), // wait 300ms after typing
+        distinctUntilChanged(), // only trigger if query changes
+        switchMap(
+          (query: string) =>
+            this.http.get<any[]>(`${API_ENDPOINTS.SEARCH}${query}`) // call your backend API
+        )
       )
-    ).subscribe({
-      next: (res: any) => {
-        this.searchResults = res.results;
-      },
-      error: (err) => {
-        console.error('Search error:', err);
-        this.searchResults = [];
-      }
-    });
+      .subscribe({
+        next: (res: any) => {
+          this.searchResults = res.results;
+        },
+        error: (err) => {
+          console.error('Search error:', err);
+          this.searchResults = [];
+        },
+      });
   }
-
-
 
   getUserInfo() {
     this.userService.getUserInfo().subscribe({
       next: (res) => {
         this.userName = res.username;
       },
-      error: (err) => console.error(err)
+      error: (err) => console.error(err),
     });
   }
 
@@ -118,7 +134,9 @@ export class HeaderComponent implements OnInit {
   // 🔹 when user presses Enter or clicks search button
   onSearch(): void {
     if (this.searchQuery.trim()) {
-      this.router.navigate(['/search'], { queryParams: { q: this.searchQuery } });
+      this.router.navigate(['/search'], {
+        queryParams: { q: this.searchQuery },
+      });
       this.searchResults = [];
     }
   }
@@ -157,7 +175,7 @@ export class HeaderComponent implements OnInit {
     const modalRef = this.modalService.open(this.locationModal, {
       centered: true,
       size: 'md',
-      backdrop: 'static'
+      backdrop: 'static',
     });
   }
 
@@ -167,24 +185,19 @@ export class HeaderComponent implements OnInit {
         (pos) => {
           const lat = pos.coords.latitude;
           const lng = pos.coords.longitude;
-          console.log('User location:', lat, lng);
-
           const apiKey = 'AIzaSyC6k0JqOh3qzhxjiWO-ua0uRYLuR7KBzRI';
-          const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${encodeURIComponent(lat)},${encodeURIComponent(lng)}&key=${apiKey}`;
+          const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${encodeURIComponent(
+            lat
+          )},${encodeURIComponent(lng)}&key=${apiKey}`;
 
           fetch(geocodeUrl)
             .then((response) => response.json())
             .then((data) => {
-              console.log('Google Maps Response:', data);
-
               if (data.status === 'OK' && data.results.length > 0) {
                 const result = data.results[0];
                 const formattedAddress = result.formatted_address;
-
-                // Extract postal code and locality
                 let postalCode = '';
                 let locality = '';
-
                 result.address_components.forEach((component: any) => {
                   if (component.types.includes('postal_code')) {
                     postalCode = component.long_name;
@@ -194,10 +207,6 @@ export class HeaderComponent implements OnInit {
                   }
                 });
 
-                console.log('Formatted Address:', formattedAddress);
-                console.log('Postal Code:', postalCode);
-                console.log('Locality:', locality);
-
                 // ✅ Store in localStorage
                 this.storage.setItem('selected_location', formattedAddress);
                 this.storage.setItem('selected_location_id', 'current');
@@ -206,34 +215,30 @@ export class HeaderComponent implements OnInit {
                 this.storage.setItem('postal_code', postalCode);
                 this.storage.setItem('locality', locality);
 
-                // ✅ Display on UI
-                this.selectedLocationName = formattedAddress;
+                // ✅ Display on header
+                this.selectedLocationName =
+                  formattedAddress || 'Current Location';
               } else {
-                console.warn('No address found, falling back to coordinates.');
-                this.selectedLocationName = `Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}`;
-                this.storage.setItem('selected_location', this.selectedLocationName);
+                console.warn('No address found.');
               }
-
               modal.close();
+              // ✅ Refresh or navigate to home
+              window.location.reload(); // simplest approach
             })
             .catch((error) => {
               console.error('Error fetching location details:', error);
-              this.selectedLocationName = 'Current Location';
               modal.close();
             });
         },
         (error) => {
           console.error('Error getting location:', error);
-          alert('Unable to retrieve your location. Please enable location access.');
+          alert('Unable to retrieve your location.');
         }
       );
     } else {
       alert('Geolocation is not supported on this browser.');
     }
   }
-
-
-
 
   // reference to modal template
   @ViewChild('locationModal') locationModal!: TemplateRef<any>;

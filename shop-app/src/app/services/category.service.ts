@@ -16,4 +16,8 @@ export class CategoryService {
   getStores(): Observable<any> {
     return this.http.get(API_ENDPOINTS.STORES);
   }
+
+  getStoresByPincode(pincode: string) {
+  return this.http.get(API_ENDPOINTS.STORES_WITH_PINCODE + pincode);
+}
 }

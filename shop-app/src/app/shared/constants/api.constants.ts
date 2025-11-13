@@ -44,4 +44,5 @@ export const API_ENDPOINTS = {
   GET_WALLET_TRANSACTION: `${API_BASE_URL}/api/v1/wallet/transactions/`,
   USER_ADDRESS_SYNC: `${API_BASE_URL}/api/v1/user/sync-address/`,
   STORES: `${API_BASE_URL}/api/v1/vendors/stores/`,
+  STORES_WITH_PINCODE: `${API_BASE_URL}/api/v1/vendors/stores/?pincode=`,
 };

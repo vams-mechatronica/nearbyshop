@@ -168,6 +168,7 @@
       height: 2.2rem;
       /* fixed height for 2 lines */
     }
+
   }
 
 
@@ -288,4 +289,15 @@
   width: 100%;
   height: 200px;
   margin-bottom: 12px;
+}
+
+.no-stores-message {
+  padding: 2rem;
+  background-color: #fafafa;
+  border: 1px dashed #ccc;
+  border-radius: 12px;
+  color: #555;
+  font-weight: 500;
+  max-width: 400px;
+  margin: 2rem auto;
 }

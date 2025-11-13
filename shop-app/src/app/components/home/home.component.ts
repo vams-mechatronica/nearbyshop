@@ -42,6 +42,8 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   /** Recent Visit & Banner State */
   recentVisits = ['Groceries', 'Rice', 'Wheat'];
   currentBannerIndex = 0;
+  noStoresFound = false;
+  postalCode: string | null = null;
 
   /** Utilities */
   private interval!: ReturnType<typeof setInterval>;
@@ -60,6 +62,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   // 🧩 INIT
   // ────────────────────────────────
   ngOnInit(): void {
+    this.postalCode = this.storageService.getItem('postal_code');
     this.fetchCategories();
     this.fetchStores();
     this.fetchBanners(); // initial load
@@ -100,12 +103,34 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
+  // fetchStores(): void {
+  //   this.categoryService.getStores().subscribe({
+  //     next: (res: any) => (this.stores = res.results || [], this.cdr.markForCheck()),
+  //     error: (err) => console.error('Error loading stores:', err),
+  //   });
+  // }
+
   fetchStores(): void {
-    this.categoryService.getStores().subscribe({
-      next: (res: any) => (this.stores = res.results || [], this.cdr.markForCheck()),
-      error: (err) => console.error('Error loading stores:', err),
+    const postalCode = this.storageService.getItem('postal_code');
+    let apiCall$;
+
+    if (postalCode) {
+      // console.log(`🔍 Fetching stores for pincode: ${postalCode}`);
+      apiCall$ = this.categoryService.getStoresByPincode(postalCode);
+    } else {
+      apiCall$ = this.categoryService.getStores();
+    }
+
+    apiCall$.subscribe({
+      next: (res: any) => {
+        this.stores = res.results || [];
+        this.noStoresFound = this.stores.length === 0;
+        this.cdr.markForCheck();
+      },
+      error: (err) => { console.error('Error loading stores:', err); this.noStoresFound = true; this.cdr.markForCheck(); },
     });
   }
+
 
   fetchBanners(): Promise<void> {
     return new Promise((resolve) => {
