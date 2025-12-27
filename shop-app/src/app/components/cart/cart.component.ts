@@ -301,6 +301,65 @@ export class CartComponent implements OnInit {
     });
   }
 
+  checkoutCOD(address: any) {
+    this.isloadingCheckout = true;
+    // this.loaderService.show();
+    if (!this.authService.hasToken()) {
+      // 🔑 User not logged in → show login modal
+      const modalRef = this.modalService.open(AuthComponent, { backdrop: 'static', keyboard: false });
+
+      // ⏳ When modal closes, retry checkout if login was successful
+      modalRef.closed.subscribe((result) => {
+        if (result === 'logged-in') {
+          // run both sync calls in parallel and wait for both to finish
+          forkJoin({
+            cart: this.cartService.syncGuestCart(),
+            address: this.userService.syncGuestAddress()
+          }).subscribe({
+            next: ({ cart, address }) => {
+              // cart is an array of responses
+              this.cartId = cart.length > 0 ? cart[0].id : null;
+              // address is your synced address object
+              address = address;
+
+              // now that everything is synced, call checkout again
+              this.checkout(address);
+            },
+            error: () => {
+              this.isloadingCheckout = false;
+              if (isPlatformBrowser(this.platformId)) {
+                this.toastrService.error('Failed to sync guest data', 'Failed');
+              }
+            }
+          });
+        }
+      });
+
+      return;
+    }
+
+    if (!address) {
+      this.isloadingCheckout = false;
+
+      this.toastrService.error('Please Enter delivery address', 'Failed');
+      return;
+    }
+    // ✅ Logged in → proceed with order
+    this.cartService.createOrder(this.cartId, address.id, 'cod', this.couponCode).subscribe({
+      next: (res: Order) => {
+        const ord_id = res.id;
+        console.log('Order:',ord_id);
+        this.router.navigate(['/payment-status'], { queryParams: { status: 'success', orderId: ord_id } });},
+      error: () => {
+        this.isloadingCheckout = false;
+
+        if (isPlatformBrowser(this.platformId)) {
+          this.toastrService.error('Failed to order', 'Error');
+        }
+      }
+    });
+  }
+
   applyCoupon() {
     if (!this.couponCode) {
       this.message = 'Please enter a coupon code';

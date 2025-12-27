@@ -171,6 +171,15 @@
               Processing...
             </ng-container>
           </button>
+          <button class="btn checkout-cod w-100 btn-lg my-2" [disabled]="isloadingCheckout" (click)="checkoutCOD(selectedAddress)">
+            <ng-container *ngIf="!isloadingCheckout">
+              <i class="bi bi-bag-check"></i> Cash-on-Delivery (COD)
+            </ng-container>
+            <ng-container *ngIf="isloadingCheckout">
+              <span class="spinner-border spinner-border-sm me-2"></span>
+              Processing...
+            </ng-container>
+          </button>
 
         </div>
       </div>

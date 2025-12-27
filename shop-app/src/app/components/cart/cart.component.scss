@@ -136,6 +136,15 @@
     }
 }
 
+.checkout-cod {
+  background-color: var(--neutral-dark);
+  color: var(--neutral-light);
+
+  &:hover {
+      background-color: var(--success-dark);
+  }
+}
+
 .cart-item {
   .quantity-control {
     display: flex;
