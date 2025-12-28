@@ -5,6 +5,7 @@ export const API_BASE_URL = environment.apiUrl;
 export const API_ENDPOINTS = {
   CATEGORIES: `${API_BASE_URL}/api/v1/categories/?is_active=true&page_size=20`,
   PRODUCTS: `${API_BASE_URL}/api/v1/products/`,
+  PRODUCTS_PAGINATION: `${API_BASE_URL}/api/v1/products/?page_size=20&page=`,
   STORE_PRODUCTS: `${API_BASE_URL}/api/v1/vendors/stores/`,
   STORE_DETAILS: `${API_BASE_URL}/api/v1/vendors/stores/`,
   PRODUCT_DETAIL: `${API_BASE_URL}/api/v1/product/`,

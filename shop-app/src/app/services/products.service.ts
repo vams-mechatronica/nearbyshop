@@ -7,17 +7,38 @@ import { API_ENDPOINTS } from '../shared/constants/api.constants';
   providedIn: 'root',
 })
 export class ProductsService {
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getProducts(): Observable<any> {
     // const params = new HttpParams().set('category', category.toString());
     return this.http.get(API_ENDPOINTS.PRODUCTS);
+  }
+  getProductsPaginated(page: number,
+    pageSize: number = 12): Observable<any> {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('page_size', pageSize.toString());
+    // const params = new HttpParams().set('category', category.toString());
+    return this.http.get(API_ENDPOINTS.PRODUCTS, { params });
   }
 
   getProductsByCategorySlug(slug: string): Observable<any> {
     const params = new HttpParams().set('category__slug', slug);
     return this.http.get(API_ENDPOINTS.PRODUCTS, { params });
   }
+  getProductsByCategorySlugPagination(
+    slug: string,
+    page: number,
+    pageSize: number = 12
+  ) {
+    const params = new HttpParams()
+      .set('category__slug', slug)
+      .set('page', page.toString())
+      .set('page_size', pageSize.toString());
+
+    return this.http.get(API_ENDPOINTS.PRODUCTS, { params });
+  }
+
   getProductsByStoreSlug(slug: string): Observable<any> {
     // const params = new HttpParams().set('store__slug', slug);
     return this.http.get(API_ENDPOINTS.STORE_PRODUCTS + `${slug}/products/`);

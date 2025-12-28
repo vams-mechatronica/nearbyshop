@@ -14,6 +14,7 @@ import { StorageService } from '../../services/storage.service';
 import { AuthService } from '../../services/auth.service';
 import { HeaderCountService } from '../../services/header.service';
 import { LoaderService } from '../../services/loader.service';
+import { HostListener } from '@angular/core';
 
 @Component({
   standalone: true,
@@ -28,10 +29,16 @@ import { LoaderService } from '../../services/loader.service';
 export class ProductsComponent implements OnInit {
   products: any[] = [];
   categoryName: string = 'Darity';
+  categorySlug: string = '';
   categories: any[] = [];
   selectedProduct: any;
   subscriptionPlan = 'daily';
   startDate: string = '';
+
+  currentPage = 1;
+  pageSize = 12;
+  hasMore = true;
+  isLoading = false;
 
   @ViewChild('subscribeModal') subscribeModal!: TemplateRef<any>;
   private subscribeModalRef!: NgbModalRef;
@@ -50,30 +57,100 @@ export class ProductsComponent implements OnInit {
     private toastr: ToastrService,
   ) { }
 
+  @HostListener('window:scroll', [])
+  onScroll(): void {
+    const threshold = 300;
+    if (
+      window.innerHeight + window.scrollY >=
+      document.body.offsetHeight - threshold
+    ) {
+      this.loadProducts();
+    }
+  }
+
+
+
+  // ngOnInit(): void {
+  //   const categorySlug = this.route.snapshot.paramMap.get('slug');
+  //   this.loaderService.show();
+  //   this.getCategory();
+  //   this.loadProducts(categorySlug);
+  //   // if (categorySlug) {
+  //   //   this.categoryName = categorySlug;
+  //   //   this.productService.getProductsByCategorySlugPagination(categorySlug).subscribe({
+  //   //     next: (res: any) => (this.products = res.results),
+  //   //     error: (err) => console.error('Error fetching products:', err),
+  //   //   });
+  //   // } else {
+  //   //   this.productService.getProducts().subscribe({
+  //   //     next: (res: any) => (this.products = res.results),
+  //   //     error: (err) => console.error('Error fetching products:', err),
+  //   //   });
+  //   // }
+  //   // this.loaderService.hide();
+  // }
   ngOnInit(): void {
-    const categorySlug = this.route.snapshot.paramMap.get('slug');
     this.loaderService.show();
     this.getCategory();
-    if (categorySlug) {
-      this.categoryName = categorySlug;
-      this.productService.getProductsByCategorySlug(categorySlug).subscribe({
-        next: (res: any) => (this.products = res.results),
-        error: (err) => console.error('Error fetching products:', err),
-      });
-    } else {
-      this.productService.getProducts().subscribe({
-        next: (res: any) => (this.products = res.results),
-        error: (err) => console.error('Error fetching products:', err),
-      });
-    }
-    this.loaderService.hide();
+
+    this.route.paramMap.subscribe(params => {
+      this.categorySlug = params.get('slug') || '';
+
+      if (this.categorySlug) {
+        this.categoryName = this.categorySlug;
+      }
+
+      // RESET STATE
+      this.products = [];
+      this.currentPage = 1;
+      this.hasMore = true;
+
+      this.loadProducts();
+    });
   }
+
   getCategory() {
     this.categoryService.getCategories().subscribe({
       next: (res: any) => (this.categories = res.results),
       error: (err) => console.error('Error fetching categories:', err),
     });
   }
+
+  loadProducts(): void {
+    if (this.isLoading || !this.hasMore) return;
+
+    this.isLoading = true;
+    this.loaderService.show();
+
+    const request$ = this.categorySlug
+      ? this.productService.getProductsByCategorySlugPagination(
+        this.categorySlug,
+        this.currentPage,
+        this.pageSize
+      )
+      : this.productService.getProductsPaginated(
+        this.currentPage,
+        this.pageSize
+      );
+
+    request$.subscribe({
+      next: (res: any) => {
+        if (!res?.results || res.results.length === 0) {
+          this.hasMore = false;
+        } else {
+          this.products = [...this.products, ...res.results];
+          this.currentPage++;
+        }
+        this.isLoading = false;
+        this.loaderService.hide();
+      },
+      error: () => {
+        this.isLoading = false;
+        this.loaderService.hide();
+      }
+    });
+  }
+
 
   addToCart(product: any) {
     // initialize cart structure if not present
@@ -92,7 +169,7 @@ export class ProductsComponent implements OnInit {
           id: product.id,
           name: product.name,
           price: product.price,
-          final_price:product.final_price,
+          final_price: product.final_price,
           image: product.image,
           discount_type: product.discount_type,
           discount_value: product.discount_value
@@ -112,10 +189,11 @@ export class ProductsComponent implements OnInit {
 
     product.qty = 1;
     if (this.authService.hasToken()) {
-    this.cartService.addToCart(product).subscribe({
-      next: (res: any) => console.log('Added to cart:', res),
-      error: (err: HttpErrorResponse) => console.error('Add to cart failed:', err),
-    }); }
+      this.cartService.addToCart(product).subscribe({
+        next: (res: any) => console.log('Added to cart:', res),
+        error: (err: HttpErrorResponse) => console.error('Add to cart failed:', err),
+      });
+    }
 
     this.headerService.fetchCounts();
   }
@@ -144,10 +222,10 @@ export class ProductsComponent implements OnInit {
           this.subscribeModalRef?.close(); // ✅ now reliably closes modal
         },
         error: (err) => {
-          this.toastr.error(err.error.message,'Subscription Failed');
+          this.toastr.error(err.error.message, 'Subscription Failed');
         },
       });
-    
+
     this.headerService.fetchCounts();
 
   }
@@ -159,7 +237,7 @@ export class ProductsComponent implements OnInit {
       error: (err) => console.error('Cart update failed:', err),
     });
 
-    
+
   }
 
   decreaseQty(product: any): void {
@@ -180,21 +258,36 @@ export class ProductsComponent implements OnInit {
 
   }
 
+  // onCategoryChange(event: Event): void {
+  //   const checkbox = event.target as HTMLInputElement;
+  //   const categorySlug = checkbox.value;
+
+  //   if (checkbox.checked) {
+  //     this.productService.getProductsByCategorySlug(categorySlug).subscribe({
+  //       next: (res: any) => (this.products = res.results),
+  //       error: (err) => console.error('Error fetching products:', err),
+  //     });
+
+  //   } else {
+  //     this.productService.getProductsByCategorySlug(this.categoryName.toLowerCase()).subscribe({
+  //       next: (res: any) => (this.products = res.results),
+  //       error: (err) => console.error('Error fetching products:', err),
+  //     });
+  //   }
+  // }
+
   onCategoryChange(event: Event): void {
     const checkbox = event.target as HTMLInputElement;
-    const categorySlug = checkbox.value;
-
-    if (checkbox.checked) {
-      this.productService.getProductsByCategorySlug(categorySlug).subscribe({
-        next: (res: any) => (this.products = res.results),
-        error: (err) => console.error('Error fetching products:', err),
-      });
-
-    } else {
-      this.productService.getProductsByCategorySlug(this.categoryName.toLowerCase()).subscribe({
-        next: (res: any) => (this.products = res.results),
-        error: (err) => console.error('Error fetching products:', err),
-      });
-    }
+  
+    this.categorySlug = checkbox.checked ? checkbox.value : '';
+  
+    // RESET
+    this.products = [];
+    this.currentPage = 1;
+    this.hasMore = true;
+  
+    this.loadProducts();
   }
+  
+
 }
