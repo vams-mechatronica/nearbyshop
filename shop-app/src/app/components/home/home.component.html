@@ -1,159 +1,103 @@
-<div class="landing-page">
-  <!-- HERO BANNER SECTION -->
-  <section class="hero-section">
-    <div class="hero-carousel">
-      <ng-container *ngIf="processedBanners.length; else heroLoading">
-        <div
-          class="hero-slide"
-          *ngFor="let banner of processedBanners; let i = index"
-          [class.active]="i === currentBannerIndex"
-        >
-          <img
-            [src]="
-              banner.cachedSrc ||
-              banner.image + '?f_auto,q_auto,w_1600,h_600,c_fill'
-            "
-            alt="{{ banner.title }}"
-            loading="lazy"
-          />
-          <div class="hero-overlay">
-            <h1>{{ banner.title }}</h1>
-            <p>{{ banner.subtitle }}</p>
-            <a
-              class="cta-btn"
-              [href]="banner.redirect_url"
-              target="_blank"
-              *ngIf="banner.redirect_url; else noLink"
-            >
-              Shop Now
-            </a>
-            <ng-template #noLink>
-              <button class="cta-btn" disabled>Shop Now</button>
-            </ng-template>
-          </div>
-        </div>
-      </ng-container>
+<div class="zepto-home">
 
-      <ng-template #heroLoading>
-        <div class="hero-skeleton" *ngFor="let _ of [1, 2, 3]"></div>
-      </ng-template>
+  <!-- CATEGORY STRIP -->
+  <section class="category-strip">
+    <div class="category-item" *ngFor="let cat of categories" (click)="selectCategory(cat)">
+      <div class="category-img">
+        <img [src]="cat.image" alt="{{ cat.name }}" />
+      </div>
+      <div class="category-label">
+        {{ cat.name }}
+      </div>
+    </div>
+  </section>
+
+
+  <!-- OFFER BANNERS -->
+  <section class="offer-section">
+    <div class="offer-card primary">
+      <h3>₹0 Convenience Fee</h3>
+      <p>On all nearby shop orders</p>
+      <button>Order now</button>
+    </div>
+
+    <div class="offer-card secondary">
+      <h3>Lowest Prices Everyday</h3>
+      <p>No surge, no rain fee</p>
     </div>
   </section>
 
   <!-- SHOP BY CATEGORY -->
-  <section class="category-section">
+  <!-- <section class="section">
     <div class="section-header">
-      <h2>Shop by Categories</h2>
-      <a class="view-all">View All →</a>
+      <h2>Shop by Category</h2>
+      <span class="view-all">View all</span>
     </div>
-    <div class="carousel-container">
-      <button
-        class="carousel-arrow left"
-        (click)="scrollLeft(categoryCarousel)"
-      >
-        <span>&#10094;</span>
-      </button>
 
-      <div class="carousel-wrapper" #categoryCarousel>
-        <ng-container *ngIf="categories.length; else categoryLoading">
-          <div
-            class="category-card"
-            *ngFor="let cat of categories"
-            (click)="selectCategory(cat)"
-          >
-            <div class="image-container">
-              <img [src]="cat.image" alt="{{ cat.name }}" loading="lazy" />
-            </div>
-            <div class="label">{{ cat.name }}</div>
-          </div>
-        </ng-container>
-
-        <ng-template #categoryLoading>
-          <div
-            class="category-card-skeleton"
-            *ngFor="let _ of [1, 2, 3, 4, 5]"
-          ></div>
-        </ng-template>
+    <div class="horizontal-scroll">
+      <div class="category-card" *ngFor="let cat of categories">
+        <img [src]="cat.image" />
+        <span>{{ cat.name }}</span>
       </div>
-
-      <button
-        class="carousel-arrow right"
-        (click)="scrollRight(categoryCarousel)"
-      >
-        <span>&#10095;</span>
-      </button>
     </div>
-  </section>
+  </section> -->
 
-  <!-- SHOP BY STORE -->
-  <section class="store-section">
+  <section class="section" *ngFor="let shelf of categoryShelves; let i = index">
+
+    <!-- HEADER -->
     <div class="section-header">
-      <h2>Shop by Store</h2>
-      <a class="view-all" *ngIf="stores.length">View All →</a>
+      <h2>{{ shelf.categoryName }}</h2>
+      <span class="view-all" [routerLink]="['/category', shelf.categorySlug]">
+        View all
+      </span>
     </div>
 
-    <div
-      class="carousel-container"
-      *ngIf="!noStoresFound; else noStoresMessage"
-    >
-      <button class="carousel-arrow left" (click)="scrollLeft(storeCarousel)">
-        <span>&#10094;</span>
-      </button>
+    <!-- PRODUCT CAROUSEL -->
+    <div class="horizontal-scroll" (scroll)="onHorizontalScroll($event, shelf.categorySlug)">
 
-      <div class="carousel-wrapper" #storeCarousel>
-        <ng-container *ngIf="stores.length; else storeLoading">
-          <div
-            class="store-card"
-            *ngFor="let store of stores"
-            (click)="selectStore(store)"
-          >
-            <div class="image-container">
-              <img
-                [src]="store.shop_image"
-                alt="{{ store.shop_name }}"
-                loading="lazy"
-              />
-            </div>
-            <div class="label">{{ store.shop_name }}</div>
-          </div>
-        </ng-container>
+      <!-- PRODUCTS -->
+      <div class="product-card" *ngFor="let product of shelf.products">
 
-        <ng-template #storeLoading>
-          <div
-            class="store-card-skeleton"
-            *ngFor="let _ of [1, 2, 3, 4, 5]"
-          ></div>
-        </ng-template>
+        <img [src]="product.image" />
+        <div class="product-name">{{ product.name }}</div>
+        <div class="price">₹{{ product.final_price }}</div>
+
       </div>
 
-      <button class="carousel-arrow right" (click)="scrollRight(storeCarousel)">
-        <span>&#10095;</span>
-      </button>
-    </div>
-
-    <ng-template #noStoresMessage>
-      <div class="no-stores-message text-center mt-4">
-        <p>No stores are serving in your area ({{postalCode}}).</p>
+      <!-- LOADER -->
+      <div class="product-skeleton" *ngIf="shelf.loading">
       </div>
-    </ng-template>
+
+    </div>
+
+    <!-- VERTICAL LAZY LOAD TRIGGER -->
+    <div class="vertical-loader" *ngIf="i === categoryShelves.length - 1" appIntersectionObserver
+      (visible)="loadNextCategoryShelf()">
+    </div>
+
   </section>
 
-  <!-- PROMOTIONAL BANNERS -->
-  <section class="banner-section">
-    <div class="banner-carousel">
-      <ng-container *ngIf="processedBanners.length; else bannerLoading">
-        <div class="banner-card" *ngFor="let banner of processedBanners">
-          <img
-            [src]="banner.cachedSrc || banner.image + '?f_auto,q_auto'"
-            alt="{{ banner.title }}"
-            loading="lazy"
-          />
-        </div>
-      </ng-container>
 
-      <ng-template #bannerLoading>
-        <div class="banner-card-skeleton" *ngFor="let _ of [1, 2, 3]"></div>
-      </ng-template>
+  <!-- STORES -->
+  <section class="section">
+    <div class="section-header">
+      <h2>Popular Stores Near You</h2>
+      <span class="view-all">View all</span>
+    </div>
+
+    <div class="horizontal-scroll">
+      <div class="store-card" *ngFor="let store of stores">
+        <img [src]="store.shop_image" />
+        <span>{{ store.shop_name }}</span>
+      </div>
     </div>
   </section>
+
+  <!-- PROMO BANNERS -->
+  <section class="promo-section">
+    <div class="promo-card" *ngFor="let banner of processedBanners">
+      <img [src]="banner.image" />
+    </div>
+  </section>
+
 </div>

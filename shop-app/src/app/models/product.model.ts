@@ -16,3 +16,10 @@ export interface Product {
   images: any[];   // could refine if you have image model
   detail: string | null;
 }
+
+export interface PaginatedResponse<T> {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
+}

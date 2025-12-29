@@ -1,120 +1,121 @@
 <div class="container-body">
 
-  <div class="product-page">
+  <div class="shop-page">
 
-    <!-- Sidebar -->
-    <aside class="product-sidebar">
-      <div class="bg-light p-3 rounded shadow-sm">
-        <h5 class="fw-bold text-uppercase">
-          {{ categoryName }}
-        </h5>
-        <hr />
+    <!-- BREADCRUMBS -->
+    <nav class="breadcrumbs">
+      <span routerLink="/">Home</span>
+      <span>/</span>
+      <span routerLink="/shop">Shop</span>
+      <span>/</span>
+      <span class="active">{{ categoryName }}</span>
+    </nav>
 
-        <div *ngFor="let category of categories" class="mb-2">
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" [value]="category.slug"
-              (change)="onCategoryChange($event)" />
-            <label class="form-check-label">
-              {{ category.name }} ({{ category.count }})
-            </label>
-          </div>
+    <div class="shop-layout">
+
+      <!-- CATEGORY SIDEBAR -->
+      <aside class="category-sidebar">
+        <h6 class="sidebar-title">Categories</h6>
+
+        <ul class="category-list">
+          <li *ngFor="let category of categories" (click)="onCategoryChange(category.slug)"
+            [class.active]="category.slug === categoryName">
+            <span>{{ category.name }}</span>
+            <small>{{ category.count }}</small>
+          </li>
+        </ul>
+      </aside>
+
+      <!-- PRODUCT AREA -->
+      <section class="product-area" #productScroller (scroll)="onProductScroll()">
+
+        <!-- LOADER -->
+        <div class="product-loader" *ngIf="isLoading">
+          <div class="spinner-border text-danger"></div>
         </div>
-      </div>
-    </aside>
 
-    <!-- Products Section -->
-    <section class="product-content" #productScroller (scroll)="onProductScroll()">
+        <!-- GRID -->
+        <div class="product-grid" *ngIf="products.length; else noProducts">
+          <div class="product-card" *ngFor="let product of products"
+            [class.vendor-closed]="!product.vendor?.is_accepting_orders">
 
-      <!-- Loader (PRODUCT ONLY) -->
-      <div class="product-loader" *ngIf="isLoading">
-        <div class="spinner-border text-danger"></div>
-      </div>
-
-      <!-- Products -->
-      <ng-container *ngIf="products.length > 0; else noProducts">
-        <div class="product-grid">
-          <div class="product-card" *ngFor="let product of products">
             <a [routerLink]="['/product', product.slug]">
-              <!-- Discount Badge -->
+
+              <!-- DISCOUNT -->
               <div *ngIf="product.discount_value > 0" class="discount-badge">
-                <ng-container *ngIf="product.discount_type === 'percentage'; else flatDiscount">
-                  {{ product.discount_value | number:'1.0-0' }}% OFF
-                </ng-container>
-                <ng-template #flatDiscount>
-                  ₹{{ product.discount_value | number:'1.0-0' }} OFF
-                </ng-template>
+                {{ product.discount_type === 'percentage'
+                ? (product.discount_value | number:'1.0-0') + '% OFF'
+                : '₹' + (product.discount_value | number:'1.0-0') + ' OFF' }}
               </div>
 
-              <!-- Carousel / Image -->
-              <div id="carousel-{{ product.id }}" class="carousel slide" data-bs-ride="carousel">
-                <div class="carousel-inner rounded-top">
-                  <div class="carousel-item active">
-                    <img [src]="product.image" class="d-block w-100 card-body product-img" alt="{{ product.name }}" />
-                  </div>
-                </div>
-              </div>
+              <!-- IMAGE -->
+              <img [src]="product.image" class="product-img" />
 
-              <!-- Card Body -->
-              <div class="card-body d-flex flex-column justify-content-between">
-                <!-- Product Name -->
+              <!-- INFO -->
+              <div class="product-info">
                 <h6 class="product-title">{{ product.name }}</h6>
 
-                <!-- Price Row -->
-                <div class="d-flex align-items-center gap-2">
-                  <p class="fw-bold text-success mb-0">₹{{ product.final_price }}</p>
-                  <p *ngIf="product.discount_value > 0" class="text-muted text-decoration-line-through mb-0">
-                    ₹{{ product.price }}
-                  </p>
-                  <span class="badge bg-light text-dark product-unit">{{ product.unit.code || 'N/A' }}</span>
+                <!-- VENDOR INFO -->
+                <div class="vendor-info">
+                  <span class="vendor-name">
+                    {{ product.vendor?.shop_name }}
+                  </span>
+                  <span class="vendor-address">
+                    {{ product.vendor?.shop_address }}
+                  </span>
                 </div>
-                <!-- Unit
-              <p class="card-text small mb-2">
-                <span class="badge bg-light text-dark">Unit: {{ product.unit.code || 'N/A' }}</span>
-              </p> -->
-                <!-- Description -->
-                <!-- <p class="card-text small text-muted mb-1 text-truncate" title="{{ product.description }}">
-                {{ product.description || 'No description available' }}
-              </p>
 
-              <div class="seller-info">
-                <p class="seller-name">{{ product.vendor?.shop_name || 'Unknown Seller' }}</p>
-                <p class="seller-address text-muted">{{ product.vendor?.shop_address || 'Address not available' }}</p>
-              </div> -->
-
-
+                <!-- PRICE -->
+                <div class="price-row">
+                  <span class="price">₹{{ product.final_price }}</span>
+                  <del *ngIf="product.discount_value">₹{{ product.price }}</del>
+                  <span class="unit">{{ product.unit.code }}</span>
+                </div>
               </div>
             </a>
 
-            <!-- Actions -->
-            <div class="d-flex align-items-center justify-content-between gap-2 mb-2 p-2">
-              <div *ngIf="!product.qty" class="add-btn-wrapper w-50">
-                <button class="btn btn-sm buy-now w-100" (click)="addToCart(product)">ADD</button>
+            <!-- ACTIONS -->
+            <div class="product-actions">
+
+              <!-- ADD TO CART -->
+              <button class="btn-add" [disabled]="!product.vendor?.is_accepting_orders" *ngIf="!product.qty"
+                (click)="addToCart(product)">
+                ADD
+              </button>
+
+              <!-- QTY -->
+              <div *ngIf="product.qty" class="qty-box">
+                <button (click)="decreaseQty(product)">−</button>
+                <span>{{ product.qty }}</span>
+                <button (click)="increaseQty(product)">+</button>
               </div>
 
-              <div *ngIf="product.qty" class="quantity-box d-flex align-items-center w-50">
-                <button class="qty-btn" (click)="decreaseQty(product)">−</button>
-                <input type="number" [(ngModel)]="product.qty" class="qty-input text-center" min="1" />
-                <button class="qty-btn" (click)="increaseQty(product)">+</button>
-              </div>
+              <!-- SUBSCRIBE (ALWAYS ENABLED) -->
+              <button class="btn-subscribe" (click)="openSubscribeModal(product)">
+                Subscribe
+              </button>
 
-              <div class="subscribe-btn-wrapper w-50">
-                <button class="btn btn-sm w-100 text-white subscribe-btn" (click)="openSubscribeModal(product)">
-                  Subscribe
-                </button>
-              </div>
             </div>
+
+            <!-- CLOSED LABEL -->
+            <div class="closed-overlay" *ngIf="!product.vendor?.is_accepting_orders">
+              Not accepting orders
+            </div>
+
           </div>
-        </div>
-      </ng-container>
 
-
-      <!-- No Products Template -->
-      <ng-template #noProducts>
-        <div class="text-center my-5">
-          <h5 class="text-muted">No products found</h5>
         </div>
-      </ng-template>
-    </section>
+
+        <!-- EMPTY -->
+        <ng-template #noProducts>
+          <div class="empty-state">
+            No products found
+          </div>
+        </ng-template>
+
+      </section>
+    </div>
+
   </div>
 
 

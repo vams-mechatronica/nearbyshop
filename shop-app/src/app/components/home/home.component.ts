@@ -11,18 +11,29 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
 } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { CategoryService } from '../../services/category.service';
 import { BannerService } from '../../services/banner.service';
 import { StorageService } from '../../services/storage.service';
+import { ProductsService } from '../../services/products.service';
+
+interface CategoryShelf {
+  categoryId: number;
+  categoryName: string;
+  categorySlug: string;
+  products: any[];
+  next: string | null;
+  loading: boolean;
+}
+
 
 @Component({
   standalone: true,
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 @Injectable({ providedIn: 'root' })
@@ -38,22 +49,26 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   stores: any[] = [];
   banners: any[] = [];
   processedBanners: any[] = [];
+  categoryShelves: CategoryShelf[] = [];
 
   /** Recent Visit & Banner State */
   recentVisits = ['Groceries', 'Rice', 'Wheat'];
   currentBannerIndex = 0;
   noStoresFound = false;
   postalCode: string | null = null;
+  loadingCategories = false;
 
   /** Utilities */
   private interval!: ReturnType<typeof setInterval>;
   private observer!: IntersectionObserver;
+  // productService: any;
 
   constructor(
     private router: Router,
     private categoryService: CategoryService,
     private bannerService: BannerService,
     private storageService: StorageService,
+    private productService: ProductsService,
     private cdr: ChangeDetectorRef,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
@@ -66,6 +81,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     this.fetchCategories();
     this.fetchStores();
     this.fetchBanners(); // initial load
+    this.loadCategories();
   }
 
   ngAfterViewInit(): void {
@@ -232,5 +248,93 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
 
   selectStore(store: any): void {
     if (store?.slug) this.router.navigate(['/stores', store.slug]);
+  }
+
+  /* STEP 1: LOAD CATEGORIES */
+  loadCategories(): void {
+    this.loadingCategories = true;
+
+    // assume you already have this API
+    this.categoryService.getCategories().subscribe(res => {
+      this.categories = res?.results || [];
+      this.initCategoryShelves();
+      this.loadingCategories = false;
+    });
+  }
+
+  /* STEP 2: INIT FIRST FEW SHELVES */
+  initCategoryShelves(): void {
+    const firstCategories = this.categories.slice(0, 4); // first 4 shelves
+
+    firstCategories.forEach(cat => {
+      this.categoryShelves.push({
+        categoryId: cat.id,
+        categoryName: cat.name,
+        categorySlug: cat.slug,
+        products: [],
+        next: null,
+        loading: false
+      });
+
+      this.loadProductsForCategory(cat.slug);
+    });
+  }
+
+  /* STEP 3: LOAD PRODUCTS (PAGINATED) */
+  loadProductsForCategory(categorySlug: string): void {
+    const shelf = this.categoryShelves.find(c => c.categorySlug === categorySlug);
+    if (!shelf || shelf.loading) return;
+
+    shelf.loading = true;
+    let page = 1;
+
+    if (shelf.next) {
+      page = Number(
+        shelf.next
+          .split('?')[1]          // page=3&page_size=10
+          .split('&')             // ["page=3", "page_size=10"]
+          .find(p => p.startsWith('page=')) // "page=3"
+          ?.split('=')[1]         // "3"
+      );
+    }
+
+    this.productService.getProductsByCategorySlugPagination(categorySlug, page).subscribe(res => {
+      shelf.products.push(...res.results);
+      shelf.next = res?.next;
+      shelf.loading = false; 
+    });
+  }
+
+  /* STEP 4: HORIZONTAL SCROLL HANDLER */
+  onHorizontalScroll(event: Event, categorySlug: string): void {
+    const el = event.target as HTMLElement;
+
+    const nearEnd =
+      el.scrollLeft + el.clientWidth >= el.scrollWidth - 100;
+
+    const shelf = this.categoryShelves.find(c => c.categorySlug === categorySlug);
+
+    if (nearEnd && shelf?.next) {
+      this.loadProductsForCategory(categorySlug);
+    }
+  }
+
+  /* STEP 5: LOAD MORE CATEGORIES ON PAGE SCROLL */
+  loadNextCategoryShelf(): void {
+    const loadedCount = this.categoryShelves.length;
+    const nextCategory = this.categories[loadedCount];
+
+    if (!nextCategory) return;
+
+    this.categoryShelves.push({
+      categoryId: nextCategory.id,
+      categoryName: nextCategory.name,
+      categorySlug: nextCategory.slug,
+      products: [],
+      next: null,
+      loading: false
+    });
+
+    this.loadProductsForCategory(nextCategory.id);
   }
 }

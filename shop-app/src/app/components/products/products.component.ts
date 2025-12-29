@@ -136,6 +136,8 @@ export class ProductsComponent implements OnInit {
           // 🔴 PERMANENT STOP
           this.hasMore = false;
           return;
+        } else if (res?.next === null) {
+          this.hasMore = false;
         }
 
         this.products = [...this.products, ...results];
@@ -262,17 +264,23 @@ export class ProductsComponent implements OnInit {
 
   }
 
-  onCategoryChange(event: Event): void {
-    const checkbox = event.target as HTMLInputElement;
+  onCategoryChange(categorySlug: string): void {
+    // Avoid reloading same category
+    if (this.categorySlug === categorySlug) {
+      return;
+    }
 
-    this.categorySlug = checkbox.checked ? checkbox.value : '';
+    this.categorySlug = categorySlug;
+    this.categoryName = categorySlug;
 
-    // RESET
+    // RESET PAGINATION
     this.products = [];
     this.currentPage = 1;
     this.hasMore = true;
 
+    // LOAD PRODUCTS
     this.loadProducts();
   }
+
 
 }

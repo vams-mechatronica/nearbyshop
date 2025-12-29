@@ -1,84 +1,109 @@
-<div class="header-wrapper">
-  <nav class="navbar navbar-expand navbar-light bg-light px-3 primary-navbar">
-    <div class="d-flex align-items-center location-select" (click)="openLocationModal()">
-      <i class="fas fa-map-marker-alt me-2 text-danger"></i>
-      <span *ngIf="selectedLocationName; else selectLoc">
-        {{ selectedLocationName }}
-      </span>
-      <ng-template #selectLoc>
-        <span class="select-location-text">Select Location</span>
-      </ng-template>
-    </div>
+<header class="zepto-header">
 
-    <ul class="navbar-nav ms-auto align-items-center">
-      <li class="nav-item position-relative me-3">
-        <a class="nav-link" routerLink="/cart" routerLinkActive="active">
-          <i class="fas fa-shopping-cart"></i>
-          <span class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle">
-            {{ cartCount }}
-          </span>
-          Cart
-        </a>
-      </li>
+  <div class="header-container">
 
-      <li class="nav-item position-relative me-3">
-        <a class="nav-link" routerLink="/subscribe" routerLinkActive="active">
-          <i class="fas fa-box-open"></i>
-          <span class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle">
-            {{ subscriptionCount }}
-          </span>
-          Subscriptions
-        </a>
-      </li>
+    <!-- LEFT : BRAND + LOCATION -->
+    <div class="header-left">
 
-      <li class="nav-item" *ngIf="!isLoggedIn">
-        <button class="btn btn-gradient ms-2" (click)="loginSignup()">Login</button>
-      </li>
-
-      <li class="nav-item dropdown profile-nav" *ngIf="isLoggedIn">
-        <div class="profile-icon" (click)="toggleProfileDropdown()">
-          <i class="fas fa-user-circle"></i>
-        </div>
-
-        <div class="profile-dropdown-card" *ngIf="showProfileDropdown" (mouseleave)="showProfileDropdown = false">
-          <div class="profile-header">
-            <i class="fas fa-user-circle me-2"></i>
-            <span>{{ userName }}</span>
-          </div>
-          <div class="dropdown-divider"></div>
-          <a class="dropdown-item" (click)="userProfile()">Profile Settings</a>
-          <a class="dropdown-item logout" (click)="logout()">Logout</a>
-        </div>
-      </li>
-    </ul>
-  </nav>
-
-  <nav class="secondary-navbar navbar navbar-light bg-light px-3 border-top">
-    <a class="navbar-brand" routerLink="/">The<span class="brand-span">NearBy</span>Shop<span
+      <a class="navbar-brand" routerLink="/">The<span class="brand-span">NearBy</span>Shop<span
         class="brand-com">.com</span></a>
 
-    <div class="search-bar">
-      <input type="text" [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange($event)" (keyup.enter)="onSearch()"
-        placeholder="Search..." />
+      <div class="location-select" (click)="openLocationModal()">
 
-      <ul class="search-results" *ngIf="searchResults.length > 0">
-        <li *ngFor="let item of searchResults" (click)="selectResult(item)">
-          <a [routerLink]="['/product', item.id]" class="search-result-item">
-            <img [src]="item.image" alt="{{ item.name }}" class="search-result-image" />
-            <div class="search-result-details">
-              <h6 class="product-name">{{ item.name }}
-                <span class="product-category sm">({{ item.sku }})</span>
-              </h6>
-              <p class="product-category">{{ item.category_name }}</p>
-              <span class="product-price">₹{{ item.price }} per {{item.unit.code}}</span>
-            </div>
-          </a>
-        </li>
-      </ul>
+        <!-- ADDRESS LINE -->
+        <div class="delivery-address" *ngIf="selectedLocationName; else selectLoc">
+          <span class="sector">
+            {{ sectorName }}
+          </span>
+          <span class="address-rest">
+            {{ addressRest }}
+          </span>
+          <i class="fas fa-chevron-down chevron"></i>
+        </div>
+
+        <!-- FALLBACK -->
+        <ng-template #selectLoc>
+          <div class="delivery-address">
+            <span class="sector muted">Select location</span>
+            <i class="fas fa-chevron-down chevron"></i>
+          </div>
+        </ng-template>
+
+      </div>
+
+
     </div>
-  </nav>
-</div>
-<!-- ✅ LOCATION MODAL -->
+
+    <!-- CENTER : SEARCH -->
+    <div class="header-center">
+      <div class="search-bar">
+
+        <i class="fas fa-search search-icon"></i>
+
+        <input type="text" [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange($event)" (keyup.enter)="onSearch()"
+          placeholder="Search for products, brands & more" autocomplete="off" />
+
+        <!-- SEARCH SUGGESTIONS -->
+        <div class="search-suggestions" *ngIf="searchResults.length > 0">
+
+          <div class="suggestion-item" *ngFor="let item of searchResults" (click)="selectResult(item)">
+
+            <img [src]="item.image" />
+
+            <div class="suggestion-text">
+              <div class="name">{{ item.name }}</div>
+              <div class="sub">{{ item.category_name }}</div>
+            </div>
+
+            <span class="cta">Shop</span>
+          </div>
+
+          <div class="show-all" (click)="onSearch()">
+            Show all results for <strong>"{{ searchQuery }}"</strong>
+            <i class="fas fa-chevron-right"></i>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT : ACTIONS -->
+    <div class="header-right">
+
+      <a class="icon-btn" routerLink="/subscribe">
+        <i class="fas fa-box-open"></i>
+        <span class="badge" *ngIf="subscriptionCount">{{ subscriptionCount }}</span>
+      </a>
+
+      <a class="icon-btn" routerLink="/cart">
+        <i class="fas fa-shopping-cart"></i>
+        <span class="badge" *ngIf="cartCount">{{ cartCount }}</span>
+      </a>
+
+      <!-- LOGIN -->
+      <button class="login-btn" *ngIf="!isLoggedIn" (click)="loginSignup()">
+        Login
+      </button>
+
+      <!-- PROFILE -->
+      <div class="profile" *ngIf="isLoggedIn" (click)="toggleProfileDropdown()">
+
+        <i class="fas fa-user-circle"></i>
+
+        <div class="profile-dropdown" *ngIf="showProfileDropdown">
+          <div class="user-name">{{ userName }}</div>
+          <a (click)="userProfile()">Profile</a>
+          <a class="logout" (click)="logout()">Logout</a>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</header>
+
 <ng-template #locationModal let-modal>
   <div class="location-modal">
     <div class="modal-header">

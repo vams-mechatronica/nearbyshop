@@ -6,7 +6,7 @@ import {
   TemplateRef,
   ViewChild
 } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
@@ -21,11 +21,12 @@ import { AuthService } from '../../services/auth.service';
 import { HeaderCountService } from '../../services/header.service';
 import { LoaderService } from '../../services/loader.service';
 import { ShopService } from '../../services/shop.service';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   standalone: true,
   selector: 'app-vendor-products',
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, RouterModule],
   templateUrl: './vendor-products.component.html',
   styleUrls: ['./vendor-products.component.scss']
 })
@@ -34,12 +35,12 @@ export class VendorProductsComponent implements OnInit {
   /* ---------------- STATE ---------------- */
 
   products: any[] = [];
- 
   categories: any[] = [];
+  stores: any[] = [];
+
   selectedProduct: any;
   subscriptionPlan = 'daily';
-  startDate: string = '';
-  stores: any[] = [];
+  startDate = '';
 
   storeName = '';
   categoryName = '';
@@ -53,6 +54,10 @@ export class VendorProductsComponent implements OnInit {
 
   private storeSlug = '';
   private scrollTimeout: any;
+  noStoresFound = false;
+  selectedCategory: string | null = null;
+  selectedStoreId: number | null = null;
+
 
   /* ---------------- VIEW ---------------- */
 
@@ -63,6 +68,8 @@ export class VendorProductsComponent implements OnInit {
   subscribeModal!: TemplateRef<any>;
 
   private subscribeModalRef!: NgbModalRef;
+
+  @ViewChild('carousel') carousel!: ElementRef;
 
   /* ---------------- CONSTRUCTOR ---------------- */
 
@@ -79,20 +86,28 @@ export class VendorProductsComponent implements OnInit {
     private headerService: HeaderCountService,
     private loaderService: LoaderService,
     private shopService: ShopService,
+    private storageService: StorageService,
     private toastr: ToastrService,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
   /* ---------------- INIT ---------------- */
 
   ngOnInit(): void {
-    this.storeSlug = this.route.snapshot.paramMap.get('slug') || '';
-
     this.getCategory();
     this.getStoresList();
-    this.getStoreDetails();
 
-    this.resetAndLoad();
+    // ✅ FIX: react to slug change
+    this.route.paramMap.subscribe(params => {
+      const slug = params.get('slug');
+
+      if (slug && slug !== this.storeSlug) {
+        this.storeSlug = slug;
+
+        this.getStoreDetails();
+        this.resetAndLoad();
+      }
+    });
   }
 
   /* ---------------- STORE ---------------- */
@@ -106,6 +121,39 @@ export class VendorProductsComponent implements OnInit {
     });
   }
 
+  // getStoresList(): void {
+  //   this.categoryService.getStores().subscribe({
+  //     next: (res: any) => this.stores = res.results
+  //   });
+  // }
+
+  getStoresList(): void {
+    const postalCode = this.storageService.getItem('postal_code');
+    let apiCall$;
+
+    if (postalCode) {
+      // console.log(`🔍 Fetching stores for pincode: ${postalCode}`);
+      apiCall$ = this.categoryService.getStoresByPincode(postalCode);
+    } else {
+      apiCall$ = this.categoryService.getStores();
+    }
+
+    apiCall$.subscribe({
+      next: (res: any) => {
+        this.stores = res.results || [];
+        this.noStoresFound = this.stores.length === 0;
+        this.cdr.markForCheck();
+      },
+      error: (err) => { console.error('Error loading stores:', err); this.noStoresFound = true; this.cdr.markForCheck(); },
+    });
+  }
+
+  selectStore(store: any): void {
+    if (!store?.slug) return;
+    this.selectedStoreId = store.id;
+    this.router.navigate(['/stores', store.slug]);
+  }
+
   /* ---------------- CATEGORY ---------------- */
 
   getCategory(): void {
@@ -114,30 +162,87 @@ export class VendorProductsComponent implements OnInit {
     });
   }
 
-  getStoresList(): void {
-    this.categoryService.getStores().subscribe({
-      next: (res: any) => this.stores = res.results
-    });
+  onCategoryChange(categorySlug: string): void {
+    // Avoid reloading same category
+    if (this.categorySlug === categorySlug) {
+      return;
+    }
+
+    this.categorySlug = categorySlug;
+    this.selectedCategory = categorySlug;
+
+    // RESET PAGINATION
+    this.products = [];
+    this.currentPage = 1;
+    this.hasMore = true;
+
+    // LOAD PRODUCTS
+    this.resetAndLoadCategory();
   }
 
-  onCategoryChange(event: Event): void {
-    const checkbox = event.target as HTMLInputElement;
-
-    this.categorySlug = checkbox.checked ? checkbox.value : '';
-    this.categoryName = this.categorySlug;
-
-    this.resetAndLoad();
-  }
-
-  /* ---------------- PAGINATION CORE ---------------- */
+  /* ---------------- PAGINATION ---------------- */
 
   resetAndLoad(): void {
     this.products = [];
     this.currentPage = 1;
     this.hasMore = true;
-
     this.loadProducts();
   }
+  resetAndLoadCategory(): void {
+    this.products = [];
+    this.currentPage = 1;
+    this.hasMore = true;
+    this.loadProductsCategory();
+  }
+
+  loadProductsCategory(): void {
+    if (this.isLoading || !this.hasMore) return;
+
+    this.isLoading = true;
+    this.loaderService.show();
+
+    setTimeout(() => {
+      const request$ = this.categorySlug
+        ? this.productService.getProductsByCategorySlugPagination(
+          this.categorySlug,
+          this.currentPage,
+          this.pageSize
+        )
+        : this.productService.getProductsPaginated(
+          this.currentPage,
+          this.pageSize
+        );
+      request$.subscribe({
+        next: (res: any) => {
+          const results = res?.results ?? [];
+
+          if (results.length === 0) {
+            // 🔴 PERMANENT STOP
+            this.hasMore = false;
+            return;
+          } else if (res?.next === null) {
+            this.hasMore = false;
+          }
+
+          this.products = [...this.products, ...results];
+          this.currentPage++;
+        },
+
+        error: () => {
+          // stop further calls on error
+          this.hasMore = false;
+        },
+
+        complete: () => {
+          this.isLoading = false;
+          this.loaderService.hide();
+          this.cdr.detectChanges();
+        }
+      });
+
+    }, 400);
+  }
+
 
   loadProducts(): void {
     if (this.isLoading || !this.hasMore) return;
@@ -145,7 +250,6 @@ export class VendorProductsComponent implements OnInit {
     this.isLoading = true;
     this.loaderService.show();
 
-    // 🔹 human-like delay
     setTimeout(() => {
       this.productService
         .getProductsByStoreSlugPagination(
@@ -158,20 +262,20 @@ export class VendorProductsComponent implements OnInit {
             const results = res?.results ?? [];
 
             if (results.length === 0) {
-              this.hasMore = false; // 🔴 stop permanently
+              this.hasMore = false;
               return;
+            } else if (res?.next === null) {
+              this.hasMore = false;
             }
 
             this.products.push(...results);
             this.currentPage++;
           },
-          error: () => {
-            this.hasMore = false;
-          },
+          error: () => this.hasMore = false,
           complete: () => {
             this.isLoading = false;
             this.loaderService.hide();
-            this.cdr.detectChanges(); // prevent NG0100
+            this.cdr.detectChanges();
           }
         });
     }, 400);
@@ -186,11 +290,7 @@ export class VendorProductsComponent implements OnInit {
 
     this.scrollTimeout = setTimeout(() => {
       const el = this.productScroller.nativeElement;
-
-      const reachedBottom =
-        el.scrollTop + el.clientHeight >= el.scrollHeight - 150;
-
-      if (reachedBottom) {
+      if (el.scrollTop + el.clientHeight >= el.scrollHeight - 150) {
         this.loadProducts();
       }
     }, 200);
@@ -228,19 +328,27 @@ export class VendorProductsComponent implements OnInit {
 
     this.storage.setItem('cart', JSON.stringify(cart));
     this.toastr.success(`${product.name} added to cart`);
+    product.qty = 1;
+    if (this.authService.hasToken()) {
+      this.cartService.addToCart(product).subscribe({
+        next: (res: any) => console.log('Added to cart:', res),
+        error: (err: HttpErrorResponse) => console.error('Add to cart failed:', err),
+      });
+    }
     this.headerService.fetchCounts();
   }
 
   /* ---------------- SUBSCRIPTION ---------------- */
 
   openSubscribeModal(product: any): void {
+    this.selectedProduct = product;
     this.subscribeModalRef = this.modal.open(this.subscribeModal, {
       centered: true,
       backdrop: 'static'
     });
   }
 
-  confirmSubscription() {
+  confirmSubscription(): void {
     if (!this.selectedProduct) return;
 
     this.subscribeService
@@ -251,73 +359,55 @@ export class VendorProductsComponent implements OnInit {
         this.selectedProduct.qty
       )
       .subscribe({
-        next: (res) => {
-          console.log('Subscription confirmed:', res);
-          this.subscribeModalRef?.close(); // ✅ now reliably closes modal
+        next: () => {
+          this.subscribeModalRef?.close();
+          this.headerService.fetchCounts();
         },
-        error: (err) => {
-          this.toastr.error(err.error.message,'Subscription Failed');
-        },
+        error: err =>
+          this.toastr.error(err.error.message, 'Subscription Failed')
       });
-    
-    this.headerService.fetchCounts();
-
   }
 
   increaseQty(product: any): void {
     product.qty = (product.qty || 0) + 1;
     this.cartService.updateCartItem(product.id, product.qty).subscribe({
-      next: (res) => this.headerService.fetchCounts(),
-      error: (err) => console.error('Cart update failed:', err),
+      next: () => this.headerService.fetchCounts()
     });
-
-    
   }
 
   decreaseQty(product: any): void {
     if ((product.qty || 1) > 1) {
       product.qty -= 1;
-      this.cartService.updateCartItem(product.id, product.qty).subscribe({
-        next: (res) => console.log('Cart updated:', res),
-        error: (err) => console.error('Cart update failed:', err),
-      });
+      this.cartService.updateCartItem(product.id, product.qty).subscribe();
     } else {
       product.qty = 0;
-      this.cartService.deleteCartItem(product.id).subscribe({
-        next: (res) => console.log('Cart item removed:', res),
-        error: (err) => console.error('Cart delete failed:', err),
-      });
+      this.cartService.deleteCartItem(product.id).subscribe();
     }
     this.headerService.fetchCounts();
-
   }
 
-  // onCategoryChange(event: Event): void {
-  //   const checkbox = event.target as HTMLInputElement;
-  //   const categorySlug = checkbox.value;
+  /* ---------------- CAROUSEL ---------------- */
 
-  //   if (checkbox.checked) {
-  //     this.productService.getProductsByCategorySlug(categorySlug).subscribe({
-  //       next: (res: any) => (this.products = res.results),
-  //       error: (err) => console.error('Error fetching products:', err),
-  //     });
-
-  //   } else {
-  //     this.productService.getProductsByCategorySlug(this.categoryName.toLowerCase()).subscribe({
-  //       next: (res: any) => (this.products = res.results),
-  //       error: (err) => console.error('Error fetching products:', err),
-  //     });
-  //   }
-  // }
-  @ViewChild('carousel') carousel!: ElementRef;
-  scrollLeft() {
+  scrollLeft(): void {
     this.carousel.nativeElement.scrollBy({ left: -200, behavior: 'smooth' });
   }
-  scrollRight() {
+
+  scrollRight(): void {
     this.carousel.nativeElement.scrollBy({ left: 200, behavior: 'smooth' });
   }
-  
-  selectStore(store: any) {
-    this.router.navigate(['/stores', store.slug]);
+
+  selectCategory(category: any): void {
+    this.selectedCategory = category.slug;
+
+    // // If you already have getCategory logic, reuse it
+    // if (this.getCategory) {
+    //   this.getCategory(this.selectedCategory);
+    // }
+
+    // // Reset pagination / products if needed
+    // this.products = [];
+    // this.page = 1;
+    // this.fetchProducts();
   }
+
 }

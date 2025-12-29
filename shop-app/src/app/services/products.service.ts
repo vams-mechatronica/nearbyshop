@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_ENDPOINTS } from '../shared/constants/api.constants';
+import { Product } from '../models/cart.model';
+import { PaginatedResponse } from '../models/product.model';
 
 @Injectable({
   providedIn: 'root',
@@ -36,7 +38,7 @@ export class ProductsService {
       .set('page', page.toString())
       .set('page_size', pageSize.toString());
 
-    return this.http.get(API_ENDPOINTS.PRODUCTS, { params });
+    return this.http.get<PaginatedResponse<Product>>(API_ENDPOINTS.PRODUCTS, { params });
   }
 
   getProductsByStoreSlug(slug: string): Observable<any> {
