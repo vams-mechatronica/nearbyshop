@@ -44,6 +44,15 @@ export class ProductsService {
     return this.http.get(API_ENDPOINTS.STORE_PRODUCTS + `${slug}/products/`);
   }
 
+  getProductsByStoreSlugPagination(slug: string,page: number,
+    pageSize: number = 12): Observable<any> {
+      const params = new HttpParams()
+      .set('page', page.toString())
+      .set('page_size', pageSize.toString());
+    // const params = new HttpParams().set('store__slug', slug);
+    return this.http.get(API_ENDPOINTS.STORE_PRODUCTS + `${slug}/products/`,{params});
+  }
+
   getProductDetailById(productId: string): Observable<any> {
     return this.http.get(`${API_ENDPOINTS.PRODUCT_DETAIL}${productId}/`);
   }

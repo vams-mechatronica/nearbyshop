@@ -1,14 +1,20 @@
-import { Component, ElementRef, Injectable, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  OnInit,
+  TemplateRef,
+  ViewChild
+} from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+import { ToastrService } from 'ngx-toastr';
+
 import { CartService } from '../../services/cart.service';
 import { ProductsService } from '../../services/products.service';
 import { CategoryService } from '../../services/category.service';
-import { HttpErrorResponse } from '@angular/common/http';
-import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { hasToken } from '../../shared/utility/utils.common';
-import { ToastrService } from 'ngx-toastr';
 import { SubscriptionService } from '../../services/subscribe.service';
 import { StorageService } from '../../services/storage.service';
 import { AuthService } from '../../services/auth.service';
@@ -23,133 +29,214 @@ import { ShopService } from '../../services/shop.service';
   templateUrl: './vendor-products.component.html',
   styleUrls: ['./vendor-products.component.scss']
 })
-export class VendorProductsComponent {
+export class VendorProductsComponent implements OnInit {
+
+  /* ---------------- STATE ---------------- */
+
   products: any[] = [];
-  categoryName: string = 'Darity';
-  storeName: string = 'Darity';
+ 
   categories: any[] = [];
   selectedProduct: any;
   subscriptionPlan = 'daily';
   startDate: string = '';
   stores: any[] = [];
 
-  @ViewChild('subscribeModal') subscribeModal!: TemplateRef<any>;
+  storeName = '';
+  categoryName = '';
+  categorySlug = '';
+
+  currentPage = 1;
+  pageSize = 12;
+
+  isLoading = false;
+  hasMore = true;
+
+  private storeSlug = '';
+  private scrollTimeout: any;
+
+  /* ---------------- VIEW ---------------- */
+
+  @ViewChild('productScroller', { static: true })
+  productScroller!: ElementRef;
+
+  @ViewChild('subscribeModal')
+  subscribeModal!: TemplateRef<any>;
+
   private subscribeModalRef!: NgbModalRef;
+
+  /* ---------------- CONSTRUCTOR ---------------- */
 
   constructor(
     private router: Router,
-    private headerService: HeaderCountService,
     private route: ActivatedRoute,
     private modal: NgbModal,
-    private cartService: CartService,
     private productService: ProductsService,
     private categoryService: CategoryService,
+    private cartService: CartService,
     private subscribeService: SubscriptionService,
     private storage: StorageService,
     private authService: AuthService,
+    private headerService: HeaderCountService,
     private loaderService: LoaderService,
+    private shopService: ShopService,
     private toastr: ToastrService,
-    private shopService: ShopService
-  ) { }
+    private cdr: ChangeDetectorRef
+  ) {}
+
+  /* ---------------- INIT ---------------- */
 
   ngOnInit(): void {
-    const storeSlug = this.route.snapshot.paramMap.get('slug');
-    this.loaderService.show();
+    this.storeSlug = this.route.snapshot.paramMap.get('slug') || '';
+
     this.getCategory();
     this.getStoresList();
-    if (storeSlug) {
-      this.shopService.getShopDetails(storeSlug).subscribe({
-        next: (res: any) => this.storeName = res.shop_name,
-        error: (err) => console.error('Error fetching store details:', err),
-      });
+    this.getStoreDetails();
 
-      this.productService.getProductsByStoreSlug(storeSlug).subscribe({
-        next: (res: any) => (this.products = res.results),
-        error: (err) => console.error('Error fetching products:', err),
-      });
-    } else {
-      this.productService.getProducts().subscribe({
-        next: (res: any) => (this.products = res.results),
-        error: (err) => console.error('Error fetching products:', err),
-      });
-    }
-    this.loaderService.hide();
+    this.resetAndLoad();
   }
 
-  getStoresList() {
-    this.categoryService.getStores().subscribe((res: any) => {
-      this.stores = res.results;
+  /* ---------------- STORE ---------------- */
+
+  getStoreDetails(): void {
+    if (!this.storeSlug) return;
+
+    this.shopService.getShopDetails(this.storeSlug).subscribe({
+      next: (res: any) => this.storeName = res.shop_name,
+      error: err => console.error(err)
     });
   }
-  getCategory() {
+
+  /* ---------------- CATEGORY ---------------- */
+
+  getCategory(): void {
     this.categoryService.getCategories().subscribe({
-      next: (res: any) => (this.categories = res.results),
-      error: (err) => console.error('Error fetching categories:', err),
+      next: (res: any) => this.categories = res.results
     });
   }
-  @ViewChild('carousel') carousel!: ElementRef;
-  scrollLeft() {
-    this.carousel.nativeElement.scrollBy({ left: -200, behavior: 'smooth' });
+
+  getStoresList(): void {
+    this.categoryService.getStores().subscribe({
+      next: (res: any) => this.stores = res.results
+    });
   }
 
-  scrollRight() {
-    this.carousel.nativeElement.scrollBy({ left: 200, behavior: 'smooth' });
+  onCategoryChange(event: Event): void {
+    const checkbox = event.target as HTMLInputElement;
+
+    this.categorySlug = checkbox.checked ? checkbox.value : '';
+    this.categoryName = this.categorySlug;
+
+    this.resetAndLoad();
   }
 
-  selectStore(store: any) {
-    this.router.navigate(['/stores', store.slug]);
+  /* ---------------- PAGINATION CORE ---------------- */
+
+  resetAndLoad(): void {
+    this.products = [];
+    this.currentPage = 1;
+    this.hasMore = true;
+
+    this.loadProducts();
   }
 
-  addToCart(product: any) {
-    // initialize cart structure if not present
-    let cart = JSON.parse(this.storage.getItem('cart') || '{"items": [], "total": 0}');
+  loadProducts(): void {
+    if (this.isLoading || !this.hasMore) return;
 
-    // check if product already exists
-    const existingItem = cart.items.find((item: any) => item.product.id === product.id);
+    this.isLoading = true;
+    this.loaderService.show();
 
-    if (existingItem) {
-      existingItem.quantity += 1;
-      existingItem.price = (parseFloat(product.price) * existingItem.quantity).toFixed(2);
+    // 🔹 human-like delay
+    setTimeout(() => {
+      this.productService
+        .getProductsByStoreSlugPagination(
+          this.storeSlug,
+          this.currentPage,
+          this.pageSize
+        )
+        .subscribe({
+          next: (res: any) => {
+            const results = res?.results ?? [];
+
+            if (results.length === 0) {
+              this.hasMore = false; // 🔴 stop permanently
+              return;
+            }
+
+            this.products.push(...results);
+            this.currentPage++;
+          },
+          error: () => {
+            this.hasMore = false;
+          },
+          complete: () => {
+            this.isLoading = false;
+            this.loaderService.hide();
+            this.cdr.detectChanges(); // prevent NG0100
+          }
+        });
+    }, 400);
+  }
+
+  /* ---------------- SCROLL ---------------- */
+
+  onProductScroll(): void {
+    if (this.isLoading || !this.hasMore) return;
+
+    clearTimeout(this.scrollTimeout);
+
+    this.scrollTimeout = setTimeout(() => {
+      const el = this.productScroller.nativeElement;
+
+      const reachedBottom =
+        el.scrollTop + el.clientHeight >= el.scrollHeight - 150;
+
+      if (reachedBottom) {
+        this.loadProducts();
+      }
+    }, 200);
+  }
+
+  /* ---------------- CART ---------------- */
+
+  addToCart(product: any): void {
+    let cart = JSON.parse(
+      this.storage.getItem('cart') || '{"items": [], "total": 0}'
+    );
+
+    const existing = cart.items.find(
+      (item: any) => item.product.id === product.id
+    );
+
+    if (existing) {
+      existing.quantity += 1;
+      existing.price = (
+        parseFloat(product.price) * existing.quantity
+      ).toFixed(2);
     } else {
       cart.items.push({
-        id: new Date().getTime(), // temporary id for local cart
-        product: {
-          id: product.id,
-          name: product.name,
-          price: product.price,
-          final_price:product.final_price,
-          image: product.image,
-          discount_type: product.discount_type,
-          discount_value: product.discount_value
-        },
+        id: Date.now(),
+        product,
         quantity: 1,
         price: product.price
       });
     }
 
-    // update total
-    cart.total = cart.items.reduce((sum: number, item: any) => sum + parseFloat(item.price), 0);
+    cart.total = cart.items.reduce(
+      (sum: number, item: any) => sum + parseFloat(item.price),
+      0
+    );
 
-    // save back to localStorage
     this.storage.setItem('cart', JSON.stringify(cart));
-
-    this.toastr.success(`${product.name} added to cart`, 'Cart Updated');
-
-    product.qty = 1;
-    if (this.authService.hasToken()) {
-    this.cartService.addToCart(product).subscribe({
-      next: (res: any) => console.log('Added to cart:', res),
-      error: (err: HttpErrorResponse) => console.error('Add to cart failed:', err),
-    }); }
-
+    this.toastr.success(`${product.name} added to cart`);
     this.headerService.fetchCounts();
   }
 
-  openSubscribeModal(product: any) {
-    this.selectedProduct = { ...product, qty: product.qty || 1 };
+  /* ---------------- SUBSCRIPTION ---------------- */
+
+  openSubscribeModal(product: any): void {
     this.subscribeModalRef = this.modal.open(this.subscribeModal, {
       centered: true,
-      backdrop: 'static',
+      backdrop: 'static'
     });
   }
 
@@ -205,21 +292,32 @@ export class VendorProductsComponent {
 
   }
 
-  onCategoryChange(event: Event): void {
-    const checkbox = event.target as HTMLInputElement;
-    const categorySlug = checkbox.value;
+  // onCategoryChange(event: Event): void {
+  //   const checkbox = event.target as HTMLInputElement;
+  //   const categorySlug = checkbox.value;
 
-    if (checkbox.checked) {
-      this.productService.getProductsByCategorySlug(categorySlug).subscribe({
-        next: (res: any) => (this.products = res.results),
-        error: (err) => console.error('Error fetching products:', err),
-      });
+  //   if (checkbox.checked) {
+  //     this.productService.getProductsByCategorySlug(categorySlug).subscribe({
+  //       next: (res: any) => (this.products = res.results),
+  //       error: (err) => console.error('Error fetching products:', err),
+  //     });
 
-    } else {
-      this.productService.getProductsByCategorySlug(this.categoryName.toLowerCase()).subscribe({
-        next: (res: any) => (this.products = res.results),
-        error: (err) => console.error('Error fetching products:', err),
-      });
-    }
+  //   } else {
+  //     this.productService.getProductsByCategorySlug(this.categoryName.toLowerCase()).subscribe({
+  //       next: (res: any) => (this.products = res.results),
+  //       error: (err) => console.error('Error fetching products:', err),
+  //     });
+  //   }
+  // }
+  @ViewChild('carousel') carousel!: ElementRef;
+  scrollLeft() {
+    this.carousel.nativeElement.scrollBy({ left: -200, behavior: 'smooth' });
+  }
+  scrollRight() {
+    this.carousel.nativeElement.scrollBy({ left: 200, behavior: 'smooth' });
+  }
+  
+  selectStore(store: any) {
+    this.router.navigate(['/stores', store.slug]);
   }
 }

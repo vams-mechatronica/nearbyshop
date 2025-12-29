@@ -15,6 +15,7 @@ import { AuthService } from '../../services/auth.service';
 import { HeaderCountService } from '../../services/header.service';
 import { LoaderService } from '../../services/loader.service';
 import { HostListener } from '@angular/core';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   standalone: true,
@@ -55,42 +56,36 @@ export class ProductsComponent implements OnInit {
     private authService: AuthService,
     private loaderService: LoaderService,
     private toastr: ToastrService,
+    private cdr: ChangeDetectorRef,
   ) { }
 
-  @HostListener('window:scroll', [])
-  onScroll(): void {
-    const threshold = 300;
-    if (
-      window.innerHeight + window.scrollY >=
-      document.body.offsetHeight - threshold
-    ) {
-      this.loadProducts();
-    }
+  @ViewChild('productScroller', { static: true })
+  productScroller!: any;
+
+  private scrollTimeout: any;
+
+  onProductScroll(): void {
+    if (this.isLoading || !this.hasMore) return;
+
+    clearTimeout(this.scrollTimeout);
+
+    this.scrollTimeout = setTimeout(() => {
+      const el = this.productScroller.nativeElement;
+
+      const reachedBottom =
+        el.scrollTop + el.clientHeight >= el.scrollHeight - 150;
+
+      if (reachedBottom) {
+        this.loadProducts();
+      }
+    }, 200);
   }
 
 
-
-  // ngOnInit(): void {
-  //   const categorySlug = this.route.snapshot.paramMap.get('slug');
-  //   this.loaderService.show();
-  //   this.getCategory();
-  //   this.loadProducts(categorySlug);
-  //   // if (categorySlug) {
-  //   //   this.categoryName = categorySlug;
-  //   //   this.productService.getProductsByCategorySlugPagination(categorySlug).subscribe({
-  //   //     next: (res: any) => (this.products = res.results),
-  //   //     error: (err) => console.error('Error fetching products:', err),
-  //   //   });
-  //   // } else {
-  //   //   this.productService.getProducts().subscribe({
-  //   //     next: (res: any) => (this.products = res.results),
-  //   //     error: (err) => console.error('Error fetching products:', err),
-  //   //   });
-  //   // }
-  //   // this.loaderService.hide();
-  // }
   ngOnInit(): void {
-    this.loaderService.show();
+    setTimeout(() => {
+      this.loaderService.show();
+    });
     this.getCategory();
 
     this.route.paramMap.subscribe(params => {
@@ -135,21 +130,30 @@ export class ProductsComponent implements OnInit {
 
     request$.subscribe({
       next: (res: any) => {
-        if (!res?.results || res.results.length === 0) {
+        const results = res?.results ?? [];
+
+        if (results.length === 0) {
+          // 🔴 PERMANENT STOP
           this.hasMore = false;
-        } else {
-          this.products = [...this.products, ...res.results];
-          this.currentPage++;
+          return;
         }
-        this.isLoading = false;
-        this.loaderService.hide();
+
+        this.products = [...this.products, ...results];
+        this.currentPage++;
       },
+
       error: () => {
+        // stop further calls on error
+        this.hasMore = false;
+      },
+
+      complete: () => {
         this.isLoading = false;
         this.loaderService.hide();
       }
     });
   }
+
 
 
   addToCart(product: any) {
@@ -258,36 +262,17 @@ export class ProductsComponent implements OnInit {
 
   }
 
-  // onCategoryChange(event: Event): void {
-  //   const checkbox = event.target as HTMLInputElement;
-  //   const categorySlug = checkbox.value;
-
-  //   if (checkbox.checked) {
-  //     this.productService.getProductsByCategorySlug(categorySlug).subscribe({
-  //       next: (res: any) => (this.products = res.results),
-  //       error: (err) => console.error('Error fetching products:', err),
-  //     });
-
-  //   } else {
-  //     this.productService.getProductsByCategorySlug(this.categoryName.toLowerCase()).subscribe({
-  //       next: (res: any) => (this.products = res.results),
-  //       error: (err) => console.error('Error fetching products:', err),
-  //     });
-  //   }
-  // }
-
   onCategoryChange(event: Event): void {
     const checkbox = event.target as HTMLInputElement;
-  
+
     this.categorySlug = checkbox.checked ? checkbox.value : '';
-  
+
     // RESET
     this.products = [];
     this.currentPage = 1;
     this.hasMore = true;
-  
+
     this.loadProducts();
   }
-  
 
 }

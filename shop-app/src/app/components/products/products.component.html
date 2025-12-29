@@ -1,65 +1,78 @@
-<div class="container mt-4">
-  <!-- Category Name Header -->
-  <h4 class="mb-4 fw-bold text-left text-uppercase">{{ categoryName }}</h4>
+<div class="container-body">
 
-  <div class="row">
+  <div class="product-page">
+
     <!-- Sidebar -->
-    <div class="col-md-3 mb-4">
+    <aside class="product-sidebar">
       <div class="bg-light p-3 rounded shadow-sm">
-        <h5 class="fw-bold">Categories</h5>
+        <h5 class="fw-bold text-uppercase">
+          {{ categoryName }}
+        </h5>
+        <hr />
+
         <div *ngFor="let category of categories" class="mb-2">
           <div class="form-check">
             <input class="form-check-input" type="checkbox" [value]="category.slug"
               (change)="onCategoryChange($event)" />
-            <label class="form-check-label">{{ category.name }} ({{ category.count }})</label>
+            <label class="form-check-label">
+              {{ category.name }} ({{ category.count }})
+            </label>
           </div>
         </div>
       </div>
-    </div>
+    </aside>
 
-    <!-- Products -->
-    <div class="col-md-9 mb-2">
-      <div *ngIf="products.length > 0; else noProducts" class="product-grid">
-        <div class="product-card" *ngFor="let product of products">
-          <a [routerLink]="['/product', product.slug]">
-            <!-- Discount Badge -->
-            <div *ngIf="product.discount_value > 0" class="discount-badge">
-              <ng-container *ngIf="product.discount_type === 'percentage'; else flatDiscount">
-                {{ product.discount_value | number:'1.0-0' }}% OFF
-              </ng-container>
-              <ng-template #flatDiscount>
-                ₹{{ product.discount_value | number:'1.0-0' }} OFF
-              </ng-template>
-            </div>
+    <!-- Products Section -->
+    <section class="product-content" #productScroller (scroll)="onProductScroll()">
 
-            <!-- Carousel / Image -->
-            <div id="carousel-{{ product.id }}" class="carousel slide" data-bs-ride="carousel">
-              <div class="carousel-inner rounded-top">
-                <div class="carousel-item active">
-                  <img [src]="product.image" class="d-block w-100 card-body product-img" alt="{{ product.name }}" />
+      <!-- Loader (PRODUCT ONLY) -->
+      <div class="product-loader" *ngIf="isLoading">
+        <div class="spinner-border text-danger"></div>
+      </div>
+
+      <!-- Products -->
+      <ng-container *ngIf="products.length > 0; else noProducts">
+        <div class="product-grid">
+          <div class="product-card" *ngFor="let product of products">
+            <a [routerLink]="['/product', product.slug]">
+              <!-- Discount Badge -->
+              <div *ngIf="product.discount_value > 0" class="discount-badge">
+                <ng-container *ngIf="product.discount_type === 'percentage'; else flatDiscount">
+                  {{ product.discount_value | number:'1.0-0' }}% OFF
+                </ng-container>
+                <ng-template #flatDiscount>
+                  ₹{{ product.discount_value | number:'1.0-0' }} OFF
+                </ng-template>
+              </div>
+
+              <!-- Carousel / Image -->
+              <div id="carousel-{{ product.id }}" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-inner rounded-top">
+                  <div class="carousel-item active">
+                    <img [src]="product.image" class="d-block w-100 card-body product-img" alt="{{ product.name }}" />
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <!-- Card Body -->
-            <div class="card-body d-flex flex-column justify-content-between">
-              <!-- Product Name -->
-              <h6 class="product-title">{{ product.name }}</h6>
+              <!-- Card Body -->
+              <div class="card-body d-flex flex-column justify-content-between">
+                <!-- Product Name -->
+                <h6 class="product-title">{{ product.name }}</h6>
 
-              <!-- Price Row -->
-              <div class="d-flex align-items-center gap-2">
-                <p class="fw-bold text-success mb-0">₹{{ product.final_price }}</p>
-                <p *ngIf="product.discount_value > 0" class="text-muted text-decoration-line-through mb-0">
-                  ₹{{ product.price }}
-                </p>
-                <span class="badge bg-light text-dark product-unit">{{ product.unit.code || 'N/A' }}</span>
-              </div>
-              <!-- Unit
+                <!-- Price Row -->
+                <div class="d-flex align-items-center gap-2">
+                  <p class="fw-bold text-success mb-0">₹{{ product.final_price }}</p>
+                  <p *ngIf="product.discount_value > 0" class="text-muted text-decoration-line-through mb-0">
+                    ₹{{ product.price }}
+                  </p>
+                  <span class="badge bg-light text-dark product-unit">{{ product.unit.code || 'N/A' }}</span>
+                </div>
+                <!-- Unit
               <p class="card-text small mb-2">
                 <span class="badge bg-light text-dark">Unit: {{ product.unit.code || 'N/A' }}</span>
               </p> -->
-              <!-- Description -->
-              <!-- <p class="card-text small text-muted mb-1 text-truncate" title="{{ product.description }}">
+                <!-- Description -->
+                <!-- <p class="card-text small text-muted mb-1 text-truncate" title="{{ product.description }}">
                 {{ product.description || 'No description available' }}
               </p>
 
@@ -69,29 +82,30 @@
               </div> -->
 
 
-            </div>
-          </a>
+              </div>
+            </a>
 
-          <!-- Actions -->
-          <div class="d-flex align-items-center justify-content-between gap-2 mb-2 p-2">
-            <div *ngIf="!product.qty" class="add-btn-wrapper w-50">
-              <button class="btn btn-sm buy-now w-100" (click)="addToCart(product)">ADD</button>
-            </div>
+            <!-- Actions -->
+            <div class="d-flex align-items-center justify-content-between gap-2 mb-2 p-2">
+              <div *ngIf="!product.qty" class="add-btn-wrapper w-50">
+                <button class="btn btn-sm buy-now w-100" (click)="addToCart(product)">ADD</button>
+              </div>
 
-            <div *ngIf="product.qty" class="quantity-box d-flex align-items-center w-50">
-              <button class="qty-btn" (click)="decreaseQty(product)">−</button>
-              <input type="number" [(ngModel)]="product.qty" class="qty-input text-center" min="1" />
-              <button class="qty-btn" (click)="increaseQty(product)">+</button>
-            </div>
+              <div *ngIf="product.qty" class="quantity-box d-flex align-items-center w-50">
+                <button class="qty-btn" (click)="decreaseQty(product)">−</button>
+                <input type="number" [(ngModel)]="product.qty" class="qty-input text-center" min="1" />
+                <button class="qty-btn" (click)="increaseQty(product)">+</button>
+              </div>
 
-            <div class="subscribe-btn-wrapper w-50">
-              <button class="btn btn-sm w-100 text-white subscribe-btn" (click)="openSubscribeModal(product)">
-                Subscribe
-              </button>
+              <div class="subscribe-btn-wrapper w-50">
+                <button class="btn btn-sm w-100 text-white subscribe-btn" (click)="openSubscribeModal(product)">
+                  Subscribe
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </ng-container>
 
 
       <!-- No Products Template -->
@@ -100,71 +114,72 @@
           <h5 class="text-muted">No products found</h5>
         </div>
       </ng-template>
+    </section>
+  </div>
 
-    </div>
 
+  <ng-template #subscribeModal let-modal>
+    <div class="p-4">
+      <!-- Header -->
+      <h5 class="mb-3">Subscribe to Product</h5>
 
-    <ng-template #subscribeModal let-modal>
-      <div class="p-4">
-        <!-- Header -->
-        <h5 class="mb-3">Subscribe to Product</h5>
+      <!-- Product Info -->
+      <div class="d-flex align-items-center mb-3">
+        <img [src]="selectedProduct?.image" alt="Product Image"
+          style="width: 100px; height: 60px; object-fit: cover; border-radius: 4px; margin-right: 10px;" />
 
-        <!-- Product Info -->
-        <div class="d-flex align-items-center mb-3">
-          <img [src]="selectedProduct?.image" alt="Product Image"
-            style="width: 100px; height: 60px; object-fit: cover; border-radius: 4px; margin-right: 10px;" />
-
-          <div class="flex-grow-1">
-            <div class="fw-bold">{{ selectedProduct?.name }} <span>({{selectedProduct?.unit.code}})</span></div>
-            <div class="text-muted small">₹{{ selectedProduct?.final_price }}</div>
-          </div>
-
-          <!-- Qty Controls -->
-          <div class="quantity-box d-flex align-items-center border rounded px-2 py-1"
-            style="width: fit-content; height: 38px;">
-            <button class="qty-btn" (click)="decreaseQty(selectedProduct)">−</button>
-            <input type="number" [(ngModel)]="selectedProduct.qty"
-              (ngModelChange)="selectedProduct.qty = selectedProduct.qty < 1 ? 1 : selectedProduct.qty"
-              class="qty-input mx-2" style="width: 50px; text-align: center; border: none; outline: none; height: 100%;"
-              min="1" />
-            <button class="qty-btn" (click)="increaseQty(selectedProduct)">+</button>
-          </div>
+        <div class="flex-grow-1">
+          <div class="fw-bold">{{ selectedProduct?.name }} <span>({{selectedProduct?.unit.code}})</span></div>
+          <div class="text-muted small">₹{{ selectedProduct?.final_price }}</div>
         </div>
 
-        <!-- Subscription Options -->
-        <div class="mb-3">
-          <div class="form-floating mb-3">
-            <select class="form-select form-select-sm" [(ngModel)]="subscriptionPlan" id="subscription-select">
-              <option value="daily">Daily</option>
-              <option value="alternate_day">Alternate Day</option>
-              <option value="every_3_days">Every 3 Days</option>
-              <option value="weekly">Weekly</option>
-              <option value="biweekly">Biweekly</option>
-              <option value="monthly">Monthly</option>
-            </select>
-            <label for="subscription-select">Pick a Schedule</label>
-          </div>
-          <div class="form-floating mb-3">
-            <input type="date" [(ngModel)]="startDate" class="form-control form-control-sm mt-2"
-              placeholder="Pick a Start date" id="schedule-date" />
-            <label for="schedule-date">Pick a start date</label>
-          </div>
-        </div>
-
-        <!-- Terms -->
-        <div class="mb-3">
-          <label class="form-label fw-semibold">Terms & Conditions</label>
-          <p class="small text-muted mb-0">
-            • You can cancel or reschedule your subscription at any time.<br />
-            • Minimum commitment of 7 days is required.<br />
-            • Delivery will be paused on public holidays.
-          </p>
-        </div>
-
-        <!-- Footer -->
-        <div class="text-end">
-          <button class="btn btn-secondary btn-sm me-2" (click)="modal.dismiss()">Cancel</button>
-          <button class="btn btn-success btn-sm" (click)="confirmSubscription()">Confirm</button>
+        <!-- Qty Controls -->
+        <div class="quantity-box d-flex align-items-center border rounded px-2 py-1"
+          style="width: fit-content; height: 38px;">
+          <button class="qty-btn" (click)="decreaseQty(selectedProduct)">−</button>
+          <input type="number" [(ngModel)]="selectedProduct.qty"
+            (ngModelChange)="selectedProduct.qty = selectedProduct.qty < 1 ? 1 : selectedProduct.qty"
+            class="qty-input mx-2" style="width: 50px; text-align: center; border: none; outline: none; height: 100%;"
+            min="1" />
+          <button class="qty-btn" (click)="increaseQty(selectedProduct)">+</button>
         </div>
       </div>
-    </ng-template>
+
+      <!-- Subscription Options -->
+      <div class="mb-3">
+        <div class="form-floating mb-3">
+          <select class="form-select form-select-sm" [(ngModel)]="subscriptionPlan" id="subscription-select">
+            <option value="daily">Daily</option>
+            <option value="alternate_day">Alternate Day</option>
+            <option value="every_3_days">Every 3 Days</option>
+            <option value="weekly">Weekly</option>
+            <option value="biweekly">Biweekly</option>
+            <option value="monthly">Monthly</option>
+          </select>
+          <label for="subscription-select">Pick a Schedule</label>
+        </div>
+        <div class="form-floating mb-3">
+          <input type="date" [(ngModel)]="startDate" class="form-control form-control-sm mt-2"
+            placeholder="Pick a Start date" id="schedule-date" />
+          <label for="schedule-date">Pick a start date</label>
+        </div>
+      </div>
+
+      <!-- Terms -->
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Terms & Conditions</label>
+        <p class="small text-muted mb-0">
+          • You can cancel or reschedule your subscription at any time.<br />
+          • Minimum commitment of 7 days is required.<br />
+          • Delivery will be paused on public holidays.
+        </p>
+      </div>
+
+      <!-- Footer -->
+      <div class="text-end">
+        <button class="btn btn-secondary btn-sm me-2" (click)="modal.dismiss()">Cancel</button>
+        <button class="btn btn-success btn-sm" (click)="confirmSubscription()">Confirm</button>
+      </div>
+    </div>
+  </ng-template>
+</div>

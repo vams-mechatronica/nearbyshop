@@ -1,81 +1,83 @@
-<nav class="navbar navbar-expand navbar-light bg-light px-3 primary-navbar">
-  <div class="d-flex align-items-center location-select" (click)="openLocationModal()">
-    <i class="fas fa-map-marker-alt me-2 text-danger"></i>
-    <span *ngIf="selectedLocationName; else selectLoc">
-      {{ selectedLocationName }}
-    </span>
-    <ng-template #selectLoc>
-      <span class="select-location-text">Select Location</span>
-    </ng-template>
-  </div>
+<div class="header-wrapper">
+  <nav class="navbar navbar-expand navbar-light bg-light px-3 primary-navbar">
+    <div class="d-flex align-items-center location-select" (click)="openLocationModal()">
+      <i class="fas fa-map-marker-alt me-2 text-danger"></i>
+      <span *ngIf="selectedLocationName; else selectLoc">
+        {{ selectedLocationName }}
+      </span>
+      <ng-template #selectLoc>
+        <span class="select-location-text">Select Location</span>
+      </ng-template>
+    </div>
 
-  <ul class="navbar-nav ms-auto align-items-center">
-    <li class="nav-item position-relative me-3">
-      <a class="nav-link" routerLink="/cart" routerLinkActive="active">
-        <i class="fas fa-shopping-cart"></i>
-        <span class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle">
-          {{ cartCount }}
-        </span>
-        Cart
-      </a>
-    </li>
-
-    <li class="nav-item position-relative me-3">
-      <a class="nav-link" routerLink="/subscribe" routerLinkActive="active">
-        <i class="fas fa-box-open"></i>
-        <span class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle">
-          {{ subscriptionCount }}
-        </span>
-        Subscriptions
-      </a>
-    </li>
-
-    <li class="nav-item" *ngIf="!isLoggedIn">
-      <button class="btn btn-gradient ms-2" (click)="loginSignup()">Login</button>
-    </li>
-
-    <li class="nav-item dropdown profile-nav" *ngIf="isLoggedIn">
-      <div class="profile-icon" (click)="toggleProfileDropdown()">
-        <i class="fas fa-user-circle"></i>
-      </div>
-
-      <div class="profile-dropdown-card" *ngIf="showProfileDropdown" (mouseleave)="showProfileDropdown = false">
-        <div class="profile-header">
-          <i class="fas fa-user-circle me-2"></i>
-          <span>{{ userName }}</span>
-        </div>
-        <div class="dropdown-divider"></div>
-        <a class="dropdown-item" (click)="userProfile()">Profile Settings</a>
-        <a class="dropdown-item logout" (click)="logout()">Logout</a>
-      </div>
-    </li>
-  </ul>
-</nav>
-
-<nav class="secondary-navbar navbar navbar-light bg-light px-3 border-top">
-  <a class="navbar-brand" routerLink="/">The<span class="brand-span">NearBy</span>Shop<span class="brand-com">.com</span></a>
-
-  <div class="search-bar">
-    <input type="text" [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange($event)" (keyup.enter)="onSearch()"
-      placeholder="Search..." />
-
-    <ul class="search-results" *ngIf="searchResults.length > 0">
-      <li *ngFor="let item of searchResults" (click)="selectResult(item)">
-        <a [routerLink]="['/product', item.id]" class="search-result-item">
-          <img [src]="item.image" alt="{{ item.name }}" class="search-result-image" />
-          <div class="search-result-details">
-            <h6 class="product-name">{{ item.name }}
-              <span class="product-category sm">({{ item.sku }})</span>
-            </h6>
-            <p class="product-category">{{ item.category_name }}</p>
-            <span class="product-price">₹{{ item.price }} per {{item.unit.code}}</span>
-          </div>
+    <ul class="navbar-nav ms-auto align-items-center">
+      <li class="nav-item position-relative me-3">
+        <a class="nav-link" routerLink="/cart" routerLinkActive="active">
+          <i class="fas fa-shopping-cart"></i>
+          <span class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle">
+            {{ cartCount }}
+          </span>
+          Cart
         </a>
       </li>
-    </ul>
-  </div>
-</nav>
 
+      <li class="nav-item position-relative me-3">
+        <a class="nav-link" routerLink="/subscribe" routerLinkActive="active">
+          <i class="fas fa-box-open"></i>
+          <span class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle">
+            {{ subscriptionCount }}
+          </span>
+          Subscriptions
+        </a>
+      </li>
+
+      <li class="nav-item" *ngIf="!isLoggedIn">
+        <button class="btn btn-gradient ms-2" (click)="loginSignup()">Login</button>
+      </li>
+
+      <li class="nav-item dropdown profile-nav" *ngIf="isLoggedIn">
+        <div class="profile-icon" (click)="toggleProfileDropdown()">
+          <i class="fas fa-user-circle"></i>
+        </div>
+
+        <div class="profile-dropdown-card" *ngIf="showProfileDropdown" (mouseleave)="showProfileDropdown = false">
+          <div class="profile-header">
+            <i class="fas fa-user-circle me-2"></i>
+            <span>{{ userName }}</span>
+          </div>
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item" (click)="userProfile()">Profile Settings</a>
+          <a class="dropdown-item logout" (click)="logout()">Logout</a>
+        </div>
+      </li>
+    </ul>
+  </nav>
+
+  <nav class="secondary-navbar navbar navbar-light bg-light px-3 border-top">
+    <a class="navbar-brand" routerLink="/">The<span class="brand-span">NearBy</span>Shop<span
+        class="brand-com">.com</span></a>
+
+    <div class="search-bar">
+      <input type="text" [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange($event)" (keyup.enter)="onSearch()"
+        placeholder="Search..." />
+
+      <ul class="search-results" *ngIf="searchResults.length > 0">
+        <li *ngFor="let item of searchResults" (click)="selectResult(item)">
+          <a [routerLink]="['/product', item.id]" class="search-result-item">
+            <img [src]="item.image" alt="{{ item.name }}" class="search-result-image" />
+            <div class="search-result-details">
+              <h6 class="product-name">{{ item.name }}
+                <span class="product-category sm">({{ item.sku }})</span>
+              </h6>
+              <p class="product-category">{{ item.category_name }}</p>
+              <span class="product-price">₹{{ item.price }} per {{item.unit.code}}</span>
+            </div>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+</div>
 <!-- ✅ LOCATION MODAL -->
 <ng-template #locationModal let-modal>
   <div class="location-modal">
@@ -84,12 +86,8 @@
       <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
     </div>
     <div class="modal-body">
-      <input
-        type="text"
-        class="form-control location-search"
-        placeholder="Search a new address"
-        [(ngModel)]="locationSearch"
-      />
+      <input type="text" class="form-control location-search" placeholder="Search a new address"
+        [(ngModel)]="locationSearch" />
 
       <div class="use-location-card">
         <div class="use-location-icon">

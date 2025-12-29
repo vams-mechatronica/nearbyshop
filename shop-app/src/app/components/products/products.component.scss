@@ -2,6 +2,44 @@
   width: 70%;
 }
 
+.product-page {
+  display: flex;
+  height: calc(100vh - 100px); // header height
+  overflow: hidden; // IMPORTANT
+}
+
+.product-sidebar {
+  width: 260px;
+  position: sticky;
+  top: 100px;
+  height: calc(100vh - 100px);
+  overflow-y: auto;
+}
+
+.product-content {
+  flex: 1;
+  height: calc(100vh - 100px); // 🔴 ADD THIS
+  overflow-y: auto;
+  position: relative;
+  padding: 0 20px 20px;
+}
+
+
+.product-loader {
+  position: absolute;
+  inset: 0;                 // fills product-content
+  display: flex;
+  align-items: center;      // vertical center
+  justify-content: center;  // horizontal center
+  z-index: 100;
+  pointer-events: none;
+}
+
+
+
+
+
+
 .product-grid {
   display: flex;
   flex-wrap: wrap;
@@ -70,6 +108,7 @@
 
       }
     }
+
     .product-unit {
       font-weight: 400;
       font-size: small;
@@ -281,5 +320,23 @@
   .subscribe-btn,
   .buy-now {
     width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .product-page {
+    flex-direction: column;
+  }
+
+  .product-sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    top: 0;
+  }
+
+  .product-content {
+    height: auto;
+    overflow: visible;
   }
 }

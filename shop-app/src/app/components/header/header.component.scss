@@ -1,6 +1,15 @@
 // ==============================
 // Common Navbar Styles
 // ==============================
+.header-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 2000;
+  background: #fff;
+}
+
 nav.navbar {
   width: 100%;
   position: relative;
@@ -51,7 +60,7 @@ nav.navbar {
   padding: 0 1rem;
   border-bottom: 1px solid #dee2e6;
   z-index: 1000;
-  position: relative;
+  position: fixed;
 
   .location-select {
     display: flex;
