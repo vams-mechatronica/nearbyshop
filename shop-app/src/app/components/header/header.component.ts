@@ -30,7 +30,7 @@ import { HeaderCountService } from '../../services/header.service';
   standalone: true,
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss'],
-  imports: [CommonModule, FormsModule, RouterLink, RouterLinkActive],
+  imports: [CommonModule, FormsModule, RouterLink],
 })
 export class HeaderComponent implements OnInit {
   searchQuery = '';
@@ -48,7 +48,7 @@ export class HeaderComponent implements OnInit {
     { id: 2, name: 'Delhi' },
     { id: 3, name: 'Gurgaon' },
   ];
-  sectorName: string = '';
+  sectorName: string | null=  null;
   addressRest: any;
   deliveryTime: string = '';
 
@@ -82,6 +82,8 @@ export class HeaderComponent implements OnInit {
 
     this.selectedLocation = this.storage.getItem('selected_location_id');
     this.selectedLocationName = this.storage.getItem('selected_location');
+    this.sectorName = this.storage.getItem('sector_name');
+    this.addressRest = this.storage.getItem('address_rest');
 
     this.headerService.counts$.subscribe((counts) => {
       this.cartCount = counts.cart_count;
