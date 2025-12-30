@@ -4,6 +4,11 @@
 <!-- <div *ngIf="isLoading$ | async" class="global-loader">
   <div class="spinner-border text-danger"></div>
 </div> -->
+<mat-progress-bar
+  *ngIf="isLoading$ | async"
+  mode="indeterminate"
+  class="top-loader">
+</mat-progress-bar>
 
 <!-- 🔽 This is where routed components render -->
 <div class="container my-4">

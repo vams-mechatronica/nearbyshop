@@ -5,7 +5,7 @@
     <!-- LEFT : BRAND + LOCATION -->
     <div class="header-left">
 
-      <a class="navbar-brand" routerLink="/">The<span class="brand-span">NearBy</span>Shop<span
+      <a class="navbar-brand" [routerLink]="['/']" (click)="onNavClick()">The<span class="brand-span">NearBy</span>Shop<span
         class="brand-com">.com</span></a>
 
       <div class="location-select" (click)="openLocationModal()">
@@ -70,12 +70,12 @@
     <!-- RIGHT : ACTIONS -->
     <div class="header-right">
 
-      <a class="icon-btn" routerLink="/subscribe">
+      <a class="icon-btn" [routerLink]="['/subscribe']" (click)="onNavClick()">
         <i class="fas fa-box-open"></i>
         <span class="badge" *ngIf="subscriptionCount">{{ subscriptionCount }}</span>
       </a>
 
-      <a class="icon-btn" routerLink="/cart">
+      <a class="icon-btn" [routerLink]="['/cart']" (click)="onNavClick()">
         <i class="fas fa-shopping-cart"></i>
         <span class="badge" *ngIf="cartCount">{{ cartCount }}</span>
       </a>

@@ -1,6 +1,7 @@
 import {
   Component,
   HostListener,
+  inject,
   Inject,
   OnInit,
   PLATFORM_ID,
@@ -24,6 +25,7 @@ import { HttpClient } from '@angular/common/http';
 import { API_ENDPOINTS } from '../../shared/constants/api.constants';
 import { StorageService } from '../../services/storage.service';
 import { HeaderCountService } from '../../services/header.service';
+import { LoaderService } from '../../services/loader.service';
 
 @Component({
   selector: 'app-header',
@@ -75,6 +77,11 @@ export class HeaderComponent implements OnInit {
     this.storage.setItem('selected_location_id', selectedId);
   }
 
+  loader = inject(LoaderService);
+
+  onNavClick(): void {
+    this.loader.show();
+  }
   ngOnInit(): void {
     if (this.isLoggedIn) {
       this.getUserInfo();

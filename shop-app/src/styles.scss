@@ -164,3 +164,16 @@ button.secondary:hover {
   // margin-top: 8rem !important;
   margin-bottom: 3rem !important;
 }
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+
+.top-loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10000;
+  height: 3px;
+
+  --mdc-linear-progress-active-indicator-color: var(--primary);
+}
