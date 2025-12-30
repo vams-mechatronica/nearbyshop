@@ -27,21 +27,6 @@
     </div>
   </section>
 
-  <!-- SHOP BY CATEGORY -->
-  <!-- <section class="section">
-    <div class="section-header">
-      <h2>Shop by Category</h2>
-      <span class="view-all">View all</span>
-    </div>
-
-    <div class="horizontal-scroll">
-      <div class="category-card" *ngFor="let cat of categories">
-        <img [src]="cat.image" />
-        <span>{{ cat.name }}</span>
-      </div>
-    </div>
-  </section> -->
-
   <section class="section" *ngFor="let shelf of categoryShelves; let i = index">
 
     <!-- HEADER -->
@@ -54,19 +39,67 @@
 
     <!-- PRODUCT CAROUSEL -->
     <div class="horizontal-scroll" (scroll)="onHorizontalScroll($event, shelf.categorySlug)">
+      <!-- PRODUCT CAROUSEL WRAPPER -->
+      <div class="product-carousel-wrapper">
 
-      <!-- PRODUCTS -->
-      <div class="product-card" *ngFor="let product of shelf.products">
+        <!-- PRODUCTS ROW -->
+        <div class="product-row" #carousel>
 
-        <img [src]="product.image" />
-        <div class="product-name">{{ product.name }}</div>
-        <div class="price">₹{{ product.final_price }}</div>
+          <a class="product-card" *ngFor="let product of shelf.products" >
+            <!-- IMAGE + ADD -->
+            <div class="image-wrapper">
+              <img [src]="product.image" alt="{{ product.name }}" />
+
+              <button class="add-btn" (click)="$event.preventDefault(); addToCart(product)">
+                ADD
+              </button>
+            </div>
+
+            <!-- PRICE -->
+            <div class="price-row">
+              <span class="final-price">₹{{ product.final_price }}</span>
+              <span class="mrp" *ngIf="product.discount_value">
+                ₹{{ product.price }}
+              </span>
+            </div>
+
+            <!-- DISCOUNT -->
+            <div class="discount-text" *ngIf="product.discount_value">
+              ₹{{ product.price - product.final_price }} OFF
+            </div>
+
+            <!-- NAME -->
+            <div class="product-name" [routerLink]="['/product', product.slug]">
+              {{ product.name }}
+            </div>
+
+            <!-- PACK -->
+            <div class="pack-info">
+              {{ product.unit?.code || '1 pack' }}
+            </div>
+
+            <!-- TAG -->
+            <div class="tag-chip">{{ product.vendor?.shop_name }}</div>
+
+            <!-- RATING -->
+            <div class="rating-row">
+              <span class="rating">⭐ {{ product.rating || 4.9 }}</span>
+              <span class="dot">•</span>
+              <span class="time">7 mins</span>
+            </div>
+          </a>
+
+          <!-- LOADER -->
+          <div class="product-skeleton" *ngIf="shelf.loading"></div>
+        </div>
+
+        <!-- RIGHT ARROW -->
+        <button class="carousel-arrow" (click)="scrollRight(carousel, shelf.categorySlug)">
+          ›
+        </button>
 
       </div>
 
-      <!-- LOADER -->
-      <div class="product-skeleton" *ngIf="shelf.loading">
-      </div>
 
     </div>
 

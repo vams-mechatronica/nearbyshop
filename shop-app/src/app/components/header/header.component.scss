@@ -371,16 +371,23 @@
     gap: 10px;
   }
 
-  /* BRAND */
+  //* BRAND FIX */
   .navbar-brand {
-    font-size: 1.1rem;
+    display: inline-flex;          /* keep inline */
+    align-items: center;
+    white-space: nowrap;           /* 🔴 KEY */
+    font-size: 1.05rem;
+    line-height: 1;
 
     .brand-span {
-      font-size: 1.3rem;
+      font-size: 1.25rem;
+      margin: 0 2px;
     }
 
     .brand-com {
-      display: none;
+      display: inline;             /* keep .com visible */
+      font-size: 0.95rem;
+      margin-left: 2px;
     }
   }
 

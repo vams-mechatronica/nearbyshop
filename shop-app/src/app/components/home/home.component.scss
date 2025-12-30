@@ -33,8 +33,8 @@
 .category-img {
   width: 96px;
   height: 96px;
-  background: #f6f7f8;
-  border-radius: 22px; /* Zepto uses soft large radius */
+  background: #fff;
+  border-radius: 8px; /* Zepto uses soft large radius */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -187,24 +187,135 @@
   scroll-behavior: smooth;
 }
 
+.product-carousel-wrapper {
+  position: relative;
+}
+
+.product-row {
+  display: flex;
+  gap: 14px;
+  overflow: hidden; // ❌ no scrollbar
+  scroll-behavior: smooth;
+}
+
+/* PRODUCT CARD */
 .product-card {
-  min-width: 140px;
+  min-width: 160px;
   background: #fff;
-  border-radius: 14px;
+  border-radius: 16px;
   padding: 10px;
-
-  img {
-    max-width: 110px;
-  }
+  text-decoration: none;
+  color: #000;
 }
 
-.product-name {
-  font-size: 13px;
-  font-weight: 600;
+/* IMAGE */
+.image-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
 }
 
-.price {
+.image-wrapper img {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+}
+
+/* ADD BUTTON */
+.add-btn {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  background: #fff;
+  color: #ff3366;
+  border: 1px solid #ff3366;
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* PRICE */
+.price-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-top: 6px;
+}
+
+.final-price {
+  background: #2e7d32;
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 8px;
   font-size: 13px;
+  font-weight: 700;
+}
+
+.mrp {
+  color: #777;
+  font-size: 13px;
+  text-decoration: line-through;
+}
+
+/* DISCOUNT */
+.discount-text {
+  font-size: 12px;
   color: #2e7d32;
+  margin-top: 2px;
+}
+
+/* NAME */
+.product-name {
+  font-size: 14px;
   font-weight: 600;
+  margin-top: 6px;
+  line-height: 1.2;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* PACK */
+.pack-info {
+  font-size: 12px;
+  color: #666;
+}
+
+/* TAG */
+.tag-chip {
+  display: inline-block;
+  margin-top: 6px;
+  background: #e6f4f1;
+  color: #00695c;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 8px;
+}
+
+/* RATING */
+.rating-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  font-size: 12px;
+  color: #444;
+}
+
+/* RIGHT ARROW */
+.carousel-arrow {
+  position: absolute;
+  right: -6px;
+  top: 45%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
 }

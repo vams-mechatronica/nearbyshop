@@ -17,6 +17,13 @@ import { CategoryService } from '../../services/category.service';
 import { BannerService } from '../../services/banner.service';
 import { StorageService } from '../../services/storage.service';
 import { ProductsService } from '../../services/products.service';
+import { HttpErrorResponse } from '@angular/common/http';
+import { CartService } from '../../services/cart.service';
+import { SubscriptionService } from '../../services/subscribe.service';
+import { AuthService } from '../../services/auth.service';
+import { LoaderService } from '../../services/loader.service';
+import { ToastrService } from 'ngx-toastr';
+import { HeaderCountService } from '../../services/header.service';
 
 interface CategoryShelf {
   categoryId: number;
@@ -70,8 +77,16 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     private storageService: StorageService,
     private productService: ProductsService,
     private cdr: ChangeDetectorRef,
+    private cartService: CartService,
+    private subscribeService: SubscriptionService,
+    private storage: StorageService,
+    private authService: AuthService,
+    private loaderService: LoaderService,
+    private toastr: ToastrService,
+    private headerService: HeaderCountService,
+
     @Inject(PLATFORM_ID) private platformId: Object
-  ) {}
+  ) { }
 
   // ────────────────────────────────
   // 🧩 INIT
@@ -114,7 +129,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   // ────────────────────────────────
   fetchCategories(): void {
     this.categoryService.getCategories().subscribe({
-      next: (res: any) => {this.categories = res.results || [],this.cdr.markForCheck();},
+      next: (res: any) => { this.categories = res.results || [], this.cdr.markForCheck(); },
       error: (err) => console.error('Error loading categories:', err),
     });
   }
@@ -201,10 +216,12 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     const promises = banners.map(
       (b) =>
         new Promise((resolve) => {
-          const img = new Image();
-          img.src = b.image + '?f_auto,q_auto,w_1600,h_600,c_fill';
-          img.onload = () => resolve({ ...b, cachedSrc: img.src });
-          img.onerror = () => resolve({ ...b, cachedSrc: b.image }); // fallback
+          if (isPlatformBrowser(this.platformId)) {
+            const img = new Image();
+            img.src = b.image + '?f_auto,q_auto,w_1600,h_600,c_fill';
+            img.onload = () => resolve({ ...b, cachedSrc: img.src });
+            img.onerror = () => resolve({ ...b, cachedSrc: b.image }); // fallback
+          }
         })
     );
     return Promise.all(promises);
@@ -235,9 +252,9 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     carousel.scrollBy({ left: -300, behavior: 'smooth' });
   }
 
-  scrollRight(carousel: HTMLElement): void {
-    carousel.scrollBy({ left: 300, behavior: 'smooth' });
-  }
+  // scrollRight(carousel: HTMLElement): void {
+  //   carousel.scrollBy({ left: 300, behavior: 'smooth' });
+  // }
 
   // ────────────────────────────────
   // 🧭 NAVIGATION
@@ -301,7 +318,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     this.productService.getProductsByCategorySlugPagination(categorySlug, page).subscribe(res => {
       shelf.products.push(...res.results);
       shelf.next = res?.next;
-      shelf.loading = false; 
+      shelf.loading = false;
     });
   }
 
@@ -318,6 +335,24 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
       this.loadProductsForCategory(categorySlug);
     }
   }
+  scrollRight(carousel: HTMLElement, categorySlug: string) {
+
+    carousel.scrollBy({
+      left: 300,
+      behavior: 'smooth'
+    });
+
+    const nearEnd =
+      carousel.scrollLeft + carousel.clientWidth >=
+      carousel.scrollWidth - 150;
+
+    const shelf = this.categoryShelves.find(c => c.categorySlug === categorySlug);
+
+    if (nearEnd && shelf?.next) {
+      this.loadProductsForCategory(categorySlug);
+    }
+  }
+
 
   /* STEP 5: LOAD MORE CATEGORIES ON PAGE SCROLL */
   loadNextCategoryShelf(): void {
@@ -336,5 +371,51 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
     this.loadProductsForCategory(nextCategory.id);
+  }
+
+  addToCart(product: any) {
+    // initialize cart structure if not present
+    let cart = JSON.parse(this.storage.getItem('cart') || '{"items": [], "total": 0}');
+
+    // check if product already exists
+    const existingItem = cart.items.find((item: any) => item.product.id === product.id);
+
+    if (existingItem) {
+      existingItem.quantity += 1;
+      existingItem.price = (parseFloat(product.price) * existingItem.quantity).toFixed(2);
+    } else {
+      cart.items.push({
+        id: new Date().getTime(), // temporary id for local cart
+        product: {
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          final_price: product.final_price,
+          image: product.image,
+          discount_type: product.discount_type,
+          discount_value: product.discount_value
+        },
+        quantity: 1,
+        price: product.price
+      });
+    }
+
+    // update total
+    cart.total = cart.items.reduce((sum: number, item: any) => sum + parseFloat(item.price), 0);
+
+    // save back to localStorage
+    this.storage.setItem('cart', JSON.stringify(cart));
+
+    this.toastr.success(`${product.name} added to cart`, 'Cart Updated');
+
+    product.qty = 1;
+    if (this.authService.hasToken()) {
+      this.cartService.addToCart(product).subscribe({
+        next: (res: any) => console.log('Added to cart:', res),
+        error: (err: HttpErrorResponse) => console.error('Add to cart failed:', err),
+      });
+    }
+
+    this.headerService.fetchCounts();
   }
 }
