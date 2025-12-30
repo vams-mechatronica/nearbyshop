@@ -45,7 +45,7 @@
         <!-- PRODUCTS ROW -->
         <div class="product-row" #carousel>
 
-          <a class="product-card" *ngFor="let product of shelf.products" >
+          <a class="product-card" *ngFor="let product of shelf.products">
             <!-- IMAGE + ADD -->
             <div class="image-wrapper">
               <img [src]="product.image" alt="{{ product.name }}" />
@@ -118,12 +118,33 @@
       <span class="view-all">View all</span>
     </div>
 
-    <div class="horizontal-scroll">
-      <div class="store-card" *ngFor="let store of stores">
-        <img [src]="store.shop_image" />
-        <span>{{ store.shop_name }}</span>
+    <div class="store-carousel">
+      <div class="store-row">
+        <div class="store-card" *ngFor="let store of stores" (click)="selectStore(store)">
+          <div class="store-img">
+            <img [src]="store.shop_image" alt="{{ store.shop_name }}" />
+          </div>
+
+          <div class="store-name">
+            {{ store.shop_name }}
+          </div>
+          
+          <!-- RATING ROW -->
+          <div class="vendor-rating">
+            <i class="fas fa-star"></i>
+            <span class="rating-value">{{ store.rating || 4.9 }}</span>
+            <span class="dot">•</span>
+            <span class="time">{{ store.delivery_time || '7 mins' }}</span>
+          </div>
+          
+          <!-- VENDOR CATEGORY PILL -->
+          <div class="vendor-category-pill">
+            {{ store.sub_category_name || 'Cafe' }}
+          </div>
+        </div>
       </div>
     </div>
+
   </section>
 
   <!-- PROMO BANNERS -->

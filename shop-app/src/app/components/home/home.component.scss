@@ -137,8 +137,7 @@
   overflow-x: auto;
 }
 
-.category-card,
-.store-card {
+.category-card{
   min-width: 110px;
   background: #fff;
   border-radius: 16px;
@@ -318,4 +317,102 @@
   border: none;
   font-size: 22px;
   cursor: pointer;
+}
+
+
+/* WRAPPER */
+.store-carousel {
+  margin-top: 10px;
+}
+
+/* ROW */
+.store-row {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scroll-behavior: smooth;
+
+  /* hide scrollbar */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* CARD */
+.store-card {
+  min-width: 130px;
+  cursor: pointer;
+  text-align: left;
+}
+
+/* IMAGE */
+.store-img {
+  width: 130px;
+  height: 130px;
+  background: #f7f7f7;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.store-img img {
+  width: 90%;
+  height: 90%;
+  object-fit: contain;
+  border-radius: 12px;
+}
+
+/* NAME */
+.store-name {
+  margin-top: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.25;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 2;   /* 🔴 two lines */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-align: left;
+}
+/* CATEGORY PILL */
+.vendor-category-pill {
+  display: inline-block;
+  margin-top: 6px;
+  background: #e6f4f1;
+  color: #00695c;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  align-items: left;
+}
+
+/* RATING ROW */
+.vendor-rating {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #333;
+}
+
+.vendor-rating i {
+  color: #f4b400;             /* star yellow */
+  font-size: 12px;
+}
+
+.rating-value {
+  font-weight: 400;
+}
+
+.dot {
+  font-weight: 400;
+  color: #888;
+}
+
+.time {
+  color: #555;
+  font-weight: 400;
 }

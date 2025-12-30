@@ -40,6 +40,8 @@ export class ProductsComponent implements OnInit {
   pageSize = 12;
   hasMore = true;
   isLoading = false;
+  showCategories = false;
+
 
   @ViewChild('subscribeModal') subscribeModal!: TemplateRef<any>;
   private subscribeModalRef!: NgbModalRef;

@@ -14,25 +14,41 @@
     <div class="shop-layout">
 
       <!-- CATEGORY SIDEBAR -->
-      <aside class="category-sidebar">
-        <h6 class="sidebar-title">Categories</h6>
+      <aside class="category-sidebar"
+            [class.open]="showCategories">
+
+        <!-- MOBILE HEADER -->
+        <div class="sidebar-header mobile-only">
+          <h6>Categories</h6>
+          <button class="close-btn" (click)="showCategories = false">✕</button>
+        </div>
 
         <ul class="category-list">
-          <li *ngFor="let category of categories" (click)="onCategoryChange(category.slug)"
-            [class.active]="category.slug === categoryName">
+          <li *ngFor="let category of categories"
+              (click)="onCategoryChange(category.slug); showCategories = false"
+              [class.active]="category.slug === categoryName">
             <span>{{ category.name }}</span>
             <small>{{ category.count }}</small>
           </li>
         </ul>
+
       </aside>
+
 
       <!-- PRODUCT AREA -->
       <section class="product-area" #productScroller (scroll)="onProductScroll()">
+
+        <!-- MOBILE CATEGORY TOGGLE -->
+        <button class="mobile-filter-btn" (click)="showCategories = true">
+          <i class="fas fa-list"></i>
+          Categories
+        </button>
 
         <!-- LOADER -->
         <div class="product-loader" *ngIf="isLoading">
           <div class="spinner-border text-danger"></div>
         </div>
+
 
         <!-- GRID -->
         <div class="product-grid" *ngIf="products.length; else noProducts">

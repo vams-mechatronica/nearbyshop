@@ -57,6 +57,7 @@ export class VendorProductsComponent implements OnInit {
   noStoresFound = false;
   selectedCategory: string | null = null;
   selectedStoreId: number | null = null;
+  showCategories = false;
 
 
   /* ---------------- VIEW ---------------- */
@@ -116,16 +117,10 @@ export class VendorProductsComponent implements OnInit {
     if (!this.storeSlug) return;
 
     this.shopService.getShopDetails(this.storeSlug).subscribe({
-      next: (res: any) => this.storeName = res.shop_name,
+      next: (res: any) => {this.storeName = res.shop_name, this.selectedStoreId= res.id},
       error: err => console.error(err)
     });
   }
-
-  // getStoresList(): void {
-  //   this.categoryService.getStores().subscribe({
-  //     next: (res: any) => this.stores = res.results
-  //   });
-  // }
 
   getStoresList(): void {
     const postalCode = this.storageService.getItem('postal_code');
