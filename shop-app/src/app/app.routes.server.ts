@@ -16,5 +16,8 @@ export const serverRoutes: ServerRoute[] = [
   },{
     path: 'stores/:slug',
     renderMode: RenderMode.Server
+  },{
+    path: 'category/:slug',
+    renderMode: RenderMode.Server
   }
 ];
