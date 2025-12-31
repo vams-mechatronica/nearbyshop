@@ -87,7 +87,7 @@ export class CartComponent implements OnInit {
     this.cartService.getCart().subscribe({
       next: (data) => {
         this.cartItems = data.items || data;
-        this.totaldiscount = data.total_discount;
+        this.totaldiscount = data.total_discount || 0;
         this.gTotal = data.total_price_after_discount; //? parseFloat(data.total_price_after_discount) : this.getTotal();
         this.cartId = data.id;
         this.headerService.fetchCounts();

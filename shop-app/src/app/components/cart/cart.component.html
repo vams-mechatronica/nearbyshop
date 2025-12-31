@@ -9,67 +9,69 @@
           <span class="badge">{{ cartItems.length }} items</span>
         </div>
 
-        <div class="card-body p-0">
+        <div class="card-body p-0 cart-items-wrapper">
           <ng-container *ngIf="cartItems && cartItems.length > 0; else emptyCart">
-            <ul class="list-group list-group-flush">
-              <li class="list-group-item" *ngFor="let item of cartItems">
-                <div class="row align-items-center border-bottom py-3 cart-item">
-                  <!-- Product image -->
-                  <div class="col-3 col-md-2 text-center">
-                    <img [src]="item.product.image" alt="{{ item.product.name }}" class="rounded img-fluid"
-                      style="width: 80px; height: 80px; object-fit: cover;">
-                  </div>
-
-                  <!-- Product details -->
-                  <div class="col-9 col-md-4 text-start">
-                    <h6 class="mb-1 fw-semibold">{{ item.product.name }}</h6>
-
-                    <div class="price-section mb-1">
-                      <span *ngIf="item.product.final_price < item.product.price"
-                        class="text-muted text-decoration-line-through me-2 small">
-                        ₹{{ item.product.price }}
-                      </span>
-
-                      <span class="fw-bold text-success">
-                        ₹{{ item.product.final_price }}
-                      </span>
-
-                      <span *ngIf="item.product.final_price < item.product.price" class="badge bg-danger ms-2">
-                        -{{ (((item.product.price - item.product.final_price) / item.product.price) * 100) |
-                        number:'1.0-0' }}%
-                      </span>
+            <div class="cart-items-scroll">
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item" *ngFor="let item of cartItems">
+                  <div class="row align-items-center border-bottom py-3 cart-item">
+                    <!-- Product image -->
+                    <div class="col-3 col-md-2 text-center">
+                      <img [src]="item.product.image" alt="{{ item.product.name }}" class="rounded img-fluid"
+                        style="width: 80px; height: 80px; object-fit: cover;">
                     </div>
 
-                    <small class="text-muted">{{ item.product.unit }}</small>
-                  </div>
+                    <!-- Product details -->
+                    <div class="col-9 col-md-4 text-start">
+                      <h6 class="mb-1">{{ item.product.name }}</h6>
 
-                  <!-- Controls (Quantity, Subtotal, Delete) -->
-                  <div class="col-12 col-md-6 mt-3 mt-md-0">
-                    <div class="d-flex justify-content-between align-items-center">
-                      <!-- Quantity Selector -->
-                      <div class="quantity-control">
-                        <button class="btn btn-sm btn-outline-secondary" (click)="decreaseQuantity(item)">−</button>
-                        <input type="text" [value]="item.quantity" class="form-control form-control-sm text-center"
-                          readonly>
-                        <button class="btn btn-sm btn-outline-secondary" (click)="increaseQuantity(item)">+</button>
+                      <div class="price-section mb-1">
+                        <span *ngIf="item.product.final_price < item.product.price"
+                          class="text-muted text-decoration-line-through me-2 small">
+                          ₹{{ item.product.price }}
+                        </span>
+
+                        <span class="fw-bold text-success">
+                          ₹{{ item.product.final_price }}
+                        </span>
+
+                        <span *ngIf="item.product.final_price < item.product.price" class="badge bg-success ms-2">
+                          -{{ (((item.product.price - item.product.final_price) / item.product.price) * 100) |
+                          number:'1.0-0' }}%
+                        </span>
                       </div>
 
-                      <!-- Subtotal -->
-                      <div class="fw-semibold text-success">
-                        ₹{{ item.price }}
-                      </div>
+                      <small class="text-muted">{{ item.product.unit }}</small>
+                    </div>
 
-                      <!-- Delete -->
-                      <button class="btn btn-sm btn-outline-danger" (click)="removeItem(item)">
-                        <i class="fa-solid fa-trash"></i>
-                      </button>
+                    <!-- Controls (Quantity, Subtotal, Delete) -->
+                    <div class="col-12 col-md-6 mt-3 mt-md-0">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <!-- Quantity Selector -->
+                        <div class="quantity-control">
+                          <button class="btn btn-sm btn-outline-secondary" (click)="decreaseQuantity(item)">−</button>
+                          <input type="text" [value]="item.quantity" class="form-control form-control-sm text-center"
+                            readonly>
+                          <button class="btn btn-sm btn-outline-secondary" (click)="increaseQuantity(item)">+</button>
+                        </div>
+
+                        <!-- Subtotal -->
+                        <div class="fw-semibold text-success">
+                          ₹{{ item.price }}
+                        </div>
+
+                        <!-- Delete -->
+                        <button class="btn btn-sm btn-outline-danger" (click)="removeItem(item)">
+                          <i class="fa-solid fa-trash"></i>
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
 
 
-              </li>
-            </ul>
+                </li>
+              </ul>
+            </div>
           </ng-container>
 
           <!-- Empty Cart Template -->
@@ -123,9 +125,19 @@
           </div>
           <div class="d-flex justify-content-between align-items-center mb-3">
             <span>Discount</span>
-            <span class="badge bg-danger fs-6">
-              - ₹{{ getTotalDiscount() }}
-            </span>
+            <!-- <span class="badge bg-success fs-6">
+              ₹{{ getTotalDiscount() }}
+            </span> -->
+            <ng-container *ngIf="getTotalDiscount() > 0; else noDiscount">
+              <span class="badge bg-danger fs-6">
+                ₹{{ getTotalDiscount() }}
+              </span>
+            </ng-container>
+
+            <ng-template #noDiscount>
+              <span>-</span>
+            </ng-template>
+
           </div>
 
           <hr>
