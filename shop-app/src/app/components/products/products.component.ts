@@ -58,6 +58,7 @@ export class ProductsComponent implements OnInit {
     private authService: AuthService,
     private loaderService: LoaderService,
     private toastr: ToastrService,
+    private storageService: StorageService,
     private cdr: ChangeDetectorRef,
   ) { }
 
@@ -113,50 +114,71 @@ export class ProductsComponent implements OnInit {
     });
   }
 
-  loadProducts(): void {
-    if (this.isLoading || !this.hasMore) return;
-
-    this.isLoading = true;
-    this.loaderService.show();
-
-    const request$ = this.categorySlug
-      ? this.productService.getProductsByCategorySlugPagination(
-        this.categorySlug,
-        this.currentPage,
-        this.pageSize
-      )
-      : this.productService.getProductsPaginated(
-        this.currentPage,
-        this.pageSize
-      );
-
-    request$.subscribe({
-      next: (res: any) => {
-        const results = res?.results ?? [];
-
-        if (results.length === 0) {
-          // 🔴 PERMANENT STOP
-          this.hasMore = false;
-          return;
-        } else if (res?.next === null) {
-          this.hasMore = false;
-        }
-
-        this.products = [...this.products, ...results];
-        this.currentPage++;
-      },
-
-      error: () => {
-        // stop further calls on error
-        this.hasMore = false;
-      },
-
-      complete: () => {
-        this.isLoading = false;
-        this.loaderService.hide();
-      }
-    });
+  loadProducts(reset = false): void {
+  if (reset) {
+    this.currentPage = 1;
+    this.products = [];
+    this.hasMore = true;
   }
+
+  if (this.isLoading || !this.hasMore) return;
+
+  this.isLoading = true;
+  this.loaderService.show();
+
+  const pincode = this.storageService.getItem('postal_code');
+  // console.log(pincode);
+
+  let request$;
+
+  if (this.categorySlug && pincode) {
+    request$ = this.productService.getProductsByCategorySlugPaginationPincode(
+      this.categorySlug,
+      pincode,
+      this.currentPage,
+      this.pageSize
+    );
+  } 
+  else if (this.categorySlug) {
+    request$ = this.productService.getProductsByCategorySlugPagination(
+      this.categorySlug,
+      this.currentPage,
+      this.pageSize
+    );
+  }
+  // else if (pincode) {
+  //   request$ = this.productService.getProductsByPincode(
+  //     pincode,
+  //     this.currentPage,
+  //     this.pageSize
+  //   );
+  // }
+  else {
+    request$ = this.productService.getProductsPaginated(
+      this.currentPage,
+      this.pageSize
+    );
+  }
+
+  request$.subscribe({
+    next: (res: any) => {
+      const results = res?.results ?? [];
+
+      this.products = [...this.products, ...results];
+      this.hasMore = !!res?.next;
+      this.currentPage++;
+    },
+
+    error: () => {
+      this.hasMore = false;
+    },
+
+    complete: () => {
+      this.isLoading = false;
+      this.loaderService.hide();
+    }
+  });
+}
 
 
 

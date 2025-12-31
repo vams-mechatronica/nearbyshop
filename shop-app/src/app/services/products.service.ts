@@ -40,6 +40,19 @@ export class ProductsService {
 
     return this.http.get<PaginatedResponse<Product>>(API_ENDPOINTS.PRODUCTS, { params });
   }
+  getProductsByCategorySlugPaginationPincode(
+    slug: string,pincode: string,
+    page: number,
+    pageSize: number = 12
+  ) {
+    const params = new HttpParams()
+      .set('category__slug', slug)
+      .set('vendor__shop_location__pincode', pincode)
+      .set('page', page.toString())
+      .set('page_size', pageSize.toString());
+
+    return this.http.get<PaginatedResponse<Product>>(API_ENDPOINTS.PRODUCTS, { params });
+  }
 
   getProductsByStoreSlug(slug: string): Observable<any> {
     // const params = new HttpParams().set('store__slug', slug);
