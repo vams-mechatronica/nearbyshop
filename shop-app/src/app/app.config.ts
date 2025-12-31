@@ -7,12 +7,13 @@ import { provideRouter } from '@angular/router';
 import { provideToastr } from 'ngx-toastr';
 import { routes } from './app.routes';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { NoCacheInterceptor } from './interceptors/no-cache.interceptors';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }), 
     provideRouter(routes), 
     provideClientHydration(withEventReplay()),
-    provideHttpClient(withFetch(),withInterceptors([AuthInterceptor])),
+    provideHttpClient(withFetch(),withInterceptors([AuthInterceptor,NoCacheInterceptor])),
     provideAnimations(),
     importProvidersFrom(MatProgressBarModule),
     provideToastr({
