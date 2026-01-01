@@ -19,6 +19,7 @@ import { LoaderService } from '../../services/loader.service';
 import { HeaderCountService } from '../../services/header.service';
 import { forkJoin } from 'rxjs';
 import { CartFullResponse } from '../../models/cart.model';
+import { environment } from '../../../environments/environment';
 
 declare var Razorpay: any;
 
@@ -155,6 +156,99 @@ export class CartComponent implements OnInit {
   // ========== ADDRESS MANAGEMENT ==========
   openAddressModal() { this.showAddressModal = true; }
   closeAddressModal() { this.showAddressModal = false; }
+
+  useCurrentLocation(): void {
+
+    if (!navigator.geolocation) {
+      this.toastrService.error('Geolocation not supported');
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+
+        const apiKey = environment.googleMapsApiKey;
+        const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`;
+
+        try {
+          const response = await fetch(url);
+          const data = await response.json();
+
+          if (data.status !== 'OK' || !data.results.length) {
+            throw new Error('No address found');
+          }
+
+          const result = data.results[0];
+
+          let street = '';
+          let city = '';
+          let state = '';
+          let zip = '';
+
+          result.address_components.forEach((component: any) => {
+            const types = component.types;
+
+            if (types.includes('street_number')) {
+              street = component.long_name + ' ' + street;
+            }
+
+            if (types.includes('route')) {
+              street += component.long_name;
+            }
+
+            if (types.includes('locality')) {
+              city = component.long_name;
+            }
+
+            if (types.includes('administrative_area_level_1')) {
+              state = component.long_name;
+            }
+
+            if (types.includes('postal_code')) {
+              zip = component.long_name;
+            }
+          });
+
+          // ✅ Autofill form
+          this.newAddress.address = street || result.formatted_address;
+          this.newAddress.city = city;
+          this.newAddress.state = state;
+          this.newAddress.zip = zip;
+
+          this.toastrService.success(
+            'Location fetched successfully',
+            'Address Auto-filled'
+          );
+
+          // Optional: auto-check delivery
+          if (zip) {
+            this.checkDelivery();
+          }
+
+        } catch (err) {
+          console.error(err);
+          this.toastrService.error(
+            'Unable to fetch address from location',
+            'Error'
+          );
+        }
+      },
+      (error) => {
+        console.error(error);
+        this.toastrService.error(
+          'Location permission denied',
+          'Error'
+        );
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000
+      }
+    );
+  }
+
 
   loadAddresses() {
     if (!isPlatformBrowser(this.platformId)) return;

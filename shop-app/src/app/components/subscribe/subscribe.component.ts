@@ -12,6 +12,8 @@ import { Subscription } from '../../models/subscribe.model';
 import { InitiatePayment } from '../../models/payment.model';
 import { SubFilterPipe } from '../../shared/utility/subfilter.pipe';
 import { StorageService } from '../../services/storage.service';
+import { AuthService } from '../../services/auth.service';
+import { AuthModalService } from '../../services/auth-modal.service';
 
 declare var Razorpay: any;
 
@@ -49,8 +51,10 @@ export class SubscriptionsComponent implements OnInit {
     private paymentService: PaymentService,
     private toast: ToastrService,
     private storage: StorageService,
-    private modalService: NgbModal
-  ) {}
+    private modalService: NgbModal,
+    private authService: AuthService,
+    private authModal: AuthModalService
+  ) { }
 
   ngOnInit(): void {
     this.loadSubscriptions();
@@ -119,10 +123,26 @@ export class SubscriptionsComponent implements OnInit {
   }
 
   // -------- Subscription Edit ----------
-  openSubscribeModal(sub: Subscription, modalTemplate: TemplateRef<any>) {
+  openSubscribeModal(
+    sub: Subscription,
+    modalTemplate: TemplateRef<any>
+  ): void {
+
+    // 🔐 Force login before managing subscription
+    if (!this.authService.isLoggedIn()) {
+      // optional: remember intent
+      localStorage.setItem('redirect_url', '/subscribe');
+
+      // open login modal
+      this.authModal.openLogin();
+      return;
+    }
+
+    // ✅ User is logged in → open subscription modal
     this.selectedSubscription = { ...sub };
     this.subscriptionPlan = sub.frequency || 'daily';
-    this.startDate = sub.start_date || new Date().toISOString().split('T')[0];
+    this.startDate =
+      sub.start_date || new Date().toISOString().split('T')[0];
     this.subscriptionStatus = sub.status || 'active';
 
     this.modalRef = this.modalService.open(modalTemplate, {
@@ -131,6 +151,7 @@ export class SubscriptionsComponent implements OnInit {
       backdrop: 'static'
     });
   }
+
 
   increaseQty() {
     if (this.selectedSubscription) this.selectedSubscription.quantity++;
@@ -174,7 +195,7 @@ export class SubscriptionsComponent implements OnInit {
     });
   }
 
-  activateSubscription(sub: Subscription){
+  activateSubscription(sub: Subscription) {
     this.subscriptionService.pauseSubscription(sub.id, 'active').subscribe({
       next: () => {
         this.toast.success('Subscription activated successfully', 'Subscription Activate');

@@ -50,7 +50,7 @@ export class HeaderComponent implements OnInit {
     { id: 2, name: 'Delhi' },
     { id: 3, name: 'Gurgaon' },
   ];
-  sectorName: string | null=  null;
+  sectorName: string | null = null;
   addressRest: any;
   deliveryTime: string = '';
 
@@ -62,7 +62,7 @@ export class HeaderComponent implements OnInit {
     private http: HttpClient, // for search API calls
     private headerService: HeaderCountService,
     @Inject(PLATFORM_ID) private platformId: Object
-  ) {}
+  ) { }
 
   get isLoggedIn(): boolean {
     if (isPlatformBrowser(this.platformId)) {
@@ -124,6 +124,7 @@ export class HeaderComponent implements OnInit {
     this.userService.getUserInfo().subscribe({
       next: (res) => {
         this.userName = res.username;
+        // this.showProfileDropdown = true;
       },
       error: (err) => console.error(err),
     });
@@ -160,11 +161,14 @@ export class HeaderComponent implements OnInit {
     this.searchQuery = '';
   }
 
-  toggleProfileDropdown(): void {
+  toggleProfileDropdown(event: Event): void {
+    event.stopPropagation();
     this.showProfileDropdown = !this.showProfileDropdown;
   }
 
+
   userProfile(): void {
+    this.showProfileDropdown = false;
     this.router.navigate(['/profile']);
   }
 
@@ -177,10 +181,11 @@ export class HeaderComponent implements OnInit {
   @HostListener('document:click', ['$event'])
   onClickOutside(event: Event): void {
     const target = event.target as HTMLElement;
-    if (!target.closest('.profile-nav') && this.showProfileDropdown) {
+    if (!target.closest('.profile-nav')) {
       this.showProfileDropdown = false;
     }
   }
+
 
   // ✅ Open Location Modal
   openLocationModal(): void {
@@ -253,91 +258,91 @@ export class HeaderComponent implements OnInit {
   // }
 
   useCurrentLocation(modal: any): void {
-  if (!navigator.geolocation) {
-    alert('Geolocation is not supported on this browser.');
-    return;
-  }
-
-  navigator.geolocation.getCurrentPosition(
-    async (pos) => {
-      const lat = pos.coords.latitude;
-      const lng = pos.coords.longitude;
-
-      const apiKey = 'AIzaSyC6k0JqOh3qzhxjiWO-ua0uRYLuR7KBzRI';
-      const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`;
-
-      try {
-        const response = await fetch(geocodeUrl);
-        const data = await response.json();
-
-        if (data.status !== 'OK' || !data.results.length) {
-          throw new Error('No address found');
-        }
-
-        const result = data.results[0];
-
-        let postalCode = '';
-        let locality = '';
-        let sector = '';
-        let formattedAddress = result.formatted_address;
-
-        result.address_components.forEach((component: any) => {
-          if (component.types.includes('postal_code')) {
-            postalCode = component.long_name;
-          }
-
-          if (
-            component.types.includes('sublocality_level_1') ||
-            component.types.includes('sublocality')
-          ) {
-            sector = component.long_name; // Sector 74
-          }
-
-          if (component.types.includes('locality')) {
-            locality = component.long_name;
-          }
-        });
-
-        // 🔹 Fallback if sector not found
-        if (!sector && locality) {
-          sector = locality;
-        }
-
-        // 🔹 Prepare address rest (remove sector)
-        const addressRest = formattedAddress
-          .replace(sector, '')
-          .replace(/^,/, '')
-          .trim();
-
-        // ✅ STORE RAW DATA
-        this.storage.setItem('selected_location', formattedAddress);
-        this.storage.setItem('sector_name', sector);
-        this.storage.setItem('address_rest', addressRest);
-        this.storage.setItem('latitude', lat.toString());
-        this.storage.setItem('longitude', lng.toString());
-        this.storage.setItem('postal_code', postalCode);
-        this.storage.setItem('locality', locality);
-        this.storage.setItem('selected_location_id', 'current');
-
-        // ✅ UPDATE HEADER (NO RELOAD)
-        this.selectedLocationName = formattedAddress;
-        this.sectorName = sector;
-        this.addressRest = addressRest;
-        this.deliveryTime = '6 minutes'; // static or from API later
-
-        modal.close();
-      } catch (err) {
-        console.error('Location error:', err);
-        alert('Unable to fetch location details.');
-        modal.close();
-      }
-    },
-    (error) => {
-      console.error('Geolocation error:', error);
-      alert('Unable to retrieve your location.');
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported on this browser.');
+      return;
     }
-  );
-}
+
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+
+        const apiKey = 'AIzaSyC6k0JqOh3qzhxjiWO-ua0uRYLuR7KBzRI';
+        const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`;
+
+        try {
+          const response = await fetch(geocodeUrl);
+          const data = await response.json();
+
+          if (data.status !== 'OK' || !data.results.length) {
+            throw new Error('No address found');
+          }
+
+          const result = data.results[0];
+
+          let postalCode = '';
+          let locality = '';
+          let sector = '';
+          let formattedAddress = result.formatted_address;
+
+          result.address_components.forEach((component: any) => {
+            if (component.types.includes('postal_code')) {
+              postalCode = component.long_name;
+            }
+
+            if (
+              component.types.includes('sublocality_level_1') ||
+              component.types.includes('sublocality')
+            ) {
+              sector = component.long_name; // Sector 74
+            }
+
+            if (component.types.includes('locality')) {
+              locality = component.long_name;
+            }
+          });
+
+          // 🔹 Fallback if sector not found
+          if (!sector && locality) {
+            sector = locality;
+          }
+
+          // 🔹 Prepare address rest (remove sector)
+          const addressRest = formattedAddress
+            .replace(sector, '')
+            .replace(/^,/, '')
+            .trim();
+
+          // ✅ STORE RAW DATA
+          this.storage.setItem('selected_location', formattedAddress);
+          this.storage.setItem('sector_name', sector);
+          this.storage.setItem('address_rest', addressRest);
+          this.storage.setItem('latitude', lat.toString());
+          this.storage.setItem('longitude', lng.toString());
+          this.storage.setItem('postal_code', postalCode);
+          this.storage.setItem('locality', locality);
+          this.storage.setItem('selected_location_id', 'current');
+
+          // ✅ UPDATE HEADER (NO RELOAD)
+          this.selectedLocationName = formattedAddress;
+          this.sectorName = sector;
+          this.addressRest = addressRest;
+          this.deliveryTime = '6 minutes'; // static or from API later
+
+          modal.close();
+        } catch (err) {
+          console.error('Location error:', err);
+          alert('Unable to fetch location details.');
+          modal.close();
+        }
+      },
+      (error) => {
+        console.error('Geolocation error:', error);
+        alert('Unable to retrieve your location.');
+      }
+    );
+  }
 
 
   // reference to modal template

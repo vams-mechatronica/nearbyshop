@@ -226,3 +226,82 @@
   width: 100%;
   background: linear-gradient(transparent, white);
 }
+
+/* Modal Backdrop */
+.address-modal {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+/* Modal Shape */
+.address-content {
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+/* Header */
+.address-header {
+  border-bottom: none;
+  padding: 16px;
+}
+
+/* Body */
+.address-body {
+  padding: 16px;
+}
+
+/* Section titles */
+.section-title {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+/* Location Button */
+.btn-location {
+  border: 1px dashed #0d6efd;
+  color: #0d6efd;
+  background: #f5f9ff;
+  font-weight: 500;
+}
+
+/* Address Cards */
+.address-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+.address-card.active {
+  border-color: #0d6efd;
+  background: #f5f9ff;
+}
+
+.address-card p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #555;
+}
+
+/* Footer */
+.address-footer {
+  padding: 12px;
+  border-top: none;
+}
+
+/* MOBILE BOTTOM SHEET */
+@media (max-width: 768px) {
+  .address-dialog {
+    position: fixed;
+    bottom: 0;
+    margin: 0;
+    width: 100%;
+  }
+
+  .address-content {
+    border-radius: 16px 16px 0 0;
+  }
+}

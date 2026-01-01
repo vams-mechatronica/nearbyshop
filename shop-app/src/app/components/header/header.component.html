@@ -5,8 +5,8 @@
     <!-- LEFT : BRAND + LOCATION -->
     <div class="header-left">
 
-      <a class="navbar-brand" [routerLink]="['/']" (click)="onNavClick()">The<span class="brand-span">NearBy</span>Shop<span
-        class="brand-com">.com</span></a>
+      <a class="navbar-brand" [routerLink]="['/']" (click)="onNavClick()">The<span
+          class="brand-span">NearBy</span>Shop<span class="brand-com">.com</span></a>
 
       <div class="location-select" (click)="openLocationModal()">
 
@@ -86,17 +86,16 @@
       </button>
 
       <!-- PROFILE -->
-      <div class="profile" *ngIf="isLoggedIn" (click)="toggleProfileDropdown()">
-
+      <div class="profile profile-nav" *ngIf="isLoggedIn" (click)="toggleProfileDropdown($event)">
         <i class="fas fa-user-circle"></i>
 
-        <div class="profile-dropdown" *ngIf="showProfileDropdown">
+        <div class="profile-dropdown" *ngIf="showProfileDropdown" (click)="$event.stopPropagation()">
           <div class="user-name">{{ userName }}</div>
           <a (click)="userProfile()">Profile</a>
           <a class="logout" (click)="logout()">Logout</a>
         </div>
-
       </div>
+
 
     </div>
 

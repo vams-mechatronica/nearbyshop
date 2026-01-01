@@ -16,6 +16,7 @@ import { HeaderCountService } from '../../services/header.service';
 import { LoaderService } from '../../services/loader.service';
 import { HostListener } from '@angular/core';
 import { ChangeDetectorRef } from '@angular/core';
+import { AuthModalService } from '../../services/auth-modal.service';
 
 @Component({
   standalone: true,
@@ -60,6 +61,7 @@ export class ProductsComponent implements OnInit {
     private toastr: ToastrService,
     private storageService: StorageService,
     private cdr: ChangeDetectorRef,
+    private authModal: AuthModalService,
   ) { }
 
   @ViewChild('productScroller', { static: true })
@@ -115,126 +117,129 @@ export class ProductsComponent implements OnInit {
   }
 
   loadProducts(reset = false): void {
-  if (reset) {
-    this.currentPage = 1;
-    this.products = [];
-    this.hasMore = true;
-  }
-
-  if (this.isLoading || !this.hasMore) return;
-
-  this.isLoading = true;
-  this.loaderService.show();
-
-  const pincode = this.storageService.getItem('postal_code');
-  // console.log(pincode);
-
-  let request$;
-
-  if (this.categorySlug && pincode) {
-    request$ = this.productService.getProductsByCategorySlugPaginationPincode(
-      this.categorySlug,
-      pincode,
-      this.currentPage,
-      this.pageSize
-    );
-  } 
-  else if (this.categorySlug) {
-    request$ = this.productService.getProductsByCategorySlugPagination(
-      this.categorySlug,
-      this.currentPage,
-      this.pageSize
-    );
-  }
-  // else if (pincode) {
-  //   request$ = this.productService.getProductsByPincode(
-  //     pincode,
-  //     this.currentPage,
-  //     this.pageSize
-  //   );
-  // }
-  else {
-    request$ = this.productService.getProductsPaginated(
-      this.currentPage,
-      this.pageSize
-    );
-  }
-
-  request$.subscribe({
-    next: (res: any) => {
-      const results = res?.results ?? [];
-
-      this.products = [...this.products, ...results];
-      this.hasMore = !!res?.next;
-      this.currentPage++;
-    },
-
-    error: () => {
-      this.hasMore = false;
-    },
-
-    complete: () => {
-      this.isLoading = false;
-      this.loaderService.hide();
+    if (reset) {
+      this.currentPage = 1;
+      this.products = [];
+      this.hasMore = true;
     }
+
+    if (this.isLoading || !this.hasMore) return;
+
+    this.isLoading = true;
+    this.loaderService.show();
+
+    const pincode = this.storageService.getItem('postal_code');
+    // console.log(pincode);
+
+    let request$;
+
+    if (this.categorySlug && pincode) {
+      request$ = this.productService.getProductsByCategorySlugPaginationPincode(
+        this.categorySlug,
+        pincode,
+        this.currentPage,
+        this.pageSize
+      );
+    }
+    else if (this.categorySlug) {
+      request$ = this.productService.getProductsByCategorySlugPagination(
+        this.categorySlug,
+        this.currentPage,
+        this.pageSize
+      );
+    }
+    // else if (pincode) {
+    //   request$ = this.productService.getProductsByPincode(
+    //     pincode,
+    //     this.currentPage,
+    //     this.pageSize
+    //   );
+    // }
+    else {
+      request$ = this.productService.getProductsPaginated(
+        this.currentPage,
+        this.pageSize
+      );
+    }
+
+    request$.subscribe({
+      next: (res: any) => {
+        const results = res?.results ?? [];
+
+        this.products = [...this.products, ...results];
+        this.hasMore = !!res?.next;
+        this.currentPage++;
+      },
+
+      error: () => {
+        this.hasMore = false;
+      },
+
+      complete: () => {
+        this.isLoading = false;
+        this.loaderService.hide();
+      }
+    });
+  }
+
+
+
+  addToCart(product: any): void {
+
+    // 🔐 Force login
+    if (!this.authService.isLoggedIn()) {
+      localStorage.setItem('redirect_url', '/cart');
+      this.authModal.openLogin();
+      return;
+    }
+
+    const body = {
+      product_id: product.id,
+      quantity: 1
+    };
+
+    this.cartService.addToCart(body).subscribe({
+      next: (res) => {
+        this.toastr.success(
+          `${product.name} added to cart`,
+          'Cart Updated'
+        );
+
+        // 🔄 Refresh header/cart counts
+        this.headerService.fetchCounts();
+      },
+      error: (err) => {
+        console.error('Add to cart failed', err);
+        this.toastr.error(
+          'Unable to add product to cart',
+          'Error'
+        );
+      }
+    });
+  }
+
+
+  openSubscribeModal(product: any): void {
+
+  // 🔐 Force login before subscription
+  if (!this.authService.isLoggedIn()) {
+    // save intent (optional but recommended)
+    localStorage.setItem('redirect_url', '/subscribe');
+
+    // open login modal
+    this.authModal.openLogin();
+    return;
+  }
+
+  // ✅ user is logged in → open subscribe modal
+  this.selectedProduct = { ...product, qty: product.qty || 1 };
+
+  this.subscribeModalRef = this.modal.open(this.subscribeModal, {
+    centered: true,
+    backdrop: 'static',
   });
 }
 
-
-
-  addToCart(product: any) {
-    // initialize cart structure if not present
-    let cart = JSON.parse(this.storage.getItem('cart') || '{"items": [], "total": 0}');
-
-    // check if product already exists
-    const existingItem = cart.items.find((item: any) => item.product.id === product.id);
-
-    if (existingItem) {
-      existingItem.quantity += 1;
-      existingItem.price = (parseFloat(product.price) * existingItem.quantity).toFixed(2);
-    } else {
-      cart.items.push({
-        id: new Date().getTime(), // temporary id for local cart
-        product: {
-          id: product.id,
-          name: product.name,
-          price: product.price,
-          final_price: product.final_price,
-          image: product.image,
-          discount_type: product.discount_type,
-          discount_value: product.discount_value
-        },
-        quantity: 1,
-        price: product.price
-      });
-    }
-
-    // update total
-    cart.total = cart.items.reduce((sum: number, item: any) => sum + parseFloat(item.price), 0);
-
-    // save back to localStorage
-    this.storage.setItem('cart', JSON.stringify(cart));
-
-    this.toastr.success(`${product.name} added to cart`, 'Cart Updated');
-
-    product.qty = 1;
-    if (this.authService.hasToken()) {
-      this.cartService.addToCart(product).subscribe({
-        next: (res: any) => console.log('Added to cart:', res),
-        error: (err: HttpErrorResponse) => console.error('Add to cart failed:', err),
-      });
-    }
-
-    this.headerService.fetchCounts();
-  }
-
-  openSubscribeModal(product: any) {
-    this.selectedProduct = { ...product, qty: product.qty || 1 };
-    this.subscribeModalRef = this.modal.open(this.subscribeModal, {
-      centered: true,
-      backdrop: 'static',
-    });
-  }
 
   confirmSubscription() {
     if (!this.selectedProduct) return;

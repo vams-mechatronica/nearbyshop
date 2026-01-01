@@ -25,7 +25,7 @@ export class AuthComponent implements OnInit {
   phone: string = '';
   otp: string = '';
   showOtpInput = false;
-  redirectTo: string |null= null;
+  redirectTo: string | null = null;
   isSendingOtp = false;
 
   constructor(
@@ -33,14 +33,14 @@ export class AuthComponent implements OnInit {
     private authService: AuthService,
     private router: Router,
     public activeModal: NgbActiveModal,
-    private loaderService:LoaderService,
-    private locationService:LocationService,
+    private loaderService: LoaderService,
+    private locationService: LocationService,
     private toastrService: ToastrService,
     private storage: StorageService
   ) { }
 
   ngOnInit(): void {
-    this.redirectTo = this.route.snapshot.queryParamMap.get('redirectTo');
+    // this.redirectTo = this.route.snapshot.queryParamMap.get('redirectTo');
   }
 
   sendOtp() {
@@ -86,12 +86,12 @@ export class AuthComponent implements OnInit {
   }
 
   onOtpBackspace(event: any, index: number) {
-  const input = event.target as HTMLInputElement;
-  if (!input.value && index > 0 && event.key === 'Backspace') {
-    const prev = input.previousElementSibling as HTMLInputElement;
-    prev?.focus();
+    const input = event.target as HTMLInputElement;
+    if (!input.value && index > 0 && event.key === 'Backspace') {
+      const prev = input.previousElementSibling as HTMLInputElement;
+      prev?.focus();
+    }
   }
-}
 
 
   emitOtp() {
@@ -110,23 +110,34 @@ export class AuthComponent implements OnInit {
           this.storage.setItem('phone', this.phone);
         }
 
-        // ✅ Close the modal after login
-        this.activeModal.close('logged-in');
-        
-        this.toastrService.success('User logged in successfully','Login Success');
+        // ✅ Location validation
         this.onLoginSuccess();
-        // ✅ Redirect only if redirectTo is provided
-        if (this.redirectTo) {
-          this.router.navigateByUrl(this.redirectTo);
+
+        // ✅ Close modal
+        this.activeModal.close('logged-in');
+
+        // ✅ Redirect if needed
+        const redirectUrl = localStorage.getItem('redirect_url');
+        if (redirectUrl) {
+          localStorage.removeItem('redirect_url');
+          this.router.navigateByUrl(redirectUrl);
         }
 
+        this.toastrService.success(
+          'User logged in successfully',
+          'Login Success'
+        );
       },
-      error: (err) => {
-        this.toastrService.error('Please try again', 'OTP verification failed');
-      },
+      error: () => {
+        this.toastrService.error(
+          'Please try again',
+          'OTP verification failed'
+        );
+      }
     });
   }
-  onLoginSuccess(){
+
+  onLoginSuccess() {
     this.locationService.getAndValidateLocation().subscribe({
       next: (data) => {
         if (data) {

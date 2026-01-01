@@ -12,21 +12,27 @@ import { PolicyComponent } from './pages/policy/policy.component';
 import { ContactUsComponent } from './pages/contact-us/contact-us.component';
 import { ProductDetailComponent } from './pages/product-detail/product-detail.component';
 import { VendorProductsComponent } from './components/vendor-products/vendor-products.component';
+import { AuthGuard } from './core/gaurds/auth.gaurd';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
+
+  // 🔐 Auth (optional page route)
   { path: 'auth', component: AuthComponent },
-  { path: 'cart', component: CartComponent },
-  { path: 'category/:slug', component: ProductsComponent},
-  { path: 'products/:slug', component: ProductsComponent},
+
+  // 🔐 PROTECTED ROUTES
+  { path: 'cart', component: CartComponent, canActivate: [AuthGuard] },
+  { path: 'subscribe', component: SubscriptionsComponent, canActivate: [AuthGuard] },
+  { path: 'profile', component: UserProfileComponent, canActivate: [AuthGuard] },
+  { path: 'payment-status', component: PaymentStatusComponent, canActivate: [AuthGuard] },
+  { path: 'order-summary/:orderId', component: OrderSummaryComponent, canActivate: [AuthGuard] },
+
+  // 🌍 PUBLIC ROUTES
+  { path: 'category/:slug', component: ProductsComponent },
+  { path: 'products/:slug', component: ProductsComponent },
   { path: 'product/:slug', component: ProductDetailComponent },
   { path: 'stores/:slug', component: VendorProductsComponent },
-  { path: 'subscribe', component: SubscriptionsComponent },
-  { path: 'profile', component: UserProfileComponent },
-  { path: 'payment-status', component: PaymentStatusComponent },
-  { path: 'order-summary/:orderId', component: OrderSummaryComponent },
   { path: 'about-us', component: AboutUsComponent },
   { path: 'policy', component: PolicyComponent },
   { path: 'contact-us', component: ContactUsComponent }
 ];
-

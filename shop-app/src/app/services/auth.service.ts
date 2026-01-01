@@ -10,7 +10,7 @@ export class AuthService {
   constructor(
     private http: HttpClient,
     private storage: StorageService,
-    private headerService: HeaderCountService) {}
+    private headerService: HeaderCountService) { }
 
   sendLoginOtp(phone: string) {
     return this.http.post(API_ENDPOINTS.GET_LOGIN_OTP, {
@@ -54,19 +54,28 @@ export class AuthService {
   }
 
   // ✅ If backend supports refresh
- refreshToken() {
-  const refresh = this.storage.getItem('refresh_token');
-  // you could also check here
-  if (!refresh) {
-    return throwError(() => new Error('No refresh token'));
+  refreshToken() {
+    const refresh = this.storage.getItem('refresh_token');
+    // you could also check here
+    if (!refresh) {
+      return throwError(() => new Error('No refresh token'));
+    }
+    return this.http.post(API_ENDPOINTS.REFRESH_TOKEN, { refresh });
   }
-  return this.http.post(API_ENDPOINTS.REFRESH_TOKEN, { refresh });
-}
 
 
   logout() {
     this.clearTokens();
-    this.headerService.updateCountsManually({cart_count:0, subscription_count:0});
-    // optionally redirect to login
+    localStorage.removeItem('redirect_url');
+    this.headerService.updateCountsManually({
+      cart_count: 0,
+      subscription_count: 0
+    });
   }
+
+
+  isLoggedIn(): boolean {
+    return this.hasToken();
+  }
+
 }

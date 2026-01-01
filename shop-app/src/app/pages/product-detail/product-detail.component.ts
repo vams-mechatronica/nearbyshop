@@ -8,6 +8,8 @@ import { ToastrService } from 'ngx-toastr';
 import { SubscriptionService } from '../../services/subscribe.service';
 import { CartService } from '../../services/cart.service';
 import { FormsModule } from '@angular/forms';
+import { AuthModalService } from '../../services/auth-modal.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-product-detail',
@@ -39,8 +41,10 @@ export class ProductDetailComponent {
     private toastr: ToastrService,
     private modal: NgbModal,
     private subscribeService: SubscriptionService,
-    private cartService: CartService
-  ) {}
+    private cartService: CartService,
+    private authModal: AuthModalService,
+    private authService: AuthService,
+  ) { }
 
   ngOnInit(): void {
     // Subscribe to route params changes
@@ -98,13 +102,27 @@ export class ProductDetailComponent {
     this.productComp.addToCart(product);
   }
 
-  openSubscribeModal(product: any) {
+  openSubscribeModal(product: any): void {
+
+    // 🔐 Force login before subscription
+    if (!this.authService.isLoggedIn()) {
+      // save intent (optional but recommended)
+      localStorage.setItem('redirect_url', '/subscribe');
+
+      // open login modal
+      this.authModal.openLogin();
+      return;
+    }
+
+    // ✅ user is logged in → open subscribe modal
     this.selectedProduct = { ...product, qty: product.qty || 1 };
+
     this.subscribeModalRef = this.modal.open(this.subscribeModal, {
       centered: true,
       backdrop: 'static',
     });
   }
+
 
   confirmSubscription() {
     if (!this.selectedProduct) return;
@@ -122,7 +140,7 @@ export class ProductDetailComponent {
           this.subscribeModalRef?.close();
         },
         error: (err) => {
-          this.toastr.error(err.error.message,'Subscription Failed');
+          this.toastr.error(err.error.message, 'Subscription Failed');
         },
       });
   }

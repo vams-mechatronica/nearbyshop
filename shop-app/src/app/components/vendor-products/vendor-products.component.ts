@@ -22,6 +22,7 @@ import { HeaderCountService } from '../../services/header.service';
 import { LoaderService } from '../../services/loader.service';
 import { ShopService } from '../../services/shop.service';
 import { HttpErrorResponse } from '@angular/common/http';
+import { AuthModalService } from '../../services/auth-modal.service';
 
 @Component({
   standalone: true,
@@ -89,7 +90,8 @@ export class VendorProductsComponent implements OnInit {
     private shopService: ShopService,
     private storageService: StorageService,
     private toastr: ToastrService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private authModal: AuthModalService,
   ) { }
 
   /* ---------------- INIT ---------------- */
@@ -117,7 +119,7 @@ export class VendorProductsComponent implements OnInit {
     if (!this.storeSlug) return;
 
     this.shopService.getShopDetails(this.storeSlug).subscribe({
-      next: (res: any) => {this.storeName = res.shop_name, this.selectedStoreId= res.id},
+      next: (res: any) => { this.storeName = res.shop_name, this.selectedStoreId = res.id },
       error: err => console.error(err)
     });
   }
@@ -294,54 +296,62 @@ export class VendorProductsComponent implements OnInit {
   /* ---------------- CART ---------------- */
 
   addToCart(product: any): void {
-    let cart = JSON.parse(
-      this.storage.getItem('cart') || '{"items": [], "total": 0}'
-    );
 
-    const existing = cart.items.find(
-      (item: any) => item.product.id === product.id
-    );
-
-    if (existing) {
-      existing.quantity += 1;
-      existing.price = (
-        parseFloat(product.price) * existing.quantity
-      ).toFixed(2);
-    } else {
-      cart.items.push({
-        id: Date.now(),
-        product,
-        quantity: 1,
-        price: product.price
-      });
+    // 🔐 Force login before cart action
+    if (!this.authService.isLoggedIn()) {
+      localStorage.setItem('redirect_url', '/cart');
+      this.authModal.openLogin();
+      return;
     }
 
-    cart.total = cart.items.reduce(
-      (sum: number, item: any) => sum + parseFloat(item.price),
-      0
-    );
+    const payload = {
+      product_id: product.id,
+      quantity: 1
+    };
 
-    this.storage.setItem('cart', JSON.stringify(cart));
-    this.toastr.success(`${product.name} added to cart`);
-    product.qty = 1;
-    if (this.authService.hasToken()) {
-      this.cartService.addToCart(product).subscribe({
-        next: (res: any) => console.log('Added to cart:', res),
-        error: (err: HttpErrorResponse) => console.error('Add to cart failed:', err),
-      });
-    }
-    this.headerService.fetchCounts();
+    this.cartService.addToCart(payload).subscribe({
+      next: () => {
+        this.toastr.success(
+          `${product.name} added to cart`,
+          'Cart Updated'
+        );
+
+        // 🔄 Sync header cart count
+        this.headerService.fetchCounts();
+      },
+      error: (err) => {
+        console.error('Add to cart failed:', err);
+        this.toastr.error(
+          'Unable to add product to cart',
+          'Error'
+        );
+      }
+    });
   }
 
   /* ---------------- SUBSCRIPTION ---------------- */
 
   openSubscribeModal(product: any): void {
-    this.selectedProduct = product;
-    this.subscribeModalRef = this.modal.open(this.subscribeModal, {
-      centered: true,
-      backdrop: 'static'
-    });
+
+  // 🔐 Force login before subscription
+  if (!this.authService.isLoggedIn()) {
+    // save intent (optional but recommended)
+    localStorage.setItem('redirect_url', '/subscribe');
+
+    // open login modal
+    this.authModal.openLogin();
+    return;
   }
+
+  // ✅ user is logged in → open subscribe modal
+  this.selectedProduct = { ...product, qty: product.qty || 1 };
+
+  this.subscribeModalRef = this.modal.open(this.subscribeModal, {
+    centered: true,
+    backdrop: 'static',
+  });
+}
+
 
   confirmSubscription(): void {
     if (!this.selectedProduct) return;

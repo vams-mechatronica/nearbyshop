@@ -24,6 +24,7 @@ import { AuthService } from '../../services/auth.service';
 import { LoaderService } from '../../services/loader.service';
 import { ToastrService } from 'ngx-toastr';
 import { HeaderCountService } from '../../services/header.service';
+import { AuthModalService } from '../../services/auth-modal.service';
 
 interface CategoryShelf {
   categoryId: number;
@@ -84,6 +85,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     private loaderService: LoaderService,
     private toastr: ToastrService,
     private headerService: HeaderCountService,
+    private authModal: AuthModalService,
 
     @Inject(PLATFORM_ID) private platformId: Object
   ) { }
@@ -373,49 +375,38 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     this.loadProductsForCategory(nextCategory.id);
   }
 
-  addToCart(product: any) {
-    // initialize cart structure if not present
-    let cart = JSON.parse(this.storage.getItem('cart') || '{"items": [], "total": 0}');
+  addToCart(product: any): void {
 
-    // check if product already exists
-    const existingItem = cart.items.find((item: any) => item.product.id === product.id);
-
-    if (existingItem) {
-      existingItem.quantity += 1;
-      existingItem.price = (parseFloat(product.price) * existingItem.quantity).toFixed(2);
-    } else {
-      cart.items.push({
-        id: new Date().getTime(), // temporary id for local cart
-        product: {
-          id: product.id,
-          name: product.name,
-          price: product.price,
-          final_price: product.final_price,
-          image: product.image,
-          discount_type: product.discount_type,
-          discount_value: product.discount_value
-        },
-        quantity: 1,
-        price: product.price
-      });
+    // 🔐 Force login
+    if (!this.authService.isLoggedIn()) {
+      localStorage.setItem('redirect_url', '/cart');
+      this.authModal.openLogin();
+      return;
     }
 
-    // update total
-    cart.total = cart.items.reduce((sum: number, item: any) => sum + parseFloat(item.price), 0);
+    const body = {
+      product_id: product.id,
+      quantity: 1
+    };
 
-    // save back to localStorage
-    this.storage.setItem('cart', JSON.stringify(cart));
+    this.cartService.addToCart(body).subscribe({
+      next: (res) => {
+        this.toastr.success(
+          `${product.name} added to cart`,
+          'Cart Updated'
+        );
 
-    this.toastr.success(`${product.name} added to cart`, 'Cart Updated');
-
-    product.qty = 1;
-    if (this.authService.hasToken()) {
-      this.cartService.addToCart(product).subscribe({
-        next: (res: any) => console.log('Added to cart:', res),
-        error: (err: HttpErrorResponse) => console.error('Add to cart failed:', err),
-      });
-    }
-
-    this.headerService.fetchCounts();
+        // 🔄 Refresh header/cart counts
+        this.headerService.fetchCounts();
+      },
+      error: (err) => {
+        console.error('Add to cart failed', err);
+        this.toastr.error(
+          'Unable to add product to cart',
+          'Error'
+        );
+      }
+    });
   }
+
 }

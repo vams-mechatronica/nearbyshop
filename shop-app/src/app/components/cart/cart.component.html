@@ -207,71 +207,151 @@
   </div>
 </div>
 
-<!-- Address Modal -->
-<div class="modal fade show" tabindex="-1" *ngIf="showAddressModal" style="display:block; background: rgba(0,0,0,0.6);">
-  <div class="modal-dialog modal-lg">
+<!-- ADDRESS MODAL BACKDROP -->
+<div
+  class="modal fade show"
+  tabindex="-1"
+  *ngIf="showAddressModal"
+  style="display: block; background: rgba(0,0,0,0.6);"
+>
+  <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
 
+      <!-- HEADER -->
       <div class="modal-header">
         <h5 class="modal-title">Select / Add Delivery Address</h5>
-        <button type="button" class="btn-close" (click)="closeAddressModal()"></button>
+        <button
+          type="button"
+          class="btn-close"
+          (click)="closeAddressModal()">
+        </button>
       </div>
 
+      <!-- BODY -->
       <div class="modal-body">
-        <!-- Address List -->
+
+        <!-- USE CURRENT LOCATION -->
+        <button
+          class="btn btn-outline-primary mb-3"
+          (click)="useCurrentLocation()">
+          📍 Use Current Location
+        </button>
+
+        <!-- SAVED ADDRESSES -->
         <div *ngIf="addresses.length > 0; else noAddrList">
-          <ul class="list-group mb-3">
-            <li *ngFor="let addr of addresses; let i=index"
+          <ul class="list-group mb-4">
+            <li
+              *ngFor="let addr of addresses; let i = index"
               class="list-group-item d-flex justify-content-between align-items-center"
-              [class.active]="selectedAddress === addr" (click)="selectAddress(i)">
+              [class.active]="selectedAddress === addr"
+              (click)="selectAddress(i)"
+              style="cursor: pointer;"
+            >
               <div>
                 <strong>{{ addr.name }}</strong><br>
-                {{ addr.address_line }}, {{ addr.city }}, {{ addr.state }} - {{ addr.zip_code }}
+                {{ addr.address_line }},
+                {{ addr.city }},
+                {{ addr.state }} - {{ addr.zip_code }}
               </div>
               <span class="badge bg-primary">Select</span>
             </li>
           </ul>
         </div>
+
         <ng-template #noAddrList>
-          <p>No addresses saved yet</p>
+          <p class="text-muted mb-4">No addresses saved yet</p>
         </ng-template>
 
-        <!-- Add New Address Form -->
-        <h6>Add New Address</h6>
+        <!-- ADD NEW ADDRESS -->
+        <h6 class="mb-3">Add New Address</h6>
+
         <div class="row g-3">
+
+          <!-- NAME -->
           <div class="col-md-6">
-            <input type="text" [(ngModel)]="newAddress.name" class="form-control" placeholder="Name">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Name"
+              [(ngModel)]="newAddress.name"
+            />
           </div>
+
+          <!-- STREET -->
           <div class="col-md-6">
-            <input type="text" [(ngModel)]="newAddress.address" class="form-control" placeholder="Street Address">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Street Address"
+              [(ngModel)]="newAddress.address"
+            />
           </div>
+
+          <!-- CITY -->
           <div class="col-md-4">
-            <input type="text" [(ngModel)]="newAddress.city" class="form-control" placeholder="City">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="City"
+              [(ngModel)]="newAddress.city"
+            />
           </div>
+
+          <!-- STATE -->
           <div class="col-md-4">
-            <input type="text" [(ngModel)]="newAddress.state" class="form-control" placeholder="State">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="State"
+              [(ngModel)]="newAddress.state"
+            />
           </div>
 
           <!-- ZIP -->
           <div class="col-md-4">
-            <input type="text" [(ngModel)]="newAddress.zip" class="form-control" placeholder="Zip Code"
-              (blur)="checkDelivery()">
-            <small *ngIf="deliveryMessage" [ngClass]="deliveryAvailable ? 'text-success' : 'text-danger'">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Zip Code"
+              [(ngModel)]="newAddress.zip"
+              (blur)="checkDelivery()"
+            />
+            <small
+              *ngIf="deliveryMessage"
+              [ngClass]="deliveryAvailable ? 'text-success' : 'text-danger'"
+            >
               {{ deliveryMessage }}
             </small>
           </div>
 
+          <!-- PHONE -->
           <div class="col-md-12">
-            <input type="text" [(ngModel)]="newAddress.phone" class="form-control" placeholder="Phone Number">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Phone Number"
+              [(ngModel)]="newAddress.phone"
+            />
           </div>
+
         </div>
-
       </div>
 
+      <!-- FOOTER -->
       <div class="modal-footer">
-        <button class="btn btn-success" (click)="addAddress()">Save Address</button>
-        <button class="btn btn-secondary" (click)="closeAddressModal()">Close</button>
+        <button
+          class="btn btn-success"
+          [disabled]="!newAddress.zip"
+          (click)="addAddress()">
+          Save Address
+        </button>
+        <button
+          class="btn btn-secondary"
+          (click)="closeAddressModal()">
+          Close
+        </button>
       </div>
+
     </div>
   </div>
 </div>

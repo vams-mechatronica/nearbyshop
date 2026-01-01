@@ -19,32 +19,10 @@ export class CartService {
     private authService: AuthService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) { }
-  addToCart(product: any) {
-    if (this.authService.hasToken()) {
-
-      const body = {
-        product_id: product.id,
-        quantity: 1
-      };
-      return this.http.post<any>(API_ENDPOINTS.ADD_TO_CART, body);
-    } else {
-      // Fallback: store in localStorage for guest users
-      let cart = JSON.parse(this.storage.getItem('cart') || '[]');
-
-      // Check if product already exists -> update quantity instead of duplicate push
-      const existingItem = cart.find((item: any) => item.product_id === product.id);
-
-      if (existingItem) {
-        existingItem.quantity += 1;
-      } else {
-        cart.push({ product_id: product.id, quantity: 1 });
-      }
-
-      this.storage.setItem('cart', JSON.stringify(cart));
-
-      return of(cart);
-    }
+  addToCart(data: { product_id: number; quantity: number }) {
+    return this.http.post(API_ENDPOINTS.ADD_TO_CART, data);
   }
+
 
 
 
@@ -160,8 +138,8 @@ export class CartService {
     );
   }
 
-  checkDeliveryAddress(zip: any){
-    return this.http.get<any>(API_ENDPOINTS.VERIFY_PINCODE,{params: {pincode: zip}});
+  checkDeliveryAddress(zip: any) {
+    return this.http.get<any>(API_ENDPOINTS.VERIFY_PINCODE, { params: { pincode: zip } });
   }
 
 }
