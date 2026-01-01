@@ -5,7 +5,7 @@ import { forkJoin, Observable, of, tap } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
 import { StorageService } from './storage.service';
 import { AuthService } from './auth.service';
-import { CartItem, CartResponse } from '../models/cart.model';
+import { CartFullResponse, CartItem, CartResponse } from '../models/cart.model';
 import { HeaderCount, HeaderCountService } from './header.service';
 
 @Injectable({ providedIn: 'root' })

@@ -14,7 +14,16 @@ export interface CartItem {
   price: string; 
 }
 
-export interface CartResponse {
+export interface CartFullResponse {
   items: CartItem[];
   total: number;
+  total_discount: number;
+  total_price_after_discount: number;
+  total_price_before_discount: number;
+  user: number;
+  id: number;
 }
+
+export interface CartResponse {
+   items: CartItem[];
+  total: number;}

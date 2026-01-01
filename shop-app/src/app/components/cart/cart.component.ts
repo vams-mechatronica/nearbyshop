@@ -18,6 +18,7 @@ import { AuthComponent } from '../auth/auth.component';
 import { LoaderService } from '../../services/loader.service';
 import { HeaderCountService } from '../../services/header.service';
 import { forkJoin } from 'rxjs';
+import { CartFullResponse } from '../../models/cart.model';
 
 declare var Razorpay: any;
 
@@ -36,6 +37,8 @@ export class CartComponent implements OnInit {
   totaldiscount: number = 0;
   couponCode: string = '';
   message: string = '';
+  messageType: 'success' | 'error' | '' = '';
+
   isloadingCheckout = false;
 
   user = { mobile: '', otp: '', address: '' };
@@ -85,11 +88,12 @@ export class CartComponent implements OnInit {
   // ========== CART ==========
   loadCart() {
     this.cartService.getCart().subscribe({
-      next: (data) => {
+      next: (data: CartFullResponse) => {
         this.cartItems = data.items || data;
         this.totaldiscount = data.total_discount || 0;
-        this.gTotal = data.total_price_after_discount; //? parseFloat(data.total_price_after_discount) : this.getTotal();
+        this.gTotal = data.total_price_after_discount;
         this.cartId = data.id;
+
         this.headerService.fetchCounts();
       },
       error: (err) => {
@@ -348,8 +352,9 @@ export class CartComponent implements OnInit {
     this.cartService.createOrder(this.cartId, address.id, 'cod', this.couponCode).subscribe({
       next: (res: Order) => {
         const ord_id = res.id;
-        console.log('Order:',ord_id);
-        this.router.navigate(['/payment-status'], { queryParams: { status: 'success', orderId: ord_id } });},
+        console.log('Order:', ord_id);
+        this.router.navigate(['/payment-status'], { queryParams: { status: 'success', orderId: ord_id } });
+      },
       error: () => {
         this.isloadingCheckout = false;
 
@@ -363,25 +368,26 @@ export class CartComponent implements OnInit {
   applyCoupon() {
     if (!this.couponCode) {
       this.message = 'Please enter a coupon code';
+      this.messageType = 'error';
       return;
     }
 
     this.cartService.applyCoupon(this.couponCode).subscribe({
       next: (res) => {
         if (res.success) {
-          this.gTotal = res.discounted_total;
-          this.loadCart();
           this.message = `Coupon ${res.coupon} applied successfully!`;
+          this.messageType = 'success';
+
+          // Reload cart to get fresh totals
+          this.loadCart();
         }
       },
       error: (err) => {
-        this.message = err.error.error || 'Invalid coupon';
-        this.gTotal = this.gTotal;
+        this.message = err.error?.error || 'Invalid coupon';
+        this.messageType = 'error';
       }
     });
   }
-
-
 
   paymentRazorpay(amount: any, orderId: number) {
     if (!isPlatformBrowser(this.platformId)) return;

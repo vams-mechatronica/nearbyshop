@@ -18,12 +18,20 @@ export interface OrderItem {
   quantity: number;
   price: string; // keep as string since API returns "100.00"
 }
+export interface Coupon {
+  id: number;
+  code: string;
+  active: boolean;
+  discount_type: 'percentage' | 'fixed';
+  discount_value: number;
+}
 
 export interface Order {
   id: number;
   user: number;
   total_price: string; // "100.00"
-  coupon: string | null;
+  coupon: Coupon;
+  coupon_code:string | null;
   address: Address;
   payment_method: "razorpay" | "cod" | string; // extend if more methods exist
   payment: any | null; // replace with a payment interface if you have one
