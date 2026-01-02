@@ -41,6 +41,7 @@ export class CartComponent implements OnInit {
   messageType: 'success' | 'error' | '' = '';
 
   isloadingCheckout = false;
+  isloadingCheckoutCOD = false;
 
   user = { mobile: '', otp: '', address: '' };
   addresses: any[] = [];
@@ -400,7 +401,7 @@ export class CartComponent implements OnInit {
   }
 
   checkoutCOD(address: any) {
-    this.isloadingCheckout = true;
+    this.isloadingCheckoutCOD = true;
     // this.loaderService.show();
     if (!this.authService.hasToken()) {
       // 🔑 User not logged in → show login modal
@@ -424,7 +425,7 @@ export class CartComponent implements OnInit {
               this.checkout(address);
             },
             error: () => {
-              this.isloadingCheckout = false;
+              this.isloadingCheckoutCOD = false;
               if (isPlatformBrowser(this.platformId)) {
                 this.toastrService.error('Failed to sync guest data', 'Failed');
               }
@@ -437,7 +438,7 @@ export class CartComponent implements OnInit {
     }
 
     if (!address) {
-      this.isloadingCheckout = false;
+      this.isloadingCheckoutCOD = false;
 
       this.toastrService.error('Please Enter delivery address', 'Failed');
       return;
@@ -450,7 +451,7 @@ export class CartComponent implements OnInit {
         this.router.navigate(['/payment-status'], { queryParams: { status: 'success', orderId: ord_id } });
       },
       error: () => {
-        this.isloadingCheckout = false;
+        this.isloadingCheckoutCOD = false;
 
         if (isPlatformBrowser(this.platformId)) {
           this.toastrService.error('Failed to order', 'Error');

@@ -4,9 +4,21 @@
 
     <!-- Payment Status -->
     <div *ngIf="orderSummary.status === 'Completed'; else failedBlock">
-      <h3 class="text-success mb-3">✅ Payment Successful!</h3>
-      <p>Your order has been placed successfully.</p>
+
+      <!-- COD -->
+      <ng-container *ngIf="orderSummary.payment_method === 'cod'; else onlineSuccess">
+        <h3 class="text-success mb-3">✅ Order Placed Successfully!</h3>
+        <p>Your order has been placed successfully. Pay at the time of delivery.</p>
+      </ng-container>
+
+      <!-- Online Payment -->
+      <ng-template #onlineSuccess>
+        <h3 class="text-success mb-3">✅ Payment Successful!</h3>
+        <p>Your order has been placed successfully.</p>
+      </ng-template>
+
     </div>
+
 
     <!-- Failed Message -->
     <ng-template #failedBlock>
@@ -23,10 +35,9 @@
     <h5>Order Details</h5>
     <p><strong>Order ID:</strong> {{ orderSummary.id }}</p>
     <p><strong>Date:</strong> {{ orderSummary.created_at | date:'medium' }}</p>
-    <p><strong>Payment Method:</strong> {{ orderSummary.payment_method | titlecase }}</p>
-    <p><strong>Status:</strong> 
-      <span class="badge"
-            [ngClass]="{
+    <p><strong>Payment Method:</strong> {{ getPaymentMethodLabel(orderSummary.payment_method) }}</p>
+    <p><strong>Status:</strong>
+      <span class="badge" [ngClass]="{
               'bg-success': orderSummary.status === 'Completed',
               'bg-danger': orderSummary.status === 'Payment Failed',
               'bg-warning text-dark': orderSummary.status === 'Pending'

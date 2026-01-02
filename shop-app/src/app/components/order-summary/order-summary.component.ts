@@ -19,7 +19,7 @@ export class OrderSummaryComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private orderService: OrderService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     const orderId = this.route.snapshot.paramMap.get('orderId')!;
@@ -34,7 +34,18 @@ export class OrderSummaryComponent implements OnInit {
     });
   }
 
-  retryPayment(){
-    
+  retryPayment() {
+
   }
+
+  getPaymentMethodLabel(method: string): string {
+    if (!method) return '-';
+
+    if (method.toLowerCase() === 'cod') {
+      return 'CASH ON DELIVERY';
+    }
+
+    return method.toUpperCase();
+  }
+
 }
