@@ -125,7 +125,7 @@ export class AuthComponent implements OnInit {
 
         this.toastrService.success(
           'User logged in successfully',
-          'Login Success'
+          'Success'
         );
       },
       error: () => {
@@ -138,20 +138,57 @@ export class AuthComponent implements OnInit {
   }
 
   onLoginSuccess() {
+    const postalCode =
+      this.storage.getItem('postal_code') ||
+      this.storage.getItem('selected_location_id');
+
+    if (postalCode) {
+      // ✅ Already have location → just validate
+      this.locationService
+        .checkDeliveryAvailability(postalCode)
+        .subscribe({
+          next: (data) => {
+            if (!data) {
+              this.toastrService.warning(
+                'Delivery is not available at your selected location.',
+                'Warning'
+              );
+            }
+          },
+          error: () => {
+            this.toastrService.error(
+              'Failed to validate delivery location.',
+              'Error'
+            );
+          }
+        });
+
+      return;
+    }
+
+    // ❌ No stored location → fallback
     this.locationService.getAndValidateLocation().subscribe({
       next: (data) => {
         if (data) {
-          localStorage.setItem('selected_location_id', data.location_id);
+          this.storage.setItem(
+            'selected_location_id',
+            data.location_id
+          );
         } else {
-          alert('Delivery is not available in your area. Please choose a different location.');
-          // this.toastrService.warning('Delivery is not available in your area. Please choose a different location.', 'Warning');
+          this.toastrService.warning(
+            'Delivery is not available in your area.',
+            'Warning'
+          );
         }
       },
-      error: (err) => {
-        console.error('Location validation failed:', err);
-        this.toastrService.error('Failed to validate location. Please set your location.', 'Error');
+      error: () => {
+        this.toastrService.error(
+          'Please select your delivery location.',
+          'Error'
+        );
       }
     });
   }
+
 }
 

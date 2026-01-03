@@ -6,6 +6,7 @@ export interface Address {
   state: string;
   zip_code: string;
   phone_number: string;
+  billing_address: string;
   created_at: string; // ISO datetime string
   updated_at: string; // ISO datetime string
   user: number;

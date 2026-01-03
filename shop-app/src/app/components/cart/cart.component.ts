@@ -218,10 +218,10 @@ export class CartComponent implements OnInit {
           this.newAddress.state = state;
           this.newAddress.zip = zip;
 
-          this.toastrService.success(
-            'Location fetched successfully',
-            'Address Auto-filled'
-          );
+          // this.toastrService.success(
+          //   'Location fetched successfully',
+          //   'Address Auto-filled'
+          // );
 
           // Optional: auto-check delivery
           if (zip) {
@@ -322,7 +322,7 @@ export class CartComponent implements OnInit {
         next: (res) => {
           this.addresses.push(res);
           this.setSelectedAddress(res);
-          this.toastrService.success('Address added successfully', 'Success');
+          // this.toastrService.success('Address added successfully', 'Success');
           this.newAddress = { name: '', address: '', city: '', state: '', zip: '', phone: '' };
           this.loadAddresses();
         },
@@ -332,7 +332,7 @@ export class CartComponent implements OnInit {
       this.addresses.push(addressPayload);
       this.storage.setItem('addresses', JSON.stringify(this.addresses));
       this.setSelectedAddress(addressPayload);
-      this.toastrService.info('Address saved locally', 'Guest Mode');
+      // this.toastrService.info('Address saved locally', 'Guest Mode');
       this.newAddress = { name: '', address: '', city: '', state: '', zip: '', phone: '' };
       this.loadAddresses();
     }

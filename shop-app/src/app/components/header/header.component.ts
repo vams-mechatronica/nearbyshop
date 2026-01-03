@@ -322,7 +322,7 @@ export class HeaderComponent implements OnInit {
           this.storage.setItem('longitude', lng.toString());
           this.storage.setItem('postal_code', postalCode);
           this.storage.setItem('locality', locality);
-          this.storage.setItem('selected_location_id', 'current');
+          this.storage.setItem('selected_location_id', postalCode);
 
           // ✅ UPDATE HEADER (NO RELOAD)
           this.selectedLocationName = formattedAddress;

@@ -200,20 +200,20 @@ export class ProductsComponent implements OnInit {
 
     this.cartService.addToCart(body).subscribe({
       next: (res) => {
-        this.toastr.success(
-          `${product.name} added to cart`,
-          'Cart Updated'
-        );
+        // this.toastr.success(
+        //   `${product.name} added to cart`,
+        //   'Cart Updated'
+        // );
 
         // 🔄 Refresh header/cart counts
         this.headerService.fetchCounts();
       },
       error: (err) => {
         console.error('Add to cart failed', err);
-        this.toastr.error(
-          'Unable to add product to cart',
-          'Error'
-        );
+        // this.toastr.error(
+        //   'Unable to add product to cart',
+        //   'Error'
+        // );
       }
     });
   }

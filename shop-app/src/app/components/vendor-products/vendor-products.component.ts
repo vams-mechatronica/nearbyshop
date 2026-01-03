@@ -311,20 +311,20 @@ export class VendorProductsComponent implements OnInit {
 
     this.cartService.addToCart(payload).subscribe({
       next: () => {
-        this.toastr.success(
-          `${product.name} added to cart`,
-          'Cart Updated'
-        );
+        // this.toastr.success(
+        //   `${product.name} added to cart`,
+        //   'Cart Updated'
+        // );
 
         // 🔄 Sync header cart count
         this.headerService.fetchCounts();
       },
       error: (err) => {
         console.error('Add to cart failed:', err);
-        this.toastr.error(
-          'Unable to add product to cart',
-          'Error'
-        );
+        // this.toastr.error(
+        //   'Unable to add product to cart',
+        //   'Error'
+        // );
       }
     });
   }
