@@ -63,4 +63,15 @@ export class HeaderCountService {
   updateCountsManually(newCounts: HeaderCount) {
     this.countsSubject.next(newCounts);
   }
+
+  updateCartSummary(cart: { total_items: number }) {
+    this.updateCountsManually({
+      cart_count: cart.total_items,
+      subscription_count: this.getCurrentSubscriptionCount()
+    });
+  }
+
+   private getCurrentSubscriptionCount(): number {
+    return this.countsSubject.getValue()?.subscription_count ?? 0;
+  }
 }

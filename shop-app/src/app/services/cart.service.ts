@@ -5,7 +5,7 @@ import { forkJoin, Observable, of, tap } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
 import { StorageService } from './storage.service';
 import { AuthService } from './auth.service';
-import { CartFullResponse, CartItem, CartResponse } from '../models/cart.model';
+import { AddToCartApiResponse, CartFullResponse, CartItem, CartResponse } from '../models/cart.model';
 import { HeaderCount, HeaderCountService } from './header.service';
 
 @Injectable({ providedIn: 'root' })
@@ -19,11 +19,15 @@ export class CartService {
     private authService: AuthService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) { }
-  addToCart(data: { product_id: number; quantity: number }) {
-    return this.http.post(API_ENDPOINTS.ADD_TO_CART, data);
+  // addToCart(data: { product_id: number; quantity: number }) {
+  //   return this.http.post(API_ENDPOINTS.ADD_TO_CART, data);
+  // }
+  addToCart(data: { product_id: number; quantity: number }): Observable<AddToCartApiResponse> {
+    return this.http.post<AddToCartApiResponse>(
+      API_ENDPOINTS.ADD_TO_CART,
+      data
+    );
   }
-
-
 
 
   getCart(): Observable<any> {
@@ -38,39 +42,23 @@ export class CartService {
 
 
   /** ✅ Update quantity */
-  updateCartItem(productId: number, quantity: number): Observable<CartResponse> {
-    if (this.authService.hasToken()) {
-      // Logged-in user → API call (interceptor adds headers)
-      const body = { product_id: productId, quantity: quantity };
-      return this.http.put<CartResponse>(`${API_ENDPOINTS.UPDATE_CART_ITEM}`, body);
-    } else {
-      // Guest user → update localStorage
-      this.cart = this.storage.getItem('cart');
-      this.cartItems = this.cart ? JSON.parse(this.cart) as CartResponse : { items: [], total: 0 };
+  updateCartItem(
+    productId: number,
+    quantity: number
+  ): Observable<AddToCartApiResponse> {
 
-      const item = this.cartItems.items.find((p: CartItem) => p.product.id === productId);
+    const body = {
+      product_id: productId,
+      quantity
+    };
 
-      if (item) {
-        if (quantity > 0) {
-          item.quantity = quantity;
-          // also update the price for that item
-          item.price = (Number(item.product.price) * quantity).toFixed(2);
-        } else {
-          // ✅ correctly reassign the filtered array
-          this.cartItems.items = this.cartItems.items.filter((p: CartItem) => p.product.id !== productId);
-        }
-      }
-
-      // ✅ recalculate total
-      this.cartItems.total = this.cartItems.items.reduce(
-        (sum, i) => sum + Number(i.price),
-        0
-      );
-
-      this.storage.setItem('cart', JSON.stringify(this.cartItems));
-      return of(this.cartItems);
-    }
+    // 🔐 Auth required – interceptor handles token
+    return this.http.put<AddToCartApiResponse>(
+      API_ENDPOINTS.UPDATE_CART_ITEM,
+      body
+    );
   }
+
 
   /** ✅ Delete item */
   deleteCartItem(productId: number): Observable<CartResponse> {

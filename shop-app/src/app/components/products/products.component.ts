@@ -200,13 +200,16 @@ export class ProductsComponent implements OnInit {
 
     this.cartService.addToCart(body).subscribe({
       next: (res) => {
-        // this.toastr.success(
-        //   `${product.name} added to cart`,
-        //   'Cart Updated'
-        // );
+        if (!res.success) return;
+
+        if (res.action === 'removed') {
+          product.qty = 0;
+        } else if (res.item) {
+          product.qty = res.item.quantity;
+        }
 
         // 🔄 Refresh header/cart counts
-        this.headerService.fetchCounts();
+        this.headerService.updateCartSummary(res.cart);
       },
       error: (err) => {
         console.error('Add to cart failed', err);
@@ -221,24 +224,24 @@ export class ProductsComponent implements OnInit {
 
   openSubscribeModal(product: any): void {
 
-  // 🔐 Force login before subscription
-  if (!this.authService.isLoggedIn()) {
-    // save intent (optional but recommended)
-    localStorage.setItem('redirect_url', '/subscribe');
+    // 🔐 Force login before subscription
+    if (!this.authService.isLoggedIn()) {
+      // save intent (optional but recommended)
+      localStorage.setItem('redirect_url', '/subscribe');
 
-    // open login modal
-    this.authModal.openLogin();
-    return;
+      // open login modal
+      this.authModal.openLogin();
+      return;
+    }
+
+    // ✅ user is logged in → open subscribe modal
+    this.selectedProduct = { ...product, qty: product.qty || 1 };
+
+    this.subscribeModalRef = this.modal.open(this.subscribeModal, {
+      centered: true,
+      backdrop: 'static',
+    });
   }
-
-  // ✅ user is logged in → open subscribe modal
-  this.selectedProduct = { ...product, qty: product.qty || 1 };
-
-  this.subscribeModalRef = this.modal.open(this.subscribeModal, {
-    centered: true,
-    backdrop: 'static',
-  });
-}
 
 
   confirmSubscription() {
@@ -265,33 +268,69 @@ export class ProductsComponent implements OnInit {
 
   }
 
-  increaseQty(product: any): void {
-    product.qty = (product.qty || 0) + 1;
-    this.cartService.updateCartItem(product.id, product.qty).subscribe({
-      next: (res) => this.headerService.fetchCounts(),
-      error: (err) => console.error('Cart update failed:', err),
-    });
-
-
-  }
-
   decreaseQty(product: any): void {
-    if ((product.qty || 1) > 1) {
-      product.qty -= 1;
-      this.cartService.updateCartItem(product.id, product.qty).subscribe({
-        next: (res) => console.log('Cart updated:', res),
-        error: (err) => console.error('Cart update failed:', err),
-      });
-    } else {
-      product.qty = 0;
-      this.cartService.deleteCartItem(product.id).subscribe({
-        next: (res) => console.log('Cart item removed:', res),
-        error: (err) => console.error('Cart delete failed:', err),
-      });
-    }
-    this.headerService.fetchCounts();
+    const currentQty = product.qty || 1;
 
+    // 🗑️ If qty will become 0 → DELETE API
+    if (currentQty <= 1) {
+      this.cartService.deleteCartItem(product.id).subscribe({
+        next: (res) => {
+          // ✅ update local UI
+          product.qty = 0;
+
+          // ✅ update header (expects cart summary)
+          this.headerService.fetchCounts();
+        },
+        error: (err) => {
+          console.error('Cart delete failed:', err);
+        }
+      });
+
+      return;
+    }
+
+    // ➖ Normal decrement
+    const newQty = currentQty - 1;
+
+    this.cartService.updateCartItem(product.id, newQty).subscribe({
+      next: (res) => {
+        if (!res.success) return;
+
+        if (res.item) {
+          product.qty = res.item.quantity;
+        }
+
+        this.headerService.updateCartSummary(res.cart);
+      },
+      error: (err) => {
+        console.error('Cart update failed:', err);
+      }
+    });
   }
+
+
+
+  increaseQty(product: any): void {
+    const newQty = (product.qty || 0) + 1;
+
+    this.cartService.updateCartItem(product.id, newQty).subscribe({
+      next: (res) => {
+        if (!res.success) return;
+
+        // ✅ sync qty from backend
+        if (res.item) {
+          product.qty = res.item.quantity;
+        }
+
+        // ✅ update header without extra API call
+        this.headerService.updateCartSummary(res.cart);
+      },
+      error: (err) => {
+        console.error('Cart update failed:', err);
+      }
+    });
+  }
+
 
   onCategoryChange(categorySlug: string): void {
     // Avoid reloading same category

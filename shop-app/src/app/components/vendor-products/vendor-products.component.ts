@@ -297,30 +297,33 @@ export class VendorProductsComponent implements OnInit {
 
   addToCart(product: any): void {
 
-    // 🔐 Force login before cart action
+    // 🔐 Force login
     if (!this.authService.isLoggedIn()) {
       localStorage.setItem('redirect_url', '/cart');
       this.authModal.openLogin();
       return;
     }
 
-    const payload = {
+    const body = {
       product_id: product.id,
       quantity: 1
     };
 
-    this.cartService.addToCart(payload).subscribe({
-      next: () => {
-        // this.toastr.success(
-        //   `${product.name} added to cart`,
-        //   'Cart Updated'
-        // );
+    this.cartService.addToCart(body).subscribe({
+      next: (res) => {
+        if (!res.success) return;
 
-        // 🔄 Sync header cart count
-        this.headerService.fetchCounts();
+        if (res.action === 'removed') {
+          product.qty = 0;
+        } else if (res.item) {
+          product.qty = res.item.quantity;
+        }
+
+        // 🔄 Refresh header/cart counts
+        this.headerService.updateCartSummary(res.cart);
       },
       error: (err) => {
-        console.error('Add to cart failed:', err);
+        console.error('Add to cart failed', err);
         // this.toastr.error(
         //   'Unable to add product to cart',
         //   'Error'
@@ -328,6 +331,7 @@ export class VendorProductsComponent implements OnInit {
       }
     });
   }
+
 
   /* ---------------- SUBSCRIPTION ---------------- */
 
@@ -373,23 +377,68 @@ export class VendorProductsComponent implements OnInit {
       });
   }
 
-  increaseQty(product: any): void {
-    product.qty = (product.qty || 0) + 1;
-    this.cartService.updateCartItem(product.id, product.qty).subscribe({
-      next: () => this.headerService.fetchCounts()
+decreaseQty(product: any): void {
+    const currentQty = product.qty || 1;
+
+    // 🗑️ If qty will become 0 → DELETE API
+    if (currentQty <= 1) {
+      this.cartService.deleteCartItem(product.id).subscribe({
+        next: (res) => {
+          // ✅ update local UI
+          product.qty = 0;
+
+          // ✅ update header (expects cart summary)
+          this.headerService.fetchCounts();
+        },
+        error: (err) => {
+          console.error('Cart delete failed:', err);
+        }
+      });
+
+      return;
+    }
+
+    // ➖ Normal decrement
+    const newQty = currentQty - 1;
+
+    this.cartService.updateCartItem(product.id, newQty).subscribe({
+      next: (res) => {
+        if (!res.success) return;
+
+        if (res.item) {
+          product.qty = res.item.quantity;
+        }
+
+        this.headerService.updateCartSummary(res.cart);
+      },
+      error: (err) => {
+        console.error('Cart update failed:', err);
+      }
     });
   }
 
-  decreaseQty(product: any): void {
-    if ((product.qty || 1) > 1) {
-      product.qty -= 1;
-      this.cartService.updateCartItem(product.id, product.qty).subscribe();
-    } else {
-      product.qty = 0;
-      this.cartService.deleteCartItem(product.id).subscribe();
-    }
-    this.headerService.fetchCounts();
+  increaseQty(product: any): void {
+    const newQty = (product.qty || 0) + 1;
+
+    this.cartService.updateCartItem(product.id, newQty).subscribe({
+      next: (res) => {
+        if (!res.success) return;
+
+        // ✅ sync qty from backend
+        if (res.item) {
+          product.qty = res.item.quantity;
+        }
+
+        // ✅ update header without extra API call
+        this.headerService.updateCartSummary(res.cart);
+      },
+      error: (err) => {
+        console.error('Cart update failed:', err);
+      }
+    });
   }
+
+
 
   /* ---------------- CAROUSEL ---------------- */
 

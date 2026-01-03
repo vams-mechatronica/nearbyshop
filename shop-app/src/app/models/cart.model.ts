@@ -27,3 +27,27 @@ export interface CartFullResponse {
 export interface CartResponse {
    items: CartItem[];
   total: number;}
+
+
+
+export interface CartItemApi {
+  product_id: number;
+  product_name: string;
+  quantity: number;
+}
+
+export interface CartSummary {
+  total_items: number;
+  total_before_discount: number;
+  total_discount: number;
+  total_after_discount: number;
+  final_total: number;
+  coupon: string | null;
+}
+
+export interface AddToCartApiResponse {
+  success: boolean;
+  action: 'updated' | 'removed';
+  item: CartItemApi | null;
+  cart: CartSummary;
+}

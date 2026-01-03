@@ -391,13 +391,16 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.cartService.addToCart(body).subscribe({
       next: (res) => {
-        // this.toastr.success(
-        //   `${product.name} added to cart`,
-        //   'Cart Updated'
-        // );
+        if (!res.success) return;
+
+        if (res.action === 'removed') {
+          product.qty = 0;
+        } else if (res.item) {
+          product.qty = res.item.quantity;
+        }
 
         // 🔄 Refresh header/cart counts
-        this.headerService.fetchCounts();
+        this.headerService.updateCartSummary(res.cart);
       },
       error: (err) => {
         console.error('Add to cart failed', err);
@@ -408,5 +411,6 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     });
   }
+
 
 }
