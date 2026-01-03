@@ -1,133 +1,133 @@
-<div class="container product-detail-page my-4">
-  <div class="row">
-    <!-- Left side: Product Images -->
+<div class="product-detail-page container my-4">
+
+  <div class="row g-4">
+
+    <!-- LEFT : IMAGES -->
     <div class="col-md-6">
-      <div class="main-image">
-        <img [src]="selectedImage" alt="{{ product.name }}" class="img-fluid zoom-image" />
-      </div>
-      <div class="thumbnail-strip d-flex mt-3">
-        <img *ngFor="let img of product.images" [src]="img.image" alt="img.alt_text" class="thumbnail me-2"
-          [class.active]="img.image === selectedImage" (click)="selectedImage = img.image" />
+      <div class="image-section">
+        <img [src]="selectedImage" class="main-img" alt="{{ product.name }}" />
+
+        <div class="thumbnail-strip">
+          <img *ngFor="let img of product.images" [src]="img.image" [class.active]="img.image === selectedImage"
+            (click)="selectedImage = img.image" />
+        </div>
       </div>
     </div>
 
-    <!-- Right side: Product Information -->
+    <!-- RIGHT : DETAILS -->
     <div class="col-md-6">
-      <h2 class="product-name">{{ product.name }}</h2>
-      <p class="category text-muted">{{ product.category_name }}</p>
-      
-      <span class="badge bg-light text-dark product-unit">{{ product.unit.code || 'N/A' }}</span>
-      <div class="price-section mb-3">
-        <span class="price fw-bold">₹{{ product.final_price }}</span>
-        <span class="old-price text-muted ms-2">₹{{ product.price }}</span>
-        <span *ngIf="product.discount_value > 0" class="discount badge bg-success ms-2">
+
+      <h2 class="product-title">{{ product.name }}</h2>
+
+      <!-- Vendor -->
+      <div class="vendor-info">
+        <div class="vendor-name">{{ product.vendor.shop_name }}</div>
+        <div class="vendor-address">{{ product.vendor.shop_address }}</div>
+      </div>
+
+      <!-- Price -->
+      <div class="price-row mt-2">
+        <span class="price">₹{{ product.final_price }}</span>
+        <del *ngIf="product.discount_value">₹{{ product.price }}</del>
+        <span class="unit">{{ product.unit.code }}</span>
+
+        <span *ngIf="product.discount_value > 0" class="discount-badge-inline">
           {{ product.discount_type === 'percentage'
-          ? (product.discount_value | number:'1.0-0') + '%'
-          : '₹' + (product.discount_value | number:'1.0-0') }} OFF
+          ? (product.discount_value | number:'1.0-0') + '% OFF'
+          : '₹' + (product.discount_value | number:'1.0-0') + ' OFF'
+          }}
         </span>
       </div>
 
-      <p class="description">{{ product.description }}</p>
+      <!-- Description -->
+      <p class="description mt-3">
+        {{ product.description }}
+      </p>
 
-      <!-- Seller Info -->
-      <div class="seller-info mt-3 p-3 border rounded">
-        <h6 class="fw-bold">Seller: {{ product.vendor.shop_name }}</h6>
-        <p class="mb-0"><strong>Rating:</strong> ⭐ 5</p>
-        <p class="mb-0"><strong>Location:</strong> {{ product.vendor.shop_address }}</p>
-      </div>
+      <!-- ACTIONS (MATCHES PRODUCT CARD) -->
+      <div class="product-actions mt-4">
 
-      <!-- Action Buttons -->
-      <div class="col-md-3 action-buttons mt-4 d-flex align-items-stretch gap-2">
-        <!-- Show ADD button if qty is 0 -->
-        <div *ngIf="!product.qty" class="flex-grow-1">
-          <button class="btn buy-now w-100" (click)="product.qty = 1; addToCart(product)">
-            <i class="fas fa-shopping-cart me-1"></i> Add to Cart
+        <div class="cart-action">
+
+          <!-- ADD -->
+          <button class="btn-add" [class.hidden]="product.qty" [disabled]="!product.vendor?.is_accepting_orders"
+            (click)="addToCart(product); product.qty = 1">
+            ADD
           </button>
+
+          <!-- QTY -->
+          <div class="qty-box" [class.visible]="product.qty">
+            <button (click)="decreaseQty(product)">−</button>
+            <span>{{ product.qty }}</span>
+            <button (click)="increaseQty(product)">+</button>
+          </div>
+
         </div>
 
-        <!-- Show quantity box if qty > 0 -->
-        <div *ngIf="product.qty" class="quantity-box flex-grow-1">
-          <button class="qty-btn" (click)="decreaseQty(product)">−</button>
-          <input type="number" [(ngModel)]="product.qty" class="qty-input text-center" min="1" />
-          <button class="qty-btn" (click)="increaseQty(product)">+</button>
-        </div>
-
-        <!-- Subscribe button -->
-        <button class="btn subscribe-btn flex-grow-1" (click)="openSubscribeModal(product)">
-          <i class="fas fa-bell me-1"></i> Subscribe
+        <!-- SUBSCRIBE -->
+        <button class="btn-subscribe" (click)="openSubscribeModal(product)">
+          Subscribe
         </button>
+
       </div>
 
     </div>
   </div>
 
-  <!-- Related Products Strip -->
+  <!-- RELATED PRODUCTS -->
   <div class="related-products mt-5">
-    <h4>Related Products</h4>
-    <div class="d-flex overflow-auto py-3">
-      <div *ngFor="let item of relatedProducts" class="card product-card me-3 shadow-sm"
-        style="min-width: 220px; cursor: pointer;">
+    <h5 class="section-title">Related Products</h5>
 
-        <!-- ✅ Discount Badge -->
-        <div *ngIf="item.discount_value > 0" class="discount-badge position-absolute m-2">
-          <ng-container *ngIf="item.discount_type === 'percentage'; else flatDiscount">
-            {{ item.discount_value | number:'1.0-0' }}% OFF
-          </ng-container>
-          <ng-template #flatDiscount>
-            ₹{{ item.discount_value | number:'1.0-0' }} OFF
-          </ng-template>
-        </div>
+    <div class="related-scroll">
+      <div *ngFor="let item of relatedProducts" class="product-card related-card">
 
-        <!-- Product Image -->
-        <a [routerLink]="['/product', item.id]">
-          <img [src]="item.image" class="card-img-top" alt="{{ item.name }}" />
+        <a [routerLink]="['/product', item.slug]">
+
+          <!-- DISCOUNT -->
+          <div *ngIf="item.discount_value" class="discount-badge">
+            {{ item.discount_type === 'percentage'
+            ? (item.discount_value | number:'1.0-0') + '% OFF'
+            : '₹' + (item.discount_value | number:'1.0-0') + ' OFF'
+            }}
+          </div>
+
+          <!-- IMAGE -->
+          <img [src]="item.image" class="product-img" />
+
+          <!-- INFO -->
+          <div class="product-info">
+            <h6 class="product-title">{{ item.name }}</h6>
+
+            <div class="price-row">
+              <span class="price">₹{{ item.final_price }}</span>
+              <del *ngIf="item.discount_value">₹{{ item.price }}</del>
+              <span class="unit">{{ item.unit.code }}</span>
+            </div>
+          </div>
         </a>
 
-        <!-- Product Details -->
-        <div class="card-body">
-          <!-- Product Name -->
-          <h6 class="card-title text-truncate mb-1">
-            <a [routerLink]="['/product', item.id]">{{ item.name }}</a>
-          </h6>
+        <!-- ACTIONS (same contract) -->
+        <div class="product-actions">
 
-          <!-- Category -->
-          <p class="text-muted small mb-1">{{ item.category_name }}</p>
-
-          <!-- ✅ Price Row -->
-          <div class="d-flex align-items-center gap-2 mb-2">
-            <p class="fw-bold text-success mb-0">₹{{ item.final_price }}</p>
-            <p *ngIf="item.discount_value > 0" class="text-muted text-decoration-line-through mb-0">
-              ₹{{ item.price }}
-            </p>
-            <!-- ✅ Unit Badge -->
-            <span class="badge bg-light text-dark">{{ item.unit?.code || 'N/A' }}</span>
-          </div>
-        </div>
-
-        <!-- ✅ Actions (Same as main product card) -->
-        <div class="d-flex align-items-center justify-content-between gap-2 p-2">
-
-          <!-- Show ADD button if qty is 0 -->
-          <div *ngIf="!item.qty" class="add-btn-wrapper w-50">
-            <button class="btn btn-sm buy-now w-100" (click)="addToCart(item); item.qty = 1; $event.stopPropagation()">
+          <div class="cart-action">
+            <button class="btn-add" [class.hidden]="item.qty"
+              (click)="addToCart(item); item.qty = 1; $event.stopPropagation()">
               ADD
             </button>
+
+            <div class="qty-box" [class.visible]="item.qty">
+              <button (click)="decreaseQty(item)">−</button>
+              <span>{{ item.qty }}</span>
+              <button (click)="increaseQty(item)">+</button>
+            </div>
           </div>
 
-          <!-- Show quantity box if qty > 0 -->
-          <div *ngIf="item.qty" class="quantity-box d-flex align-items-center w-50">
-            <button class="qty-btn" (click)="decreaseQty(item)">−</button>
-            <input type="number" [(ngModel)]="item.qty" class="qty-input text-center" min="1" />
-            <button class="qty-btn" (click)="increaseQty(item)">+</button>
-          </div>
+          <button class="btn-subscribe" (click)="openSubscribeModal(item)">
+            Subscribe
+          </button>
 
-          <!-- Subscribe button -->
-          <div class="subscribe-btn-wrapper w-50">
-            <button class="btn btn-sm w-100 text-white subscribe-btn" (click)="openSubscribeModal(item)">
-              Subscribe
-            </button>
-          </div>
         </div>
+
       </div>
     </div>
   </div>
@@ -137,36 +137,40 @@
 
 
 <ng-template #subscribeModal let-modal>
-  <div class="p-4">
-    <!-- Header -->
-    <h5 class="mb-3">Subscribe to Product</h5>
+  <div class="subscribe-modal">
 
-    <!-- Product Info -->
-    <div class="d-flex align-items-center mb-3">
-      <img [src]="selectedProduct?.image" alt="Product Image"
-        style="width: 100px; height: 60px; object-fit: cover; border-radius: 4px; margin-right: 10px;" />
+    <!-- HEADER -->
+    <div class="subscribe-header">
+      <h5>Subscribe to Product</h5>
+      <button class="close-btn" (click)="modal.dismiss()">×</button>
+    </div>
 
-      <div class="flex-grow-1">
-        <div class="fw-bold">{{ selectedProduct?.name }}<span class="text-muted" style="margin-left: 5px;font-size: smaller;font-weight: 400;">({{selectedProduct?.unit.code}})</span></div>
-        <div class="text-muted small">₹{{ selectedProduct?.final_price }}</div>
+    <!-- PRODUCT INFO -->
+    <div class="subscribe-product">
+      <img [src]="selectedProduct?.image" alt="Product Image" />
+
+      <div class="product-meta">
+        <div class="product-name">
+          {{ selectedProduct?.name }}
+          <span class="unit">({{ selectedProduct?.unit.code }})</span>
+        </div>
+        <div class="price">₹{{ selectedProduct?.final_price }}</div>
       </div>
 
-      <!-- Qty Controls -->
-      <div class="quantity-box-sub d-flex align-items-center border rounded px-2 py-1"
-        style="width: fit-content; height: 38px;">
-        <button class="qty-btn" (click)="decreaseQty(selectedProduct)">−</button>
-        <input type="number" [(ngModel)]="selectedProduct.qty"
-          (ngModelChange)="selectedProduct.qty = selectedProduct.qty < 1 ? 1 : selectedProduct.qty"
-          class="qty-input mx-2" style="width: 50px; text-align: center; border: none; outline: none; height: 100%;"
-          min="1" />
-        <button class="qty-btn" (click)="increaseQty(selectedProduct)">+</button>
+      <!-- QTY -->
+      <div class="quantity-box-sub">
+        <button (click)="decreaseQty(selectedProduct)">−</button>
+        <input class="sub-input" type="number" [(ngModel)]="selectedProduct.qty"
+          (ngModelChange)="selectedProduct.qty = selectedProduct.qty < 1 ? 1 : selectedProduct.qty" min="1" readonly />
+        <button (click)="increaseQty(selectedProduct)">+</button>
       </div>
     </div>
 
-    <!-- Subscription Options -->
-    <div class="mb-3">
-      <div class="form-floating mb-3">
-        <select class="form-select form-select-sm" [(ngModel)]="subscriptionPlan" id="subscription-select">
+    <!-- OPTIONS -->
+    <div class="subscribe-options">
+
+      <div class="form-floating">
+        <select class="form-select" [(ngModel)]="subscriptionPlan" id="subscription-select">
           <option value="daily">Daily</option>
           <option value="alternate_day">Alternate Day</option>
           <option value="every_3_days">Every 3 Days</option>
@@ -174,29 +178,33 @@
           <option value="biweekly">Biweekly</option>
           <option value="monthly">Monthly</option>
         </select>
-        <label for="subscription-select">Pick a Schedule</label>
+        <label for="subscription-select">Delivery Schedule</label>
       </div>
-      <div class="form-floating mb-3">
-        <input type="date" [(ngModel)]="startDate" class="form-control form-control-sm mt-2"
-          placeholder="Pick a Start date" id="schedule-date" />
-        <label for="schedule-date">Pick a start date</label>
+
+      <div class="form-floating">
+        <input type="date" [(ngModel)]="startDate" class="form-control" id="schedule-date" />
+        <label for="schedule-date">Start Date</label>
       </div>
+
     </div>
 
-    <!-- Terms -->
-    <div class="mb-3">
-      <label class="form-label fw-semibold">Terms & Conditions</label>
-      <p class="small text-muted mb-0">
-        • You can cancel or reschedule your subscription at any time.<br />
-        • Minimum commitment of 7 days is required.<br />
-        • Delivery will be paused on public holidays.
+    <!-- TERMS -->
+    <div class="subscribe-terms">
+      <label>Terms & Conditions</label>
+      <p>
+        • Cancel or reschedule anytime<br />
+        • Minimum 7-day commitment<br />
+        • Delivery paused on public holidays
       </p>
     </div>
 
-    <!-- Footer -->
-    <div class="text-end">
-      <button class="btn btn-secondary btn-sm me-2" (click)="modal.dismiss()">Cancel</button>
-      <button class="btn btn-success btn-sm" (click)="confirmSubscription()">Confirm</button>
+    <!-- FOOTER -->
+    <div class="subscribe-footer">
+      <button class="btn cancel" (click)="modal.dismiss()">Cancel</button>
+      <button class="btn confirm" (click)="confirmSubscription()">
+        Confirm Subscription
+      </button>
     </div>
+
   </div>
 </ng-template>

@@ -1,22 +1,175 @@
-.subscriptions-container {
-  max-height: 70vh; // Adjust as needed
-  overflow-y: auto;
-  padding-right: 10px; // for scrollbar spacing
+/* MODAL WRAPPER */
+.subscribe-modal {
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  animation: modalFadeUp 260ms ease-out;
+}
 
-  .subscription-card {
-    transition: transform 0.2s;
-    
-    &:hover {
-      transform: translateY(-3px);
+/* HEADER */
+.subscribe-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  border-bottom: 1px solid #eee;
+
+  h5 {
+    margin: 0;
+    font-weight: 600;
+    font-size: 16px;
+  }
+
+  .close-btn {
+    background: none;
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+    line-height: 1;
+  }
+}
+
+/* BODY */
+.subscribe-body {
+  padding: 16px 18px;
+}
+
+/* PRODUCT ROW */
+.subscribe-product {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  animation: fadeIn 200ms ease-out;
+
+  img {
+    width: 90px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+  }
+
+  .product-meta {
+    flex: 1;
+
+    .product-name {
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.3;
     }
 
-    .product-img {
-      object-fit: cover;
-      height: 150px;
-      border-bottom: 1px solid #dee2e6;
+    .price {
+      font-size: 13px;
+      font-weight: 600;
+      color: #2e7d32;
     }
   }
 }
+
+/* QTY (CONSISTENT EVERYWHERE) */
+.quantity-box-sub {
+  display: flex;
+  align-items: center;
+  height: 34px;
+  border: 1px solid #d32f2f;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+
+  button {
+    width: 32px;
+    border: none;
+    background: transparent;
+    font-size: 16px;
+    font-weight: 600;
+    color: #d32f2f;
+    cursor: pointer;
+    transition: background 0.15s ease;
+
+    &:hover {
+      background: rgba(211, 47, 47, 0.08);
+    }
+
+    &:active {
+      transform: scale(0.9);
+    }
+  }
+
+  input {
+    width: 44px;
+    border: none;
+    text-align: center;
+    font-weight: 500;
+    outline: none;
+  }
+  .sub-input{
+    text-align: center;
+    padding-left: 10px;
+  }
+}
+
+/* OPTIONS */
+.subscribe-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* FOOTER */
+.subscribe-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 18px;
+  border-top: 1px solid #eee;
+
+  .btn {
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: transform 0.15s ease;
+  }
+
+  .cancel {
+    background: #f2f2f2;
+  }
+
+  .confirm {
+    background: #2e7d32;
+    color: #fff;
+  }
+
+  .btn:active {
+    transform: scale(0.96);
+  }
+}
+
+/* ANIMATIONS */
+@keyframes modalFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ACCESSIBILITY */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
 
 /* Optional: style scrollbar */
 .subscriptions-container::-webkit-scrollbar {

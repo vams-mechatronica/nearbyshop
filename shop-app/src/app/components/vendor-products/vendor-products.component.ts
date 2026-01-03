@@ -304,6 +304,8 @@ export class VendorProductsComponent implements OnInit {
       return;
     }
 
+    product.qty += 1;
+
     const body = {
       product_id: product.id,
       quantity: 1
@@ -319,18 +321,14 @@ export class VendorProductsComponent implements OnInit {
           product.qty = res.item.quantity;
         }
 
-        // 🔄 Refresh header/cart counts
         this.headerService.updateCartSummary(res.cart);
       },
-      error: (err) => {
-        console.error('Add to cart failed', err);
-        // this.toastr.error(
-        //   'Unable to add product to cart',
-        //   'Error'
-        // );
+      error: () => {
+        product.qty -= 1;
       }
     });
   }
+
 
 
   /* ---------------- SUBSCRIPTION ---------------- */
@@ -377,67 +375,54 @@ export class VendorProductsComponent implements OnInit {
       });
   }
 
-decreaseQty(product: any): void {
+  decreaseQty(product: any): void {
     const currentQty = product.qty || 1;
-
-    // 🗑️ If qty will become 0 → DELETE API
     if (currentQty <= 1) {
+      product.qty = 0;
       this.cartService.deleteCartItem(product.id).subscribe({
-        next: (res) => {
-          // ✅ update local UI
-          product.qty = 0;
-
-          // ✅ update header (expects cart summary)
+        next: () => {
           this.headerService.fetchCounts();
         },
-        error: (err) => {
-          console.error('Cart delete failed:', err);
+        error: () => {
+          product.qty += 1;
         }
       });
-
       return;
     }
-
-    // ➖ Normal decrement
     const newQty = currentQty - 1;
-
+    product.qty -= 1;
     this.cartService.updateCartItem(product.id, newQty).subscribe({
       next: (res) => {
         if (!res.success) return;
-
         if (res.item) {
           product.qty = res.item.quantity;
         }
-
         this.headerService.updateCartSummary(res.cart);
       },
       error: (err) => {
-        console.error('Cart update failed:', err);
+        product.qty += 1;
       }
     });
   }
 
   increaseQty(product: any): void {
+
     const newQty = (product.qty || 0) + 1;
+    product.qty += 1;
 
     this.cartService.updateCartItem(product.id, newQty).subscribe({
       next: (res) => {
         if (!res.success) return;
-
-        // ✅ sync qty from backend
         if (res.item) {
           product.qty = res.item.quantity;
         }
-
-        // ✅ update header without extra API call
         this.headerService.updateCartSummary(res.cart);
       },
-      error: (err) => {
-        console.error('Cart update failed:', err);
+      error: () => {
+        product.qty -= 1;
       }
     });
   }
-
 
 
   /* ---------------- CAROUSEL ---------------- */

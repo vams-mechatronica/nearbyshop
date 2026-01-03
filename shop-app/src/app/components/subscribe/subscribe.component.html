@@ -1,57 +1,99 @@
 <ng-template #subscribeModal let-modal>
-  <div class="modal-header">
-    <h5 class="modal-title">Edit Subscription</h5>
-    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
-  </div>
+  <div class="subscribe-modal">
 
-  <div class="modal-body">
-    <!-- Product Info -->
-    <div class="d-flex align-items-center mb-3" *ngIf="selectedSubscription">
-      <img [src]="selectedSubscription.product.image" alt="Product Image" class="rounded me-3"
-        style="width: 100px; height: 60px; object-fit: cover;" />
-      <div class="flex-grow-1">
-        <div class="fw-bold">{{ selectedSubscription.product.name }}</div>
-        <div class="text-muted small">₹{{ selectedSubscription.product.price }}</div>
+    <!-- HEADER -->
+    <div class="subscribe-header">
+      <h5>Edit Subscription</h5>
+      <button class="close-btn" (click)="modal.dismiss()">×</button>
+    </div>
+
+    <!-- BODY -->
+    <div class="subscribe-body" *ngIf="selectedSubscription">
+
+      <!-- PRODUCT INFO -->
+      <div class="subscribe-product">
+        <img
+          [src]="selectedSubscription.product.image"
+          alt="Product Image"
+        />
+
+        <div class="product-meta">
+          <div class="product-name">
+            {{ selectedSubscription.product.name }}
+          </div>
+          <div class="price">
+            ₹{{ selectedSubscription.product.price }}
+          </div>
+        </div>
+
+        <!-- QTY -->
+        <div class="quantity-box-sub">
+          <button (click)="decreaseQty()">−</button>
+          <input class="sub-input"
+            type="number"
+            [(ngModel)]="selectedSubscription.quantity"
+            min="1" readonly
+          />
+          <button (click)="increaseQty()">+</button>
+        </div>
       </div>
-      <div class="quantity-box-sub d-flex align-items-center border rounded px-2 py-1">
-        <button class="btn btn-sm btn-light" (click)="decreaseQty()">−</button>
-        <input type="number" [(ngModel)]="selectedSubscription.quantity"
-          class="form-control form-control-sm text-center mx-2" style="width: 60px;" min="1" />
-        <button class="btn btn-sm btn-light" (click)="increaseQty()">+</button>
+
+      <!-- OPTIONS -->
+      <div class="subscribe-options">
+
+        <div class="form-floating">
+          <select
+            class="form-select"
+            [(ngModel)]="subscriptionPlan"
+            id="subscription-select"
+          >
+            <option value="daily">Daily</option>
+            <option value="alternate_day">Alternate Day</option>
+            <option value="every_3_days">Every 3 Days</option>
+            <option value="weekly">Weekly</option>
+            <option value="biweekly">Biweekly</option>
+            <option value="monthly">Monthly</option>
+          </select>
+          <label for="subscription-select">Delivery Schedule</label>
+        </div>
+
+        <div class="form-floating">
+          <input
+            type="date"
+            class="form-control"
+            [(ngModel)]="startDate"
+            id="schedule-date"
+          />
+          <label for="schedule-date">Start Date</label>
+        </div>
+
+        <div class="form-floating">
+          <select
+            class="form-select"
+            [(ngModel)]="subscriptionStatus"
+            id="status-select"
+          >
+            <option value="active">Active</option>
+            <option value="paused">Paused</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+          <label for="status-select">Subscription Status</label>
+        </div>
+
       </div>
     </div>
 
-    <!-- Subscription Options -->
-    <div class="form-floating mb-3">
-      <select class="form-select" [(ngModel)]="subscriptionPlan" id="subscription-select">
-        <option value="daily">Daily</option>
-        <option value="alternate_day">Alternate Day</option>
-        <option value="every_3_days">Every 3 Days</option>
-        <option value="weekly">Weekly</option>
-        <option value="biweekly">Biweekly</option>
-        <option value="monthly">Monthly</option>
-      </select>
-      <label for="subscription-select">Pick a Schedule</label>
+    <!-- FOOTER -->
+    <div class="subscribe-footer">
+      <button class="btn cancel" (click)="modal.dismiss()">Cancel</button>
+      <button class="btn confirm" (click)="confirmSubscription()">
+        Save Changes
+      </button>
     </div>
-    <div class="form-floating mb-3">
-      <input type="date" [(ngModel)]="startDate" class="form-control" id="schedule-date" />
-      <label for="schedule-date">Pick a start date</label>
-    </div>
-    <div class="form-floating mb-3">
-      <select class="form-select" [(ngModel)]="subscriptionStatus" id="status-select">
-        <option value="active">Active</option>
-        <option value="paused">Paused</option>
-        <option value="cancelled">Cancelled</option>
-      </select>
-      <label for="status-select">Subscription Status</label>
-    </div>
-  </div>
 
-  <div class="modal-footer">
-    <button class="btn btn-secondary btn-sm" (click)="modal.dismiss()">Cancel</button>
-    <button class="btn btn-success btn-sm" (click)="confirmSubscription()">Save</button>
   </div>
 </ng-template>
+
 
 <div class="container mt-4">
   <!-- Wallet + Address -->

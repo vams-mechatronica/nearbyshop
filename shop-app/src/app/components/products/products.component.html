@@ -14,8 +14,7 @@
     <div class="shop-layout">
 
       <!-- CATEGORY SIDEBAR -->
-      <aside class="category-sidebar"
-            [class.open]="showCategories">
+      <aside class="category-sidebar" [class.open]="showCategories">
 
         <!-- MOBILE HEADER -->
         <div class="sidebar-header mobile-only">
@@ -24,9 +23,8 @@
         </div>
 
         <ul class="category-list">
-          <li *ngFor="let category of categories"
-              (click)="onCategoryChange(category.slug); showCategories = false"
-              [class.active]="category.slug === categoryName">
+          <li *ngFor="let category of categories" (click)="onCategoryChange(category.slug); showCategories = false"
+            [class.active]="category.slug === categoryName">
             <span>{{ category.name }}</span>
             <!-- <small>{{ category.count }}</small> -->
           </li>
@@ -90,28 +88,31 @@
               </div>
             </a>
 
-            <!-- ACTIONS -->
             <div class="product-actions">
 
-              <!-- ADD TO CART -->
-              <button class="btn-add" [disabled]="!product.vendor?.is_accepting_orders" *ngIf="!product.qty"
-                (click)="addToCart(product)">
-                ADD
-              </button>
+              <!-- CART ACTION -->
+              <div class="cart-action">
+                <!-- ADD TO CART -->
+                <button class="btn-add" [class.hidden]="product.qty" [disabled]="!product.vendor?.is_accepting_orders"
+                  (click)="addToCart(product)">
+                  ADD
+                </button>
 
-              <!-- QTY -->
-              <div *ngIf="product.qty" class="qty-box">
-                <button (click)="decreaseQty(product)">−</button>
-                <span>{{ product.qty }}</span>
-                <button (click)="increaseQty(product)">+</button>
+                <!-- QTY -->
+                <div class="qty-box" [class.visible]="product.qty">
+                  <button (click)="decreaseQty(product)">−</button>
+                  <span>{{ product.qty }}</span>
+                  <button (click)="increaseQty(product)">+</button>
+                </div>
               </div>
 
-              <!-- SUBSCRIBE (ALWAYS ENABLED) -->
+              <!-- SUBSCRIBE -->
               <button class="btn-subscribe" (click)="openSubscribeModal(product)">
                 Subscribe
               </button>
 
             </div>
+
 
             <!-- CLOSED LABEL -->
             <div class="closed-overlay" *ngIf="!product.vendor?.is_accepting_orders">

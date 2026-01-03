@@ -384,6 +384,8 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
+    product.qty += 1;
+
     const body = {
       product_id: product.id,
       quantity: 1
@@ -399,18 +401,11 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
           product.qty = res.item.quantity;
         }
 
-        // 🔄 Refresh header/cart counts
         this.headerService.updateCartSummary(res.cart);
       },
-      error: (err) => {
-        console.error('Add to cart failed', err);
-        // this.toastr.error(
-        //   'Unable to add product to cart',
-        //   'Error'
-        // );
+      error: () => {
+        product.qty -= 1;
       }
     });
   }
-
-
 }
