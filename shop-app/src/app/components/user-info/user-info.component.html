@@ -40,10 +40,10 @@
               <i class="fa-solid fa-building-columns me-2"></i> Bank Details
             </button>
 
-            <button class="list-group-item list-group-item-action" [class.active]="activeTab === 'refunds'"
+            <!-- <button class="list-group-item list-group-item-action" [class.active]="activeTab === 'refunds'"
               (click)="setActiveTab('refunds')">
               <i class="fa-solid fa-rotate-left me-2"></i> Refund History
-            </button>
+            </button> -->
 
             <!-- <button class="list-group-item list-group-item-action" [class.active]="activeTab === 'tracking'"
               (click)="setActiveTab('tracking')">
@@ -60,15 +60,43 @@
       <div class="card shadow-sm border-0 rounded-3">
         <div class="card-body">
           <!-- Profile -->
-          <div *ngIf="activeTab === 'profile'">
-            <h4 class="mb-3">Profile Details</h4>
-            <div class="row">
-              <div class="col-md-6 mb-2"><strong>Name:</strong> {{user.username}}</div>
-              <div class="col-md-6 mb-2"><strong>Email:</strong> {{user.email}}</div>
-              <div class="col-md-6 mb-2"><strong>Phone:</strong> {{user.phone_number}}</div>
-              <div class="col-md-6 mb-2"><strong>Role:</strong> {{user.role}}</div>
+          <div *ngIf="activeTab === 'profile'" class="profile-tab">
+
+            <div class="card shadow-sm border-0 rounded-4">
+              <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-semibold">Profile Details</h5>
+                <button class="btn-edit-profile" (click)="openEditProfile()">
+                   Edit
+                </button>
+              </div>
+
+              <div class="card-body">
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="text-muted small">Username</label>
+                    <div class="fw-semibold">{{ user.username }}</div>
+                  </div>
+
+                  <div class="col-md-6">
+                    <label class="text-muted small">Email</label>
+                    <div class="fw-semibold">{{ user.email }}</div>
+                  </div>
+
+                  <div class="col-md-6">
+                    <label class="text-muted small">Phone</label>
+                    <div class="fw-semibold">{{ user.phone_number || '-' }}</div>
+                  </div>
+
+                  <div class="col-md-6">
+                    <label class="text-muted small">Role</label>
+                    <div class="fw-semibold text-capitalize">{{ user.role }}</div>
+                  </div>
+                </div>
+              </div>
             </div>
+
           </div>
+
 
           <!-- Orders -->
           <div *ngIf="activeTab === 'orders'">
@@ -86,6 +114,7 @@
                     </div>
                     <p class="card-text mb-1">Date: {{ order.created_at | date }}</p>
                     <p class="card-text mb-1">Total: ₹{{ order.total_price }}</p>
+                    <p class="card-text mb-1">Payment Method: {{ getPaymentMethodLabel(order.payment_method)}}</p>
                   </div>
                 </div>
               </div>
@@ -198,12 +227,12 @@
             </div>
           </div>
 
-          <div *ngIf="activeTab === 'refunds'">
+          <!-- <div *ngIf="activeTab === 'refunds'">
             <h4 class="mb-3">Refund History</h4>
             <ag-grid-angular class="ag-theme-alpine w-100" [rowData]="refunds" [columnDefs]="refundCols"
               style="height: 400px">
             </ag-grid-angular>
-          </div>
+          </div> -->
         </div>
         <!-- <div *ngIf="activeTab === 'bank'">
           <h4 class="mb-3">Bank Details</h4>
@@ -260,6 +289,45 @@
   </div>
 </div>
 
+<!-- Edit Profile Modal -->
+<div class="modal fade show"
+     *ngIf="showEditProfile"
+     style="display:block; background:rgba(0,0,0,0.6)">
+
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Update Profile</h5>
+        <button type="button" class="btn-close" (click)="closeEditProfile()"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Username</label>
+          <input type="text"
+                 class="form-control"
+                 [(ngModel)]="editProfile.username">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Email</label>
+          <input type="email"
+                 class="form-control"
+                 [(ngModel)]="editProfile.email">
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-light" (click)="closeEditProfile()">Cancel</button>
+        <button class="btn btn-primary" (click)="saveProfile()">Save Changes</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
 <ng-template #orderItemsModal let-modal>
   <div class="modal-header">
     <h5 class="modal-title">Order #{{ selectedOrder?.id }} Items</h5>
@@ -271,7 +339,7 @@
         <div class="d-flex justify-content-between align-items-center">
           <div class="d-flex align-items-center">
             <!-- Product image -->
-            <img [src]="item.image" alt="{{ item.product }}" width="30" height="30" class="me-2 rounded">
+            <img [src]="item.product_image" alt="{{ item.product }}" width="30" height="30" class="me-2 rounded">
 
             <!-- Product name and quantity -->
             <div>

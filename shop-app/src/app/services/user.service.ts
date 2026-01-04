@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { API_ENDPOINTS } from '../shared/constants/api.constants';
-import { AddDeliveryAddress, UserInfo } from '../models/user.model';
+import { AddDeliveryAddress, UserInfo, UserProfileUpdateResponse } from '../models/user.model';
 import { StorageService } from './storage.service';
 
 @Injectable({ providedIn: 'root' })
@@ -17,19 +17,19 @@ export class UserService {
     return this.http.get(API_ENDPOINTS.GET_USERADDRESS);
   }
 
-  addUserAddress(data: AddDeliveryAddress){
-    return this.http.post(API_ENDPOINTS.ADD_USERADDRESS,data);
+  addUserAddress(data: AddDeliveryAddress) {
+    return this.http.post(API_ENDPOINTS.ADD_USERADDRESS, data);
   }
 
-  getUserWallet(){
+  getUserWallet() {
     return this.http.get(API_ENDPOINTS.GET_USERWALLET);
   }
 
-  getUserBankDetails(){
+  getUserBankDetails() {
     return this.http.get(API_ENDPOINTS.GET_USERBANKDETAILS);
   }
 
-  getUserWalletTransactions(){
+  getUserWalletTransactions() {
     return this.http.get(API_ENDPOINTS.GET_WALLET_TRANSACTION);
   }
 
@@ -44,10 +44,17 @@ export class UserService {
 
     // convert back to object
     const guestAddress = typeof guestAddressStr === 'string'
-    ? JSON.parse(guestAddressStr)
-    : guestAddressStr;
+      ? JSON.parse(guestAddressStr)
+      : guestAddressStr;
 
     return this.http.post(API_ENDPOINTS.USER_ADDRESS_SYNC, guestAddress);
+  }
+
+  updateProfile(data: Partial<UserInfo>) {
+    return this.http.put<UserProfileUpdateResponse>(
+      API_ENDPOINTS.USER_PROFILE_UPDATE,
+      data
+    );
   }
 
 }

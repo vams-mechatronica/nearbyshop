@@ -134,7 +134,6 @@ export class HeaderComponent implements OnInit {
     this.modalService.open(AuthComponent, { centered: true, size: 'sm' });
   }
 
-  // 🔹 called on input change
   onSearchChange(query: string): void {
     this.searchQuery = query;
     if (query.trim().length > 1) {
@@ -144,7 +143,6 @@ export class HeaderComponent implements OnInit {
     }
   }
 
-  // 🔹 when user presses Enter or clicks search button
   onSearch(): void {
     if (this.searchQuery.trim()) {
       this.router.navigate(['/search'], {
@@ -196,80 +194,41 @@ export class HeaderComponent implements OnInit {
     });
   }
 
-  // useCurrentLocation(modal: any): void {
-  //   if (navigator.geolocation) {
-  //     navigator.geolocation.getCurrentPosition(
-  //       (pos) => {
-  //         const lat = pos.coords.latitude;
-  //         const lng = pos.coords.longitude;
-  //         const apiKey = 'AIzaSyC6k0JqOh3qzhxjiWO-ua0uRYLuR7KBzRI';
-  //         const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${encodeURIComponent(
-  //           lat
-  //         )},${encodeURIComponent(lng)}&key=${apiKey}`;
-
-  //         fetch(geocodeUrl)
-  //           .then((response) => response.json())
-  //           .then((data) => {
-  //             if (data.status === 'OK' && data.results.length > 0) {
-  //               const result = data.results[0];
-  //               const formattedAddress = result.formatted_address;
-  //               let postalCode = '';
-  //               let locality = '';
-  //               result.address_components.forEach((component: any) => {
-  //                 if (component.types.includes('postal_code')) {
-  //                   postalCode = component.long_name;
-  //                 }
-  //                 if (component.types.includes('locality')) {
-  //                   locality = component.long_name;
-  //                 }
-  //               });
-
-  //               // ✅ Store in localStorage
-  //               this.storage.setItem('selected_location', formattedAddress);
-  //               this.storage.setItem('selected_location_id', 'current');
-  //               this.storage.setItem('latitude', lat.toString());
-  //               this.storage.setItem('longitude', lng.toString());
-  //               this.storage.setItem('postal_code', postalCode);
-  //               this.storage.setItem('locality', locality);
-
-  //               // ✅ Display on header
-  //               this.selectedLocationName =
-  //                 formattedAddress || 'Current Location';
-  //             } else {
-  //               console.warn('No address found.');
-  //             }
-  //             modal.close();
-  //             // ✅ Refresh or navigate to home
-  //             window.location.reload(); // simplest approach
-  //           })
-  //           .catch((error) => {
-  //             console.error('Error fetching location details:', error);
-  //             modal.close();
-  //           });
-  //       },
-  //       (error) => {
-  //         console.error('Error getting location:', error);
-  //         alert('Unable to retrieve your location.');
-  //       }
-  //     );
-  //   } else {
-  //     alert('Geolocation is not supported on this browser.');
-  //   }
-  // }
-
-  useCurrentLocation(modal: any): void {
+  async useCurrentLocation(modal: any): Promise<void> {
     if (!navigator.geolocation) {
       alert('Geolocation is not supported on this browser.');
       return;
     }
 
+    // 🔹 STEP 1: Check permission state (Modern Browsers)
+    if ((navigator as any).permissions) {
+      try {
+        const permission = await (navigator as any).permissions.query({
+          name: 'geolocation'
+        });
+
+        if (permission.state === 'denied') {
+          alert(
+            'Location access is blocked.\n\nPlease enable location permission from browser settings and try again.'
+          );
+          return;
+        }
+        // If "prompt" → browser will ask
+        // If "granted" → directly fetch
+      } catch (err) {
+        console.warn('Permission API not supported, continuing...');
+      }
+    }
+
+    // 🔹 STEP 2: Request location (this triggers permission popup)
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         const lat = pos.coords.latitude;
         const lng = pos.coords.longitude;
 
         const apiKey = 'AIzaSyC6k0JqOh3qzhxjiWO-ua0uRYLuR7KBzRI';
-        const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`;
+        const geocodeUrl =
+          `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`;
 
         try {
           const response = await fetch(geocodeUrl);
@@ -284,37 +243,31 @@ export class HeaderComponent implements OnInit {
           let postalCode = '';
           let locality = '';
           let sector = '';
-          let formattedAddress = result.formatted_address;
+          const formattedAddress = result.formatted_address;
 
           result.address_components.forEach((component: any) => {
             if (component.types.includes('postal_code')) {
               postalCode = component.long_name;
             }
-
             if (
               component.types.includes('sublocality_level_1') ||
               component.types.includes('sublocality')
             ) {
-              sector = component.long_name; // Sector 74
+              sector = component.long_name;
             }
-
             if (component.types.includes('locality')) {
               locality = component.long_name;
             }
           });
 
-          // 🔹 Fallback if sector not found
-          if (!sector && locality) {
-            sector = locality;
-          }
+          if (!sector && locality) sector = locality;
 
-          // 🔹 Prepare address rest (remove sector)
           const addressRest = formattedAddress
             .replace(sector, '')
             .replace(/^,/, '')
             .trim();
 
-          // ✅ STORE RAW DATA
+          // ✅ Store
           this.storage.setItem('selected_location', formattedAddress);
           this.storage.setItem('sector_name', sector);
           this.storage.setItem('address_rest', addressRest);
@@ -324,11 +277,11 @@ export class HeaderComponent implements OnInit {
           this.storage.setItem('locality', locality);
           this.storage.setItem('selected_location_id', postalCode);
 
-          // ✅ UPDATE HEADER (NO RELOAD)
+          // ✅ Update UI
           this.selectedLocationName = formattedAddress;
           this.sectorName = sector;
           this.addressRest = addressRest;
-          this.deliveryTime = '6 minutes'; // static or from API later
+          this.deliveryTime = '6 minutes';
 
           modal.close();
         } catch (err) {
@@ -339,7 +292,19 @@ export class HeaderComponent implements OnInit {
       },
       (error) => {
         console.error('Geolocation error:', error);
-        alert('Unable to retrieve your location.');
+
+        if (error.code === error.PERMISSION_DENIED) {
+          alert(
+            'Location permission denied.\nPlease allow location access to use this feature.'
+          );
+        } else {
+          alert('Unable to retrieve your location.');
+        }
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
       }
     );
   }

@@ -120,6 +120,16 @@ export class UserProfileComponent implements OnInit {
     }
   }
 
+  getPaymentMethodLabel(method: string): string {
+    if (!method) return '-';
+
+    if (method.toLowerCase() === 'cod') {
+      return 'CASH ON DELIVERY';
+    }
+
+    return method.toUpperCase();
+  }
+
 
   getUserInfo() {
     this.userService.getUserInfo().subscribe({
@@ -127,13 +137,13 @@ export class UserProfileComponent implements OnInit {
         this.user = res;
       },
       error: (err) => {
-        const errorMsg =
-          err?.error?.message || err?.error?.detail || err?.message || 'Something went wrong';
-        this.toast.error(errorMsg, 'Failed', {
-          closeButton: true,   // adds dismiss (x) button
-          progressBar: true,   // shows progress bar until auto-hide
-          timeOut: 5000
-        });
+        // const errorMsg =
+        //   err?.error?.message || err?.error?.detail || err?.message || 'Something went wrong';
+        // this.toast.error(errorMsg, 'Failed', {
+        //   closeButton: true,   // adds dismiss (x) button
+        //   progressBar: true,   // shows progress bar until auto-hide
+        //   timeOut: 5000
+        // });
       },
     });
   }
@@ -149,9 +159,9 @@ export class UserProfileComponent implements OnInit {
         this.wallet = res;
       },
       error: (err) => {
-        const errorMsg =
-          err?.error?.message || err?.error?.detail || err?.message || 'Something went wrong';
-        this.toast.error(errorMsg, 'Failed');
+        // const errorMsg =
+        //   err?.error?.message || err?.error?.detail || err?.message || 'Something went wrong';
+        // this.toast.error(errorMsg, 'Failed');
       }
     });
   }
@@ -162,9 +172,9 @@ export class UserProfileComponent implements OnInit {
         this.subscriptions = res?.results;
       },
       error: (err) => {
-        const errorMsg =
-          err?.error?.message || err?.error?.detail || err?.message || 'Something went wrong';
-        this.toast.error(errorMsg, 'Failed');
+        // const errorMsg =
+        //   err?.error?.message || err?.error?.detail || err?.message || 'Something went wrong';
+        // this.toast.error(errorMsg, 'Failed');
       }
     })
   }
@@ -175,9 +185,9 @@ export class UserProfileComponent implements OnInit {
         this.orders = res?.results;
       },
       error: (err) => {
-        const errorMsg =
-          err?.error?.message || err?.error?.detail || err?.message || 'Something went wrong';
-        this.toast.error(errorMsg, 'Failed');
+        // const errorMsg =
+        //   err?.error?.message || err?.error?.detail || err?.message || 'Something went wrong';
+        // this.toast.error(errorMsg, 'Failed');
       }
     })
   }
@@ -187,9 +197,9 @@ export class UserProfileComponent implements OnInit {
         this.bank = res?.results;
       },
       error: (err) => {
-        const errorMsg =
-          err?.error?.message || err?.error?.detail || err?.message || 'Something went wrong';
-        this.toast.error(errorMsg, 'Failed');
+        // const errorMsg =
+        //   err?.error?.message || err?.error?.detail || err?.message || 'Something went wrong';
+        // this.toast.error(errorMsg, 'Failed');
       }
     })
   }
@@ -200,9 +210,9 @@ export class UserProfileComponent implements OnInit {
         this.cart = res?.results;
       },
       error: (err) => {
-        const errorMsg =
-          err?.error?.message || err?.error?.detail || err?.message || 'Something went wrong';
-        this.toast.error(errorMsg, 'Failed');
+        // const errorMsg =
+        //   err?.error?.message || err?.error?.detail || err?.message || 'Something went wrong';
+        // this.toast.error(errorMsg, 'Failed');
       }
     })
   }
@@ -214,9 +224,9 @@ export class UserProfileComponent implements OnInit {
           this.transactions = res?.results;
         },
         error: (err) => {
-          const errorMsg =
-            err?.error?.message || err?.error?.detail || err?.message || 'Something went wrong';
-          this.toast.error(errorMsg, 'Failed');
+          // const errorMsg =
+          //   err?.error?.message || err?.error?.detail || err?.message || 'Something went wrong';
+          // this.toast.error(errorMsg, 'Failed');
         }
       }
     )
@@ -254,16 +264,12 @@ export class UserProfileComponent implements OnInit {
           this.toast.success('Bank details updated successfully!', 'Success');
         },
         error: (err) => {
-          const errorMsg =
-            err?.error?.message || err?.error?.detail || err?.message || 'Something went wrong';
-          this.toast.error(errorMsg, 'Failed');
+          // const errorMsg =
+          //   err?.error?.message || err?.error?.detail || err?.message || 'Something went wrong';
+          // this.toast.error(errorMsg, 'Failed');
         }
       });
-    } else {
-      console.log('Adding new bank:', this.bankForm);
-      // 🔹 call API to save
     }
-
     this.closeBankModal();
   }
 
@@ -407,9 +413,9 @@ export class UserProfileComponent implements OnInit {
     { headerName: 'Amount (₹)', field: 'amount', width: 200 },
     { headerName: 'Status', field: 'status', width: 200 },
   ];
-  refunds = [
-    { date: '2025-08-12', amount: 300, status: 'Processed' }
-  ];
+  // refunds = [
+  //   { date: '2025-08-12', amount: 300, status: 'Processed' }
+  // ];
 
 
   tracking = [
@@ -420,4 +426,49 @@ export class UserProfileComponent implements OnInit {
   setActiveTab(tab: string) {
     this.activeTab = tab;
   }
+  showEditProfile = false;
+
+  editProfile = {
+    username: '',
+    email: ''
+  };
+
+  openEditProfile() {
+    this.editProfile = {
+      username: this.user.username,
+      email: this.user.email
+    };
+    this.showEditProfile = true;
+  }
+
+  closeEditProfile() {
+    this.showEditProfile = false;
+  }
+
+  saveProfile() {
+    const payload = {
+      username: this.editProfile.username,
+      email: this.editProfile.email
+    };
+
+
+    this.userService.updateProfile(payload).subscribe({
+      next: (res) => {
+        this.user = {
+          ...this.user,
+          username: res.username,
+          email: res.email
+        };
+
+        this.closeEditProfile();
+      },
+      error: (err) => {
+        const errorMsg =
+          err?.error?.email || err?.error?.username || 'Something went wrong';
+        this.toast.error(errorMsg, 'Error');
+        // console.error('Profile update failed', err);
+      }
+    });
+  }
+
 }

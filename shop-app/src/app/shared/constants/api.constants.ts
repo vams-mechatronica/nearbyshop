@@ -44,6 +44,7 @@ export const API_ENDPOINTS = {
   VERIFY_PINCODE: `${API_BASE_URL}/api/v1/check-delivery`,
   GET_WALLET_TRANSACTION: `${API_BASE_URL}/api/v1/wallet/transactions/`,
   USER_ADDRESS_SYNC: `${API_BASE_URL}/api/v1/user/sync-address/`,
+  USER_PROFILE_UPDATE: `${API_BASE_URL}/api/v1/user/update/`,
   STORES: `${API_BASE_URL}/api/v1/vendors/stores/`,
   STORES_WITH_PINCODE: `${API_BASE_URL}/api/v1/vendors/stores/?pincode=`,
 };

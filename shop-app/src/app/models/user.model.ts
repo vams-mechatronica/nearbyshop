@@ -11,6 +11,12 @@ export interface UserInfo {
   bdaprofile: any | null;       // same here
 }
 
+export interface UserProfileUpdateResponse {
+  username: string;
+  email: string;
+}
+
+
 export interface AddDeliveryAddress {
   name: string;
   address_line: string;
