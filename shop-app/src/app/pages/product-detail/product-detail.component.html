@@ -21,8 +21,8 @@
 
       <!-- Vendor -->
       <div class="vendor-info">
-        <div class="vendor-name">{{ product.vendor.shop_name }}</div>
-        <div class="vendor-address">{{ product.vendor.shop_address }}</div>
+        <div class="vendor-name">{{ product.shop.name }}</div>
+        <div class="vendor-address">{{ product.shop.address }}</div>
       </div>
 
       <!-- Price -->
@@ -50,7 +50,7 @@
         <div class="cart-action">
 
           <!-- ADD -->
-          <button class="btn-add" [class.hidden]="product.qty" [disabled]="!product.vendor?.is_accepting_orders"
+          <button class="btn-add" [class.hidden]="product.qty" [disabled]="!product.shop?.is_accepting_orders"
             (click)="addToCart(product); product.qty = 1">
             ADD
           </button>

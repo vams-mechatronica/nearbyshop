@@ -21,12 +21,12 @@ export class ProductsService {
       .set('page', page.toString())
       .set('page_size', pageSize.toString());
     // const params = new HttpParams().set('category', category.toString());
-    return this.http.get(API_ENDPOINTS.PRODUCTS, { params });
+    return this.http.get(API_ENDPOINTS.PRODUCTS_V2, { params });
   }
 
   getProductsByCategorySlug(slug: string): Observable<any> {
     const params = new HttpParams().set('category__slug', slug);
-    return this.http.get(API_ENDPOINTS.PRODUCTS, { params });
+    return this.http.get(API_ENDPOINTS.PRODUCTS_V2, { params });
   }
   getProductsByCategorySlugPagination(
     slug: string,
@@ -38,7 +38,7 @@ export class ProductsService {
       .set('page', page.toString())
       .set('page_size', pageSize.toString());
 
-    return this.http.get<PaginatedResponse<Product>>(API_ENDPOINTS.PRODUCTS, { params });
+    return this.http.get<PaginatedResponse<Product>>(API_ENDPOINTS.PRODUCTS_V2, { params });
   }
   getProductsByCategorySlugPaginationPincode(
     slug: string,pincode: string,
@@ -47,11 +47,11 @@ export class ProductsService {
   ) {
     const params = new HttpParams()
       .set('category__slug', slug)
-      .set('vendor__shop_location__pincode', pincode)
+      .set('shop__address__pincode', pincode)
       .set('page', page.toString())
       .set('page_size', pageSize.toString());
 
-    return this.http.get<PaginatedResponse<Product>>(API_ENDPOINTS.PRODUCTS, { params });
+    return this.http.get<PaginatedResponse<Product>>(API_ENDPOINTS.PRODUCTS_V2, { params });
   }
 
   getProductsByStoreSlug(slug: string): Observable<any> {
@@ -65,19 +65,19 @@ export class ProductsService {
       .set('page', page.toString())
       .set('page_size', pageSize.toString());
     // const params = new HttpParams().set('store__slug', slug);
-    return this.http.get(API_ENDPOINTS.STORE_PRODUCTS + `${slug}/products/`,{params});
+    return this.http.get(API_ENDPOINTS.STORE_PRODUCTS_V2 + `${slug}/products/`,{params});
   }
 
   getProductDetailById(productId: string): Observable<any> {
     return this.http.get(`${API_ENDPOINTS.PRODUCT_DETAIL}${productId}/`);
   }
   getProductDetailBySlug(productSlug: string): Observable<any> {
-    return this.http.get(`${API_ENDPOINTS.PRODUCT_DETAIL}${productSlug}/`);
+    return this.http.get(`${API_ENDPOINTS.PRODUCT_DETAIL_V2}${productSlug}/`);
   }
   getRelatedProductById(productId: string): Observable<any> {
     return this.http.get(`${API_ENDPOINTS.RELATED_PRODUCT}${productId}/related/`);
   }
   getRelatedProductBySlug(productSlug: string): Observable<any> {
-    return this.http.get(`${API_ENDPOINTS.RELATED_PRODUCT}${productSlug}/related/`);
+    return this.http.get(`${API_ENDPOINTS.RELATED_PRODUCT_V2}${productSlug}/related/`);
   }
 }

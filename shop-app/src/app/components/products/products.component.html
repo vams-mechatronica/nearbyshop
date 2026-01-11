@@ -51,7 +51,7 @@
         <!-- GRID -->
         <div class="product-grid" *ngIf="products.length; else noProducts">
           <div class="product-card" *ngFor="let product of products"
-            [class.vendor-closed]="!product.vendor?.is_accepting_orders">
+            [class.vendor-closed]="!product.shop?.is_accepting_orders">
 
             <a [routerLink]="['/product', product.slug]">
 
@@ -72,10 +72,10 @@
                 <!-- VENDOR INFO -->
                 <div class="vendor-info">
                   <span class="vendor-name">
-                    {{ product.vendor?.shop_name }}
+                    {{ product.shop?.name }}
                   </span>
                   <span class="vendor-address">
-                    {{ product.vendor?.shop_address }}
+                    {{ product.shop?.address }}
                   </span>
                 </div>
 
@@ -93,7 +93,7 @@
               <!-- CART ACTION -->
               <div class="cart-action">
                 <!-- ADD TO CART -->
-                <button class="btn-add" [class.hidden]="product.qty" [disabled]="!product.vendor?.is_accepting_orders"
+                <button class="btn-add" [class.hidden]="product.qty" [disabled]="!product.shop?.is_accepting_orders"
                   (click)="addToCart(product)">
                   ADD
                 </button>
@@ -115,7 +115,7 @@
 
 
             <!-- CLOSED LABEL -->
-            <div class="closed-overlay" *ngIf="!product.vendor?.is_accepting_orders">
+            <div class="closed-overlay" *ngIf="!product.shop?.is_accepting_orders">
               Not accepting orders
             </div>
 

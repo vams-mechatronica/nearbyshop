@@ -122,11 +122,11 @@
       <div class="store-row">
         <div class="store-card" *ngFor="let store of stores" (click)="selectStore(store)">
           <div class="store-img">
-            <img [src]="store.shop_image" alt="{{ store.shop_name }}" />
+            <img [src]="store.shop_image" alt="{{ store.name }}" />
           </div>
 
           <div class="store-name">
-            {{ store.shop_name }}
+            {{ store.name }}
           </div>
           
           <!-- RATING ROW -->
@@ -139,7 +139,7 @@
           
           <!-- VENDOR CATEGORY PILL -->
           <div class="vendor-category-pill">
-            {{ store.sub_category_name || 'Cafe' }}
+            {{ store.category_name || 'Cafe' }}
           </div>
         </div>
       </div>

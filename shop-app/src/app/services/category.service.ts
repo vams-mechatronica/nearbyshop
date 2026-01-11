@@ -18,6 +18,6 @@ export class CategoryService {
   }
 
   getStoresByPincode(pincode: string) {
-  return this.http.get(API_ENDPOINTS.STORES_WITH_PINCODE + pincode);
+  return this.http.get(API_ENDPOINTS.STORES_WITH_PINCODE_V2 + pincode);
 }
 }

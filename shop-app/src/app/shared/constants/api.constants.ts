@@ -47,4 +47,11 @@ export const API_ENDPOINTS = {
   USER_PROFILE_UPDATE: `${API_BASE_URL}/api/v1/user/update/`,
   STORES: `${API_BASE_URL}/api/v1/vendors/stores/`,
   STORES_WITH_PINCODE: `${API_BASE_URL}/api/v1/vendors/stores/?pincode=`,
+
+  PRODUCTS_V2: `${API_BASE_URL}/api/v2/products/`,
+  PRODUCT_DETAIL_V2: `${API_BASE_URL}/api/v2/product/`,
+  RELATED_PRODUCT_V2: `${API_BASE_URL}/api/v2/products/`,
+  STORES_WITH_PINCODE_V2: `${API_BASE_URL}/api/v2/vendors/shop/?pincode=`,
+  STORE_PRODUCTS_V2: `${API_BASE_URL}/api/v2/vendors/stores/`,
+
 };
