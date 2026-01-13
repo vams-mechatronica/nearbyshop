@@ -36,7 +36,7 @@ export class AnalyticsService {
   trackPageView(url: string): void {
     if (!this.isBrowser()) return;
 
-    window.gtag('config', 'G-WBGMWPQ6XR', {
+    window.gtag('config', 'G-5LLEFRQESF', {
       page_path: url
     });
   }
