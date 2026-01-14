@@ -11,7 +11,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
 } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { CategoryService } from '../../services/category.service';
 import { BannerService } from '../../services/banner.service';
@@ -25,6 +25,7 @@ import { LoaderService } from '../../services/loader.service';
 import { ToastrService } from 'ngx-toastr';
 import { HeaderCountService } from '../../services/header.service';
 import { AuthModalService } from '../../services/auth-modal.service';
+import { AnalyticsService } from '../../services/analytics.service';
 
 interface CategoryShelf {
   categoryId: number;
@@ -86,7 +87,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     private toastr: ToastrService,
     private headerService: HeaderCountService,
     private authModal: AuthModalService,
-
+    private analytics: AnalyticsService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) { }
 
@@ -99,6 +100,11 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     this.fetchStores();
     this.fetchBanners(); // initial load
     this.loadCategories();
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        this.analytics.trackPageView(event.urlAfterRedirects);
+      }
+    });
   }
 
   ngAfterViewInit(): void {
@@ -262,10 +268,12 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   // 🧭 NAVIGATION
   // ────────────────────────────────
   selectCategory(cat: any): void {
+    this.analytics.trackEvent('CATEGORY_PAGE_REDIRECT_CLICKED','PAGE_VISIT',1,`CATEGORY: ${cat.slug}`);
     if (cat?.slug) this.router.navigate(['/products', cat.slug]);
   }
 
   selectStore(store: any): void {
+    this.analytics.trackEvent('STORE_PAGE_REDIRECT_CLICKED','PAGE_VISIT',1,`STORE: ${store.slug}`);
     if (store?.slug) this.router.navigate(['/stores', store.slug]);
   }
 
@@ -376,6 +384,8 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   addToCart(product: any): void {
+    this.analytics.trackEvent('ADD_TO_CART_CLICKED','ECOMMERCE',1,`PRODUCT_ID: ${product.id}`);
+
 
     // 🔐 Force login
     if (!this.authService.isLoggedIn()) {
