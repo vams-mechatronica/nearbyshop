@@ -1,5 +1,5 @@
 import { Component, Injectable, OnInit } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { Order } from '../../models/order.model';
 import { OrderService } from '../../services/order.service';
 import { CommonModule } from '@angular/common';
@@ -7,7 +7,7 @@ import { CommonModule } from '@angular/common';
 @Component({
   selector: 'app-order-summary',
   templateUrl: './order-summary.component.html',
-  imports: [CommonModule, RouterLink]
+  imports: [CommonModule]
 })
 @Injectable({
   providedIn: 'root'
@@ -35,17 +35,26 @@ export class OrderSummaryComponent implements OnInit {
   }
 
   retryPayment() {
-
+    // pass
   }
 
   getPaymentMethodLabel(method: string): string {
     if (!method) return '-';
-
     if (method.toLowerCase() === 'cod') {
       return 'CASH ON DELIVERY';
     }
-
     return method.toUpperCase();
   }
+
+  printInvoice(): void {
+    window.print();
+  }
+
+  getItemTotal(item: any): number {
+    const price = Number(item.price) || 0;
+    const qty = Number(item.quantity) || 0;
+    return price * qty;
+  }
+
 
 }

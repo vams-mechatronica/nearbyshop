@@ -1,0 +1,69 @@
+.invoice-wrapper {
+  max-width: 900px;
+}
+
+.invoice {
+  font-size: 14px;
+  background: #fff;
+}
+
+.invoice-logo {
+  height: 50px;
+}
+
+.table th, .table td {
+  vertical-align: middle;
+}
+
+/* PRINT RULES */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .invoice, .invoice * {
+    visibility: visible;
+  }
+
+  .invoice {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}
+
+
+@media print {
+
+  body * {
+    visibility: hidden !important;
+  }
+
+  #invoice-print-area,
+  #invoice-print-area * {
+    visibility: visible !important;
+  }
+
+  #invoice-print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}
+
+@page {
+  size: A4;
+  margin: 15mm;
+}
