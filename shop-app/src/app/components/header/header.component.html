@@ -81,12 +81,12 @@
       </a>
 
       <!-- LOGIN -->
-      <button class="login-btn" *ngIf="!isLoggedIn" (click)="loginSignup()">
+      <button class="login-btn" *ngIf="isBrowser && !(isLoggedIn$ | async)" (click)="loginSignup()">
         Login
       </button>
 
       <!-- PROFILE -->
-      <div class="profile profile-nav" *ngIf="isLoggedIn" (click)="toggleProfileDropdown($event)">
+      <div class="profile profile-nav" *ngIf="isBrowser && (isLoggedIn$ | async)" (click)="toggleProfileDropdown($event)">
         <i class="fas fa-user-circle"></i>
 
         <div class="profile-dropdown" *ngIf="showProfileDropdown" (click)="$event.stopPropagation()">

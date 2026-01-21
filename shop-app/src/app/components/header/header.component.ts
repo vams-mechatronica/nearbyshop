@@ -16,6 +16,7 @@ import { AuthComponent } from '../auth/auth.component';
 import { UserService } from '../../services/user.service';
 import {
   BehaviorSubject,
+  Observable,
   Subject,
   debounceTime,
   distinctUntilChanged,
@@ -26,6 +27,7 @@ import { API_ENDPOINTS } from '../../shared/constants/api.constants';
 import { StorageService } from '../../services/storage.service';
 import { HeaderCountService } from '../../services/header.service';
 import { LoaderService } from '../../services/loader.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-header',
@@ -53,7 +55,9 @@ export class HeaderComponent implements OnInit {
   sectorName: string | null = null;
   addressRest: any;
   deliveryTime: string = '';
-
+  isBrowser = false;
+  isLoggedIn$!: Observable<boolean>;
+  
   constructor(
     private router: Router,
     private modalService: NgbModal,
@@ -61,30 +65,27 @@ export class HeaderComponent implements OnInit {
     private storage: StorageService,
     private http: HttpClient, // for search API calls
     private headerService: HeaderCountService,
+    private authService: AuthService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) { }
-
-  get isLoggedIn(): boolean {
-    if (isPlatformBrowser(this.platformId)) {
-      return !!this.storage.getItem('access_token');
-    }
-    return false;
-  }
-
+  
   onLocationChange(event: any): void {
     const selectedId = event.target.value;
     console.log('Selected location ID:', selectedId);
     this.storage.setItem('selected_location_id', selectedId);
   }
-
+  
   loader = inject(LoaderService);
-
+  
+  
   onNavClick(): void {
     this.loader.show();
   }
   ngOnInit(): void {
-    if (this.isLoggedIn) {
-      this.getUserInfo();
+    this.isBrowser = isPlatformBrowser(this.platformId);
+    this.isLoggedIn$ = this.authService.isLoggedIn$;
+    if (!this.authService.hasValidToken()) {
+      this.authService.logout();
     }
 
     this.selectedLocation = this.storage.getItem('selected_location_id');
@@ -171,9 +172,10 @@ export class HeaderComponent implements OnInit {
   }
 
   logout(): void {
-    this.storage.removeItem('access_token');
+    // this.storage.removeItem('access_token');
     this.showProfileDropdown = false;
-    this.router.navigate(['/']);
+    // this.router.navigate(['/']);
+    this.authService.logout();
   }
 
   @HostListener('document:click', ['$event'])

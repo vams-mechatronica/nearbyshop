@@ -109,7 +109,7 @@ export class AuthComponent implements OnInit {
           this.storage.setItem('refresh_token', refresh);
           this.storage.setItem('phone', this.phone);
         }
-
+        this.authService.login(access);
         // ✅ Location validation
         this.onLoginSuccess();
 
@@ -123,10 +123,10 @@ export class AuthComponent implements OnInit {
           this.router.navigateByUrl(redirectUrl);
         }
 
-        this.toastrService.success(
-          'User logged in successfully',
-          'Success'
-        );
+        // this.toastrService.success(
+        //   'User logged in successfully',
+        //   'Success'
+        // );
       },
       error: () => {
         this.toastrService.error(
