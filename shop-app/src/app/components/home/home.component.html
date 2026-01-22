@@ -29,33 +29,40 @@
 
   <section class="section" *ngFor="let shelf of categoryShelves; let i = index">
 
-    <!-- HEADER -->
-    <div class="section-header">
-      <h2>{{ shelf.categoryName }}</h2>
-      <span class="view-all" [routerLink]="['/category', shelf.categorySlug]">
-        View all
-      </span>
-    </div>
+  <!-- HEADER -->
+  <div class="section-header">
+    <h2>{{ shelf.categoryName }}</h2>
+    <span
+      class="view-all"
+      *ngIf="shelf.products?.length"
+      [routerLink]="['/category', shelf.categorySlug]"
+    >
+      View all
+    </span>
+  </div>
+
+  <!-- PRODUCTS / EMPTY STATE -->
+  <ng-container *ngIf="shelf.products?.length; else noProducts">
 
     <!-- PRODUCT CAROUSEL -->
-    <div class="horizontal-scroll" (scroll)="onHorizontalScroll($event, shelf.categorySlug)">
-      <!-- PRODUCT CAROUSEL WRAPPER -->
+    <div class="horizontal-scroll"
+         (scroll)="onHorizontalScroll($event, shelf.categorySlug)">
+
       <div class="product-carousel-wrapper">
 
-        <!-- PRODUCTS ROW -->
         <div class="product-row" #carousel>
 
           <a class="product-card" *ngFor="let product of shelf.products">
-            <!-- IMAGE + ADD -->
+
             <div class="image-wrapper">
               <img [src]="product.image" alt="{{ product.name }}" />
-
-              <button class="add-btn" (click)="$event.preventDefault(); addToCart(product)">
+              <button
+                class="add-btn"
+                (click)="$event.preventDefault(); addToCart(product)">
                 ADD
               </button>
             </div>
 
-            <!-- PRICE -->
             <div class="price-row">
               <span class="final-price">₹{{ product.final_price }}</span>
               <span class="mrp" *ngIf="product.discount_value">
@@ -63,52 +70,64 @@
               </span>
             </div>
 
-            <!-- DISCOUNT -->
             <div class="discount-text" *ngIf="product.discount_value">
               ₹{{ product.price - product.final_price }} OFF
             </div>
 
-            <!-- NAME -->
-            <div class="product-name" [routerLink]="['/product', product.slug]">
+            <div class="product-name"
+                 [routerLink]="['/product', product.slug]">
               {{ product.name }}
             </div>
 
-            <!-- PACK -->
             <div class="pack-info">
               {{ product.unit?.code || '1 pack' }}
             </div>
 
-            <!-- TAG -->
-            <div class="tag-chip">{{ product.vendor?.shop_name }}</div>
+            <div class="tag-chip">
+              {{ product.vendor?.shop_name }}
+            </div>
 
-            <!-- RATING -->
             <div class="rating-row">
               <span class="rating">⭐ {{ product.rating || 4.9 }}</span>
               <span class="dot">•</span>
               <span class="time">7 mins</span>
             </div>
+
           </a>
 
           <!-- LOADER -->
           <div class="product-skeleton" *ngIf="shelf.loading"></div>
+
         </div>
 
-        <!-- RIGHT ARROW -->
-        <button class="carousel-arrow" (click)="scrollRight(carousel, shelf.categorySlug)">
+        <button
+          class="carousel-arrow"
+          (click)="scrollRight(carousel, shelf.categorySlug)">
           ›
         </button>
 
       </div>
-
-
     </div>
 
-    <!-- VERTICAL LAZY LOAD TRIGGER -->
-    <div class="vertical-loader" *ngIf="i === categoryShelves.length - 1" appIntersectionObserver
-      (visible)="loadNextCategoryShelf()">
-    </div>
+  </ng-container>
 
-  </section>
+  <!-- NO PRODUCTS TEMPLATE -->
+  <ng-template #noProducts>
+    <div class="no-products">
+      <p>No products available</p>
+    </div>
+  </ng-template>
+
+  <!-- VERTICAL LAZY LOAD TRIGGER -->
+  <div
+    class="vertical-loader"
+    *ngIf="i === categoryShelves.length - 1"
+    appIntersectionObserver
+    (visible)="loadNextCategoryShelf()">
+  </div>
+
+</section>
+
 
 
   <!-- STORES -->
