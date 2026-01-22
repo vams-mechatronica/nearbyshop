@@ -1,0 +1,80 @@
+<div class="vendor-filters">
+
+  <!-- SEARCH -->
+  <input
+    type="text"
+    placeholder="Search vendors"
+    [(ngModel)]="filters.search"
+    (input)="applyFilters()"
+  />
+
+  <!-- CATEGORY -->
+  <select [(ngModel)]="filters.category" (change)="applyFilters()">
+    <option value="">All Categories</option>
+    <option *ngFor="let c of categories" [value]="c.slug">
+      {{ c.name }}
+    </option>
+  </select>
+
+  <!-- SORT -->
+  <select [(ngModel)]="filters.sort_by" (change)="applyFilters()">
+    <option value="distance">Nearest</option>
+    <option value="rating">Top Rated</option>
+    <option value="delivery_time">Fastest Delivery</option>
+  </select>
+
+  <!-- OPEN NOW -->
+  <label>
+    <input
+      type="checkbox"
+      [(ngModel)]="filters.is_open"
+      (change)="applyFilters()"
+    />
+    Open Now
+  </label>
+
+</div>
+
+<div class="vendor-list">
+
+  <a
+    class="vendor-card"
+    *ngFor="let vendor of vendors"
+    (click)="selectStore(vendor)"
+  >
+
+    <img [src]="vendor.logo" alt="{{ vendor.shop_name }}" />
+
+    <div class="vendor-info">
+      <h3>{{ vendor.shop_name }}</h3>
+
+      <p class="category">
+        {{ vendor.category_name }}
+      </p>
+
+      <div class="meta">
+        <span>⭐ {{ vendor.rating || 4.5 }}</span>
+        <span>• {{ vendor.distance }} km</span>
+        <span>• {{ vendor.delivery_time }} mins</span>
+      </div>
+
+      <span
+        class="status"
+        [class.open]="vendor.is_open"
+        [class.closed]="!vendor.is_open"
+      >
+        {{ vendor.is_open ? 'Open' : 'Closed' }}
+      </span>
+    </div>
+
+  </a>
+
+</div>
+
+<!-- EMPTY STATE -->
+<div class="empty" *ngIf="!vendors.length && !loading">
+  No vendors found near you
+</div>
+
+<!-- LOADER -->
+<div class="loader" *ngIf="loading"></div>

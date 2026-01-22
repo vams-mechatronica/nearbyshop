@@ -1,0 +1,40 @@
+.vendor-filters {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  background: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.vendor-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+  padding: 16px;
+}
+
+.vendor-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  gap: 12px;
+  text-decoration: none;
+  color: #000;
+}
+
+.vendor-card img {
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.status.open {
+  color: green;
+}
+.status.closed {
+  color: red;
+}

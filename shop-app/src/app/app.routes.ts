@@ -13,13 +13,12 @@ import { ContactUsComponent } from './pages/contact-us/contact-us.component';
 import { ProductDetailComponent } from './pages/product-detail/product-detail.component';
 import { VendorProductsComponent } from './components/vendor-products/vendor-products.component';
 import { AuthGuard } from './core/gaurds/auth.gaurd';
+import { VendorListComponent } from './components/vendor-list/vendor-list.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
-
-  // 🔐 Auth (optional page route)
   { path: 'auth', component: AuthComponent },
-
+  
   // 🔐 PROTECTED ROUTES
   { path: 'cart', component: CartComponent, canActivate: [AuthGuard] },
   { path: 'subscribe', component: SubscriptionsComponent, canActivate: [AuthGuard] },
@@ -34,5 +33,6 @@ export const routes: Routes = [
   { path: 'stores/:slug', component: VendorProductsComponent },
   { path: 'about-us', component: AboutUsComponent },
   { path: 'policy', component: PolicyComponent },
-  { path: 'contact-us', component: ContactUsComponent }
+  { path: 'contact-us', component: ContactUsComponent },
+  { path: 'stores/all', component: VendorListComponent },
 ];
