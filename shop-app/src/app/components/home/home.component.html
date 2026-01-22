@@ -134,7 +134,7 @@
   <section class="section">
     <div class="section-header">
       <h2>Popular Stores Near You</h2>
-      <span class="view-all" [routerLink]="['/stores/all']">View all</span>
+      <span class="view-all" [routerLink]="['/stores-view-all']">View all</span>
     </div>
 
     <div class="store-carousel">
@@ -149,7 +149,7 @@
           </div>
           
           <!-- RATING ROW -->
-          <div class="vendor-rating">
+          <div class="vendor-rating">`
             <i class="fas fa-star"></i>
             <span class="rating-value">{{ store.rating || 4.9 }}</span>
             <span class="dot">•</span>

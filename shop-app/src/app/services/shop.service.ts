@@ -21,7 +21,7 @@ export class ShopService {
     let params = new HttpParams();
     Object.keys(filters).forEach(key => {
       const value = filters[key];
-      if (
+      if ( 
         value !== null &&
         value !== undefined &&
         value !== '' &&
@@ -30,7 +30,7 @@ export class ShopService {
         params = params.set(key, value);
       }
     });
-    return this.http.get(API_ENDPOINTS.STORES_WITH_PINCODE_V2, { params });
+    return this.http.get(API_ENDPOINTS.STORES_V2, { params });
   }
 }
 

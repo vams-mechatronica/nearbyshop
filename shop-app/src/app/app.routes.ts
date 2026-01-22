@@ -34,5 +34,5 @@ export const routes: Routes = [
   { path: 'about-us', component: AboutUsComponent },
   { path: 'policy', component: PolicyComponent },
   { path: 'contact-us', component: ContactUsComponent },
-  { path: 'stores/all', component: VendorListComponent },
+  { path: 'stores-view-all', component: VendorListComponent },
 ];

@@ -1,73 +1,102 @@
-<div class="vendor-filters">
+<div class="vendor-filters container-fluid bg-white py-3 shadow-sm">
 
-  <!-- SEARCH -->
-  <input
-    type="text"
-    placeholder="Search vendors"
-    [(ngModel)]="filters.search"
-    (input)="applyFilters()"
-  />
+  <div class="row g-2 align-items-center">
 
-  <!-- CATEGORY -->
-  <select [(ngModel)]="filters.category" (change)="applyFilters()">
-    <option value="">All Categories</option>
-    <option *ngFor="let c of categories" [value]="c.slug">
-      {{ c.name }}
-    </option>
-  </select>
+    <!-- SEARCH -->
+    <div class="col-12 col-md-4">
+      <input
+        type="text"
+        class="form-control"
+        placeholder="Search vendors"
+        [(ngModel)]="filters.search"
+        (input)="applyFilters()"
+      />
+    </div>
 
-  <!-- SORT -->
-  <select [(ngModel)]="filters.sort_by" (change)="applyFilters()">
-    <option value="distance">Nearest</option>
-    <option value="rating">Top Rated</option>
-    <option value="delivery_time">Fastest Delivery</option>
-  </select>
+    <!-- CATEGORY -->
+    <div class="col-6 col-md-3">
+      <select
+        class="form-select"
+        [(ngModel)]="filters.category__slug"
+        (change)="applyFilters()"
+      >
+        <option value="">All Categories</option>
+        <option *ngFor="let c of categories" [value]="c.slug">
+          {{ c.name }}
+        </option>
+      </select>
+    </div>
 
-  <!-- OPEN NOW -->
-  <label>
-    <input
-      type="checkbox"
-      [(ngModel)]="filters.is_open"
-      (change)="applyFilters()"
-    />
-    Open Now
-  </label>
+    <!-- SORT -->
+    <div class="col-6 col-md-3">
+      <select
+        class="form-select"
+        [(ngModel)]="filters.sort_by"
+        (change)="applyFilters()"
+      >
+        <option value="distance">Nearest</option>
+        <option value="rating">Top Rated</option>
+        <option value="delivery_time">Fastest Delivery</option>
+      </select>
+    </div>
+
+    <!-- OPEN NOW -->
+    <div class="col-12 col-md-2 d-flex align-items-center">
+      <div class="form-check">
+        <input
+          class="form-check-input"
+          type="checkbox"
+          id="openNow"
+          [(ngModel)]="filters.is_accepting_orders"
+          (change)="applyFilters()"
+        />
+        <label class="form-check-label" for="openNow">
+          Open Now
+        </label>
+      </div>
+    </div>
+
+  </div>
 
 </div>
 
-<div class="vendor-list">
 
-  <a
-    class="vendor-card"
-    *ngFor="let vendor of vendors"
-    (click)="selectStore(vendor)"
+<div class="vendor-list container-fluid">
+
+  <div
+    class="store-card"
+    *ngFor="let store of vendors"
+    (click)="selectStore(store)"
   >
 
-    <img [src]="vendor.logo" alt="{{ vendor.shop_name }}" />
-
-    <div class="vendor-info">
-      <h3>{{ vendor.shop_name }}</h3>
-
-      <p class="category">
-        {{ vendor.category_name }}
-      </p>
-
-      <div class="meta">
-        <span>⭐ {{ vendor.rating || 4.5 }}</span>
-        <span>• {{ vendor.distance }} km</span>
-        <span>• {{ vendor.delivery_time }} mins</span>
-      </div>
-
-      <span
-        class="status"
-        [class.open]="vendor.is_open"
-        [class.closed]="!vendor.is_open"
-      >
-        {{ vendor.is_open ? 'Open' : 'Closed' }}
-      </span>
+    <!-- IMAGE -->
+    <div class="store-img">
+      <img [src]="store.shop_image" alt="{{ store.name }}" />
     </div>
 
-  </a>
+    <!-- INFO -->
+    <div class="store-info">
+
+      <div class="store-name">
+        {{ store.name }}
+      </div>
+
+      <!-- RATING -->
+      <div class="vendor-rating">
+        <i class="fas fa-star"></i>
+        <span class="rating-value">{{ store.rating || 4.9 }}</span>
+        <span class="dot">•</span>
+        <span class="time">{{ store.delivery_time || '7 mins' }}</span>
+      </div>
+
+      <!-- CATEGORY -->
+      <div class="vendor-category-pill">
+        {{ store.category_name || 'Cafe' }}
+      </div>
+
+    </div>
+
+  </div>
 
 </div>
 

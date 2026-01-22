@@ -1,31 +1,36 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ShopService } from '../../services/shop.service';
 import { AnalyticsService } from '../../services/analytics.service';
 import { Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { HomeComponent } from '../home/home.component';
+import { CategoryService } from '../../services/category.service';
 
 @Component({
   selector: 'app-vendor-list',
-  imports: [],
+  imports: [CommonModule,
+    FormsModule],
   templateUrl: './vendor-list.component.html',
   styleUrl: './vendor-list.component.scss'
 })
-export class VendorListComponent {
+export class VendorListComponent implements OnInit {
   vendors: any[] = [];
   categories: any[] = [];
   loading = false;
 
   filters = {
     search: '',
-    category: '',
+    category__slug: '',
     sort_by: 'distance',
-    is_open: false,
-    lat: null,
-    lng: null,
+    is_accepting_orders: false,
+    pincode: ''
   };
   constructor(
     private shopService: ShopService,
     private router: Router,
-    private analytics: AnalyticsService,) {
+    private analytics: AnalyticsService,
+    private categoryService: CategoryService) {
 
   }
 
@@ -44,9 +49,22 @@ export class VendorListComponent {
         }
       });
   }
+  ngOnInit(): void {
+    this.loading = true;
+    this.fetchVendors();
+    this.getCategories();
+    this.loading = false;
+  }
 
   applyFilters() {
     this.fetchVendors();
+  }
+
+  getCategories() {
+    this.categoryService.getCategories().subscribe({
+      next: (res: any) => { this.categories = res.results || []; },
+      error: (err) => console.error('Error loading categories:', err),
+    });
   }
 
   selectStore(store: any): void {
