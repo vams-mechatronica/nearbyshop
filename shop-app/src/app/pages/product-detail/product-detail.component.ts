@@ -12,6 +12,7 @@ import { AuthModalService } from '../../services/auth-modal.service';
 import { AuthService } from '../../services/auth.service';
 import { HeaderCountService } from '../../services/header.service';
 import { Meta, Title } from '@angular/platform-browser';
+import { SeoService } from '../../services/seo.service';
 
 @Component({
   selector: 'app-product-detail',
@@ -48,7 +49,8 @@ export class ProductDetailComponent {
     private authService: AuthService,
     private headerService: HeaderCountService,
     private meta: Meta,
-    private title: Title
+    private title: Title,
+    private seoService: SeoService,
   ) { }
 
   ngOnInit(): void {
@@ -79,43 +81,13 @@ export class ProductDetailComponent {
         this.product = res;
         const primary = this.product.images?.find((img: any) => img.is_primary);
         this.selectedImage = primary ? primary.image : this.product.image;
-        // 🔥 TITLE
-        this.title.setTitle(
-          this.product.seo_title || `${this.product.name} | Buy Online Near You`
+        
+        this.seoService.setProductSEO(this.product);
+        this.seoService.setProductSchema(this.product);
+        this.seoService.setCanonicalUrl(
+          `${window.location.origin}/product/${this.product.slug}`
         );
-
-        // 🔥 META DESCRIPTION
-        this.meta.updateTag({
-          name: 'description',
-          content: this.product.seo_description || this.product.short_description
-        });
-
-        // 🔥 META KEYWORDS (optional)
-        if (this.product.seo_keywords) {
-          this.meta.updateTag({
-            name: 'keywords',
-            content: this.product.seo_keywords
-          });
-        }
-
-        // 🔥 OPEN GRAPH (SOCIAL)
-        this.meta.updateTag({ property: 'og:title', content: this.product.seo_title || this.product.name });
-        this.meta.updateTag({ property: 'og:description', content: this.product.seo_description || this.product.short_description });
-        this.meta.updateTag({ property: 'og:type', content: 'product' });
-        this.meta.updateTag({ property: 'og:url', content: window.location.href });
-
-        if (this.product.seo_image) {
-          this.meta.updateTag({ property: 'og:image', content: this.product.seo_image });
-        }
-
-        // 🔥 TWITTER
-        this.meta.updateTag({ name: 'twitter:card', content: 'summary_large_image' });
-        this.meta.updateTag({ name: 'twitter:title', content: this.product.seo_title || this.product.name });
-        this.meta.updateTag({ name: 'twitter:description', content: this.product.seo_description || this.product.short_description });
-        if (this.product.seo_image) {
-          this.meta.updateTag({ name: 'twitter:image', content: this.product.seo_image });
-        }
-        this.cdRef.detectChanges(); // update view
+        this.cdRef.detectChanges();
       },
       error: (err) => console.error(err),
     });

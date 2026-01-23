@@ -15,63 +15,171 @@
     </div>
 
     <!-- RIGHT : DETAILS -->
-    <div class="col-md-6">
+    <div class="col-md-6 product-info-section">
 
-      <h2 class="product-title">{{ product.name }}</h2>
+      <!-- TITLE -->
+      <h1 class="product-title">{{ product.name }}</h1>
 
-      <!-- Vendor -->
+      <!-- BRAND / SELLER -->
       <div class="vendor-info">
-        <div class="vendor-name">{{ product.shop.name }}</div>
-        <div class="vendor-address">{{ product.shop.address }}</div>
+        <span class="vendor-name">{{ product.shop.name }}</span>
+        <span class="dot">•</span>
+        <span class="vendor-address">{{ product.shop.address }}</span>
       </div>
 
-      <!-- Price -->
+      
+
+      <!-- PRICE -->
       <div class="price-row mt-2">
         <span class="price">₹{{ product.final_price }}</span>
         <del *ngIf="product.discount_value">₹{{ product.price }}</del>
         <span class="unit">{{ product.unit.code }}</span>
 
-        <span *ngIf="product.discount_value > 0" class="discount-badge-inline">
-          {{ product.discount_type === 'percentage'
-          ? (product.discount_value | number:'1.0-0') + '% OFF'
-          : '₹' + (product.discount_value | number:'1.0-0') + ' OFF'
+        <span *ngIf="product.discount_value" class="discount-pill">
+          SAVE {{ product.discount_type === 'percentage'
+          ? (product.discount_value | number:'1.0-0') + '%'
+          : '₹' + (product.discount_value | number:'1.0-0')
           }}
         </span>
       </div>
 
-      <!-- Description -->
-      <p class="description mt-3">
-        {{ product.description }}
-      </p>
+      <!-- DELIVERY INFO -->
+      <div class="delivery-box">
+        <img src="assets/undraw/delivery.svg" alt="Fast Delivery" />
 
-      <!-- ACTIONS (MATCHES PRODUCT CARD) -->
-      <div class="product-actions mt-4">
+        <div class="delivery-text">
+          <strong>Delivery in 5–10 mins</strong>
+          <span>Fresh stock from nearby store</span>
+        </div>
+      </div>
 
+      <!-- ACTIONS -->
+      <div class="product-actions mt-3">
+        <!-- SAME CART LOGIC -->
         <div class="cart-action">
-
-          <!-- ADD -->
-          <button class="btn-add" [class.hidden]="product.qty" [disabled]="!product.shop?.is_accepting_orders"
-            (click)="addToCart(product); product.qty = 1">
+          <button class="btn-add" [class.hidden]="product.qty" (click)="addToCart(product); product.qty = 1">
             ADD
           </button>
 
-          <!-- QTY -->
           <div class="qty-box" [class.visible]="product.qty">
             <button (click)="decreaseQty(product)">−</button>
             <span>{{ product.qty }}</span>
             <button (click)="increaseQty(product)">+</button>
           </div>
-
         </div>
 
-        <!-- SUBSCRIBE -->
         <button class="btn-subscribe" (click)="openSubscribeModal(product)">
           Subscribe
         </button>
+      </div>
 
+      
+
+      <!-- HIGHLIGHTS -->
+      <div class="product-highlights">
+        <h6>Why you’ll love this</h6>
+        <!-- TRUST BADGES -->
+      <div class="trust-badges">
+        <div class="trust-card">
+          <div class="icon-wrap">
+            <img src="assets/undraw/verified.svg" alt="Authentic" />
+          </div>
+          <span>100% Authentic</span>
+        </div>
+
+        <div class="trust-card">
+          <div class="icon-wrap">
+            <img src="assets/undraw/quality.svg" alt="Quality Checked" />
+          </div>
+          <span>Quality Checked</span>
+        </div>
+
+        <div class="trust-card">
+          <div class="icon-wrap">
+            <img src="assets/undraw/store.svg" alt="Local Vendor" />
+          </div>
+          <span>Local Vendor</span>
+        </div>
+
+        <!-- <div class="trust-card">
+          <div class="icon-wrap">
+            <img src="assets/undraw/replace.svg" alt="Exchange" />
+          </div>
+          <span>2 Days Exchange</span>
+        </div> -->
+
+        <div class="trust-card">
+          <div class="icon-wrap">
+            <img src="assets/undraw/check_1.svg" alt="Exchange" />
+          </div>
+          <span>Fresh & locally sourced</span>
+        </div>
+        <div class="trust-card">
+          <div class="icon-wrap">
+            <img src="assets/undraw/check_2.svg" alt="Exchange" />
+          </div>
+          <span>No middlemen pricing</span>
+        </div>
+
+        <div class="trust-card">
+          <div class="icon-wrap">
+            <img src="assets/undraw/check_3.svg" alt="Exchange" />
+          </div>
+          <span>Fast doorstep delivery</span>
+        </div>
+      </div>
+
+
+        <!-- <ul>
+          <li>
+            <img src="assets/undraw/check_1.svg" />
+            Fresh & locally sourced
+          </li>
+          <li>
+            <img src="assets/undraw/check_2.svg" />
+            No middlemen pricing
+          </li>
+          <li>
+            <img src="assets/undraw/check_3.svg" />
+            Fast doorstep delivery
+          </li>
+        </ul> -->
+      </div>
+
+
+      <div class="product-description-box mt-4">
+        <h5>Product Details</h5>
+        <p>{{ product.description }}</p>
+      </div>
+      <div class="info-strip">
+        <div class="info-card">
+          <img src="assets/undraw/shield.svg" />
+          <div>
+            <strong>Quality Assurance</strong>
+            <span>Checked before delivery</span>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <img src="assets/undraw/replace.svg" />
+          <div>
+            <strong>Easy Replacement</strong>
+            <span>Hassle-free support</span>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <img src="assets/undraw/location.svg" />
+          <div>
+            <strong>Nearby Store</strong>
+            <span>Supports local vendors</span>
+          </div>
+        </div>
       </div>
 
     </div>
+
+
   </div>
 
   <!-- RELATED PRODUCTS -->

@@ -3,7 +3,11 @@ export interface Product {
   name: string;
   slug: string;
   sku: string;
-  vendor: number;
+  seo_title: string;
+  seo_description: string;
+  seo_keywords: string;
+  seo_image: string;  
+  shop: number;
   category: number;
   description: string;
   price: string;   // keep as string since API returns "100.00"
