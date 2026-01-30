@@ -138,7 +138,7 @@
   <div class="subscriptions-container mb-4" style="max-height: 400px; overflow-y: auto;">
     <div *ngFor="let sub of subscriptions | subFilter:activeSubTab"
       class="d-flex align-items-center p-3 border-bottom bg-white rounded mb-2 shadow-sm">
-      <img [src]="sub.product.image" class="product-thumb me-3" alt="{{ sub.product.name }}" />
+      <img [src]="sub.product.image || 'assets/images/no-image.jpg'" class="product-thumb me-3" alt="{{ sub.product.name }}" />
       <div class="flex-grow-1">
         <h6 class="fw-bold mb-1">{{ sub.product.name }}</h6>
         <p class="text-muted small mb-1">Qty: {{ sub.quantity }}</p>

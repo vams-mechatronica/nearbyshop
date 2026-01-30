@@ -48,7 +48,7 @@
 
           <div class="suggestion-item" *ngFor="let item of searchResults" (click)="selectResult(item)">
 
-            <img [src]="item.image" />
+            <img [src]="item.image || 'assets/images/no-image.jpg'" />
 
             <div class="suggestion-text">
               <div class="name">{{ item.name }}</div>

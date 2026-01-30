@@ -40,7 +40,7 @@
                 <section class="vendor-strip">
                     <div class="vendor-card" *ngFor="let store of stores" (click)="selectStore(store)"
                         [class.active]="store.id === selectedStoreId">
-                        <img [src]="store.shop_image" />
+                        <img [src]="store.shop_image || 'assets/images/no-image.jpg'" />
                         <span>{{ store.shop_name }}</span>
                     </div>
                 </section>
@@ -78,7 +78,7 @@
 
 
                                 <!-- IMAGE -->
-                                <img [src]="product.image" class="product-img" />
+                                <img [src]="product.image || 'assets/images/no-image.jpg'" class="product-img" />
 
                                 <!-- INFO -->
                                 <div class="product-info">

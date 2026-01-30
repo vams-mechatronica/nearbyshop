@@ -4,7 +4,7 @@
   <section class="category-strip">
     <div class="category-item" *ngFor="let cat of categories" (click)="selectCategory(cat)">
       <div class="category-img">
-        <img [src]="cat.image" alt="{{ cat.name }}" />
+        <img [src]="cat.image || 'assets/images/no-image.jpg'" alt="{{ cat.name }}" />
       </div>
       <div class="category-label">
         {{ cat.name }}
@@ -55,7 +55,7 @@
           <a class="product-card" *ngFor="let product of shelf.products">
 
             <div class="image-wrapper">
-              <img [src]="product.image" alt="{{ product.name }}" />
+              <img [src]="product.image || 'assets/images/no-image.jpg'" alt="{{ product.name }}" />
               <button
                 class="add-btn"
                 (click)="$event.preventDefault(); addToCart(product)">
@@ -141,7 +141,7 @@
       <div class="store-row">
         <div class="store-card" *ngFor="let store of stores" (click)="selectStore(store)">
           <div class="store-img">
-            <img [src]="store.shop_image" alt="{{ store.name }}" />
+            <img [src]="store.shop_image || 'assets/images/no-image.jpg'" alt="{{ store.name }}" />
           </div>
 
           <div class="store-name">
@@ -169,7 +169,7 @@
   <!-- PROMO BANNERS -->
   <section class="promo-section">
     <div class="promo-card" *ngFor="let banner of processedBanners">
-      <img [src]="banner.image" />
+      <img [src]="banner.image || 'assets/images/no-image.jpg'" />
     </div>
   </section>
 

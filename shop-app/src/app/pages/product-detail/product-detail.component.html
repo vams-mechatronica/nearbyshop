@@ -200,7 +200,7 @@
           </div>
 
           <!-- IMAGE -->
-          <img [src]="item.image" class="product-img" />
+          <img [src]="item.image || 'assets/images/no-image.jpg'" class="product-img" />
 
           <!-- INFO -->
           <div class="product-info">
@@ -255,7 +255,7 @@
 
     <!-- PRODUCT INFO -->
     <div class="subscribe-product">
-      <img [src]="selectedProduct?.image" alt="Product Image" />
+      <img [src]="selectedProduct?.image || 'assets/images/no-image.jpg'" alt="Product Image" />
 
       <div class="product-meta">
         <div class="product-name">

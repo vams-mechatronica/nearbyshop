@@ -71,7 +71,7 @@
 
     <!-- IMAGE -->
     <div class="store-img">
-      <img [src]="store.shop_image" alt="{{ store.name }}" />
+      <img [src]="store.shop_image || 'assets/images/no-image.jpg'" alt="{{ store.name }}" />
     </div>
 
     <!-- INFO -->
