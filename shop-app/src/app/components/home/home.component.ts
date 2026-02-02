@@ -10,6 +10,7 @@ import {
   Inject,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
+  TemplateRef,
 } from '@angular/core';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
@@ -26,6 +27,8 @@ import { ToastrService } from 'ngx-toastr';
 import { HeaderCountService } from '../../services/header.service';
 import { AuthModalService } from '../../services/auth-modal.service';
 import { AnalyticsService } from '../../services/analytics.service';
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+import { FormsModule } from '@angular/forms';
 
 interface CategoryShelf {
   categoryId: number;
@@ -42,7 +45,7 @@ interface CategoryShelf {
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, FormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 @Injectable({ providedIn: 'root' })
@@ -66,11 +69,20 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   noStoresFound = false;
   postalCode: string | null = null;
   loadingCategories = false;
+  storesNext: string | null = null;
+  loadingStores = false;
+  selectedProduct: any;
+  subscriptionPlan = 'daily';
+  startDate: string = '';
+
 
   /** Utilities */
   private interval!: ReturnType<typeof setInterval>;
   private observer!: IntersectionObserver;
   // productService: any;
+
+  @ViewChild('subscribeModal') subscribeModal!: TemplateRef<any>;
+  private subscribeModalRef!: NgbModalRef;
 
   constructor(
     private router: Router,
@@ -88,18 +100,21 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     private headerService: HeaderCountService,
     private authModal: AuthModalService,
     private analytics: AnalyticsService,
+    private modal: NgbModal,
+    
     @Inject(PLATFORM_ID) private platformId: Object
   ) { }
 
-  // ────────────────────────────────
-  // 🧩 INIT
-  // ────────────────────────────────
   ngOnInit(): void {
-    this.postalCode = this.storageService.getItem('postal_code');
-    this.fetchCategories();
-    this.fetchStores();
-    this.fetchBanners(); // initial load
+    const newPostalCode = this.storageService.getItem('postal_code');
     this.loadCategories();
+    if (this.postalCode !== newPostalCode) {
+      this.postalCode = newPostalCode;
+      this.fetchStores(false);
+    } else {
+      this.fetchStores(false);
+    }
+    this.fetchBanners();
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         this.analytics.trackPageView(event.urlAfterRedirects);
@@ -130,11 +145,11 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     if (this.interval) clearInterval(this.interval);
     if (this.observer) this.observer.disconnect();
+
+    this.categoryShelves = [];
+    this.categories = [];
   }
 
-  // ────────────────────────────────
-  // 🛒 FETCH DATA
-  // ────────────────────────────────
   fetchCategories(): void {
     this.categoryService.getCategories().subscribe({
       next: (res: any) => { this.categories = res.results || [], this.cdr.markForCheck(); },
@@ -142,32 +157,60 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  // fetchStores(): void {
-  //   this.categoryService.getStores().subscribe({
-  //     next: (res: any) => (this.stores = res.results || [], this.cdr.markForCheck()),
-  //     error: (err) => console.error('Error loading stores:', err),
-  //   });
-  // }
+  fetchStores(loadMore = false): void {
+    if (this.loadingStores) return;
 
-  fetchStores(): void {
+    // ✅ RESET state on first load
+    if (!loadMore) {
+      this.stores = [];
+      this.storesNext = null;
+      this.noStoresFound = false;
+    }
+
+    this.loadingStores = true;
+
     const postalCode = this.storageService.getItem('postal_code');
+
     let apiCall$;
 
-    if (postalCode) {
-      // console.log(`🔍 Fetching stores for pincode: ${postalCode}`);
-      apiCall$ = this.categoryService.getStoresByPincode(postalCode);
+    if (loadMore && this.storesNext) {
+      apiCall$ = postalCode
+        ? this.categoryService.getStoresByPincode(postalCode, this.storesNext)
+        : this.categoryService.getStores(this.storesNext);
     } else {
-      apiCall$ = this.categoryService.getStores();
+      apiCall$ = postalCode
+        ? this.categoryService.getStoresByPincode(postalCode)
+        : this.categoryService.getStores();
     }
 
     apiCall$.subscribe({
       next: (res: any) => {
-        this.stores = res.results || [];
+        this.stores = loadMore
+          ? [...this.stores, ...(res.results || [])]
+          : res.results || [];
+
+        this.storesNext = res.next;
         this.noStoresFound = this.stores.length === 0;
+        this.loadingStores = false;
         this.cdr.markForCheck();
       },
-      error: (err) => { console.error('Error loading stores:', err); this.noStoresFound = true; this.cdr.markForCheck(); },
+      error: () => {
+        this.noStoresFound = true;
+        this.loadingStores = false;
+        this.cdr.markForCheck();
+      }
     });
+  }
+
+  onStoreScroll(event: Event): void {
+    const el = event.target as HTMLElement;
+
+    const nearEnd =
+      el.scrollLeft + el.clientWidth >= el.scrollWidth - 120;
+
+    if (nearEnd && this.storesNext && !this.loadingStores) {
+      this.fetchStores(true);
+    }
   }
 
 
@@ -268,12 +311,12 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   // 🧭 NAVIGATION
   // ────────────────────────────────
   selectCategory(cat: any): void {
-    this.analytics.trackEvent('CATEGORY_PAGE_REDIRECT_CLICKED','PAGE_VISIT',1,`CATEGORY: ${cat.slug}`);
+    this.analytics.trackEvent('CATEGORY_PAGE_REDIRECT_CLICKED', 'PAGE_VISIT', 1, `CATEGORY: ${cat.slug}`);
     if (cat?.slug) this.router.navigate(['/products', cat.slug]);
   }
 
   selectStore(store: any): void {
-    this.analytics.trackEvent('STORE_PAGE_REDIRECT_CLICKED','PAGE_VISIT',1,`STORE: ${store.slug}`);
+    this.analytics.trackEvent('STORE_PAGE_REDIRECT_CLICKED', 'PAGE_VISIT', 1, `STORE: ${store.slug}`);
     if (store?.slug) this.router.navigate(['/stores', store.slug]);
   }
 
@@ -291,7 +334,8 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
 
   /* STEP 2: INIT FIRST FEW SHELVES */
   initCategoryShelves(): void {
-    const firstCategories = this.categories.slice(0, 4); // first 4 shelves
+    this.categoryShelves = [];
+    const firstCategories = this.categories.slice(0, 10); // first 4 shelves
 
     firstCategories.forEach(cat => {
       this.categoryShelves.push({
@@ -305,6 +349,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
 
       this.loadProductsForCategory(cat.slug);
     });
+    this.cdr.markForCheck();
   }
 
   /* STEP 3: LOAD PRODUCTS (PAGINATED) */
@@ -329,6 +374,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
       shelf.products.push(...res.results);
       shelf.next = res?.next;
       shelf.loading = false;
+      this.cdr.markForCheck();
     });
   }
 
@@ -384,7 +430,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   addToCart(product: any): void {
-    this.analytics.trackEvent('ADD_TO_CART_CLICKED','ECOMMERCE',1,`PRODUCT_ID: ${product.id}`);
+    this.analytics.trackEvent('ADD_TO_CART_CLICKED', 'ECOMMERCE', 1, `PRODUCT_ID: ${product.id}`);
 
 
     // 🔐 Force login
@@ -418,4 +464,100 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     });
   }
+
+  openSubscribeModal(product: any): void {
+
+    // 🔐 Force login before subscription
+    if (!this.authService.isLoggedIn()) {
+      // save intent (optional but recommended)
+      localStorage.setItem('redirect_url', '/subscribe');
+
+      // open login modal
+      this.authModal.openLogin();
+      return;
+    }
+
+    // ✅ user is logged in → open subscribe modal
+    this.selectedProduct = { ...product, qty: product.qty || 1 };
+
+    this.subscribeModalRef = this.modal.open(this.subscribeModal, {
+      centered: true,
+      backdrop: 'static',
+    });
+  }
+
+
+  confirmSubscription() {
+    if (!this.selectedProduct) return;
+
+    this.subscribeService
+      .addSubscription(
+        this.selectedProduct,
+        this.subscriptionPlan,
+        this.startDate,
+        this.selectedProduct.qty
+      )
+      .subscribe({
+        next: (res) => {
+          console.log('Subscription confirmed:', res);
+          this.subscribeModalRef?.close();
+        },
+        error: (err) => {
+          this.toastr.error(err.error.message, 'Subscription Failed');
+        },
+      });
+
+    this.headerService.fetchCounts();
+
+  }
+
+  decreaseQty(product: any): void {
+    const currentQty = product.qty || 1;
+    if (currentQty <= 1) {
+      product.qty = 0;
+      this.cartService.deleteCartItem(product.id).subscribe({
+        next: () => {
+          this.headerService.fetchCounts();
+        },
+        error: () => {
+          product.qty += 1;
+        }
+      });
+      return;
+    }
+    const newQty = currentQty - 1;
+    product.qty -= 1;
+    this.cartService.updateCartItem(product.id, newQty).subscribe({
+      next: (res) => {
+        if (!res.success) return;
+        if (res.item) {
+          product.qty = res.item.quantity;
+        }
+        this.headerService.updateCartSummary(res.cart);
+      },
+      error: (err) => {
+        product.qty += 1;
+      }
+    });
+  }
+
+  increaseQty(product: any): void {
+
+    const newQty = (product.qty || 0) + 1;
+    product.qty += 1;
+
+    this.cartService.updateCartItem(product.id, newQty).subscribe({
+      next: (res) => {
+        if (!res.success) return;
+        if (res.item) {
+          product.qty = res.item.quantity;
+        }
+        this.headerService.updateCartSummary(res.cart);
+      },
+      error: () => {
+        product.qty -= 1;
+      }
+    });
+  }
+
 }

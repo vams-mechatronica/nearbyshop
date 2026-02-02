@@ -1,6 +1,7 @@
 /* PAGE */
 .shop-page {
   background: #f6f7f8;
+  // min-height: 100vh;
   height: calc(100vh - 100px);
   display: flex;
   flex-direction: column;
@@ -74,48 +75,111 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
-/* VENDOR STRIP */
 .vendor-strip {
   display: flex;
   gap: 16px;
   padding: 14px 20px;
   background: #fff;
   border-bottom: 1px solid #eee;
+
   overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  scroll-behavior: smooth;
 }
 
+/* Hide scrollbar (optional) */
+.vendor-strip::-webkit-scrollbar {
+  display: none;
+}
+
+/* VENDOR CARD */
 .vendor-card {
   min-width: 90px;
-  text-align: center;
   cursor: pointer;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
-.vendor-card img {
+/* IMAGE WRAPPER */
+.vendor-img-wrap {
+  position: relative;
   width: 70px;
   height: 70px;
+  flex-shrink: 0;
+}
+
+.vendor-img-wrap img {
+  width: 100%;
+  height: 100%;
   border-radius: 14px;
   object-fit: cover;
   border: 1px solid #eee;
 }
 
-.vendor-card span {
-  font-size: 13px;
-  margin-top: 6px;
-  display: block;
+/* ⭐ RATING BADGE */
+.rating-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+
+  background: #336b3699;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+
+  padding: 2px 6px;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+
+  z-index: 3;
+  pointer-events: none;
 }
 
+/* SHOP NAME (ELLIPSIS) */
+.vendor-card span {
+  margin-top: 6px;
+  font-size: 13px;
+
+  width: 70px;           /* match image width */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ACTIVE STATE */
 .vendor-card.active img {
   border: 2px solid #d32f2f;
 }
+
+/* TAP FEEDBACK (mobile) */
+.vendor-card:active {
+  transform: scale(0.96);
+}
+
 
 /* PRODUCTS */
 .product-area {
   flex: 1;
   overflow-y: auto;
   padding: 20px;
+  padding-bottom: 80px;
+  /* space for fixed button */
+  overscroll-behavior: contain;
 }
+
+@media (max-width: 768px) {
+  .product-area {
+    padding-bottom: 120px; // safer
+  }
+}
+
 
 .product-grid {
   display: grid;
@@ -225,7 +289,7 @@
 /* PRODUCT INFO */
 .product-info {
   margin-top: 8px;
-  
+
 
   .product-name {
     font-size: 14px;
@@ -273,6 +337,7 @@
     color: #2e7d32;
     font-weight: 600;
   }
+
   del {
     color: grey;
     font-size: x-small;
@@ -333,7 +398,7 @@
   margin-bottom: 12px;
 }
 
-.mobile-only{
+.mobile-only {
   display: none;
 }
 
@@ -344,11 +409,74 @@
 //   z-index: 100;
 // }
 
+// Subscribe modal scss
+.quantity-box {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  border: 1px solid #10832b;
+  background-color: #10832b;
+  border-radius: 6px;
+  overflow: hidden;
+  height: 100%;
+  width: 100%; // ✅ takes full width like buy-now
+  min-height: 2rem;
+
+  .qty-btn {
+    flex: 0 0 25%; // ✅ each button takes 25% width
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border: none;
+    background: transparent;
+    height: 100%;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+  }
+
+  .qty-input {
+    flex: 1; // ✅ input stretches in remaining space
+    text-align: center;
+    background: transparent;
+    color: #fff;
+    font-weight: 500;
+    border: none;
+    height: 100%;
+    min-width: 0; // ✅ allows shrinking without breaking
+
+    &:focus {
+      outline: none;
+    }
+
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+  }
+}
+
+.subscribe-product-name {
+  max-width: 240px;
+}
+
+@media (max-width:768px) {
+  .subscribe-product-name {
+    max-width: 240px;
+  }
+}
+
 
 @media (max-width: 768px) {
 
   .mobile-filter-btn {
-    position: fixed;              /* 🔴 KEY */
+    position: fixed;
+    /* 🔴 KEY */
     bottom: 16px;
     left: 50%;
     transform: translateX(-50%);
@@ -361,11 +489,12 @@
     background: #fff;
     border: 1px solid #ddd;
     padding: 10px 14px;
-    border-radius: 999px;         /* pill shape */
+    border-radius: 999px;
+    /* pill shape */
     font-size: 13px;
     font-weight: 600;
 
-    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
   }
 
   // .mobile-only{
@@ -373,9 +502,7 @@
   // }
 
 
-  .product-area {
-    padding-bottom: 80px;   /* space for fixed button */
-  }
+
   .category-sidebar {
     position: fixed;
     top: 0;
@@ -386,7 +513,7 @@
     z-index: 1001;
     background: #fff;
     transition: left 0.3s ease;
-    box-shadow: 4px 0 16px rgba(0,0,0,0.2);
+    box-shadow: 4px 0 16px rgba(0, 0, 0, 0.2);
   }
 
   .category-sidebar.open {
@@ -407,4 +534,3 @@
     font-size: 18px;
   }
 }
-

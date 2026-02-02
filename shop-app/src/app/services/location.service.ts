@@ -59,8 +59,25 @@ export class LocationService {
                     return this.checkDeliveryAvailability(pincode);
                 } else {
                     return this.checkDeliveryAvailability('110001');
-                }   
+                }
             })
+        );
+    }
+
+    searchPlaces(query: string) {
+        const url =
+            `https://maps.googleapis.com/maps/api/place/autocomplete/json` +
+            `?input=${encodeURIComponent(query)}` +
+            `&components=country:in` +
+            `&key=${this.apiKey}`;
+
+        return this.http.get<any>(url).pipe(
+            map(res =>
+                res.predictions.map((p: any) => ({
+                    description: p.description,
+                    placeId: p.place_id
+                }))
+            )
         );
     }
 }

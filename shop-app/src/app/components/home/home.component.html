@@ -29,104 +29,115 @@
 
   <section class="section" *ngFor="let shelf of categoryShelves; let i = index">
 
-  <!-- HEADER -->
-  <div class="section-header">
-    <h2>{{ shelf.categoryName }}</h2>
-    <span
-      class="view-all"
-      *ngIf="shelf.products?.length"
-      [routerLink]="['/category', shelf.categorySlug]"
-    >
-      View all
-    </span>
-  </div>
+    <!-- HEADER -->
+    <div class="section-header">
+      <h2>{{ shelf.categoryName }}</h2>
+      <span class="view-all" *ngIf="shelf.products?.length" [routerLink]="['/category', shelf.categorySlug]">
+        View all
+      </span>
+    </div>
 
-  <!-- PRODUCTS / EMPTY STATE -->
-  <ng-container *ngIf="shelf.products?.length; else noProducts">
+    <!-- PRODUCTS / EMPTY STATE -->
+    <ng-container *ngIf="shelf.products?.length; else noProducts">
 
-    <!-- PRODUCT CAROUSEL -->
-    <div class="horizontal-scroll"
-         (scroll)="onHorizontalScroll($event, shelf.categorySlug)">
+      <!-- PRODUCT CAROUSEL -->
+      <div class="horizontal-scroll" (scroll)="onHorizontalScroll($event, shelf.categorySlug)">
 
-      <div class="product-carousel-wrapper">
+        <div class="product-carousel-wrapper">
 
-        <div class="product-row" #carousel>
+          <div class="product-row" #carousel>
 
-          <a class="product-card" *ngFor="let product of shelf.products">
+            <a class="product-card" *ngFor="let product of shelf.products">
 
-            <div class="image-wrapper">
-              <img [src]="product.image || 'assets/images/no-image.jpg'" alt="{{ product.name }}" />
-              <button
-                class="add-btn"
-                (click)="$event.preventDefault(); addToCart(product)">
-                ADD
-              </button>
-            </div>
+              <div class="image-wrapper">
+                <img [src]="product.image || 'assets/images/no-image.jpg'" />
 
-            <div class="price-row">
-              <span class="final-price">₹{{ product.final_price }}</span>
-              <span class="mrp" *ngIf="product.discount_value">
-                ₹{{ product.price }}
-              </span>
-            </div>
+                <div class="action-container" [class.expanded]="product.qty">
 
-            <div class="discount-text" *ngIf="product.discount_value">
-              ₹{{ product.price - product.final_price }} OFF
-            </div>
+                  <!-- SUB (always visible) -->
+                  <button class="sub-btn" (click)="$event.preventDefault(); openSubscribeModal(product)">
+                    SUB
+                  </button>
 
-            <div class="product-name"
-                 [routerLink]="['/product', product.slug]">
-              {{ product.name }}
-            </div>
+                  <!-- ADD (+) -->
+                  <button *ngIf="!product.qty" class="add-btn" (click)="$event.preventDefault(); addToCart(product)">
+                    +
+                  </button>
 
-            <div class="pack-info">
-              {{ product.unit?.code || '1 pack' }}
-            </div>
+                  <!-- QTY BOX  -->
+                  <div *ngIf="product.qty" class="qty-box">
+                    <button (click)="$event.preventDefault(); decreaseQty(product)">−</button>
+                    <span>{{ product.qty }}</span>
+                    <button (click)="$event.preventDefault(); increaseQty(product)">+</button>
+                  </div>
 
-            <div class="tag-chip">
-              {{ product.vendor?.shop_name }}
-            </div>
+                </div>
+              </div>
 
-            <div class="rating-row">
-              <span class="rating">⭐ {{ product.rating || 4.9 }}</span>
-              <span class="dot">•</span>
-              <span class="time">7 mins</span>
-            </div>
 
-          </a>
 
-          <!-- LOADER -->
-          <div class="product-skeleton" *ngIf="shelf.loading"></div>
+              <div class="price-row">
+                <span class="final-price">₹{{ product.final_price }}</span>
+                <span class="mrp" *ngIf="product.discount_value">
+                  ₹{{ product.price }}
+                </span>
+              </div>
+
+              <div class="discount-text" *ngIf="product.discount_value">
+                ₹{{ product.price - product.final_price | number:'1.2-2'}} OFF
+              </div>
+
+              <div class="product-name" [routerLink]="['/product', product.slug]">
+                {{ product.name }}
+              </div>
+
+              <div class="pack-info">
+                {{ product.unit?.code || '1 pack' }}
+              </div>
+
+              <div class="tag-chip">
+                {{ product.shop?.name }}
+              </div>
+
+              <div class="rating-row">
+                <span class="rating">
+                  <i class="fas fa-star"></i>
+                  {{ product.rating || 4.9 }}
+                </span>
+
+                <span class="dot">•</span>
+                <span class="time">7 mins</span>
+              </div>
+
+            </a>
+
+            <!-- LOADER -->
+            <div class="product-skeleton" *ngIf="shelf.loading"></div>
+
+          </div>
+
+          <button class="carousel-arrow" (click)="scrollRight(carousel, shelf.categorySlug)">
+            ›
+          </button>
 
         </div>
-
-        <button
-          class="carousel-arrow"
-          (click)="scrollRight(carousel, shelf.categorySlug)">
-          ›
-        </button>
-
       </div>
+
+    </ng-container>
+
+    <!-- NO PRODUCTS TEMPLATE -->
+    <ng-template #noProducts>
+      <div class="no-products">
+        <p>No products available</p>
+      </div>
+    </ng-template>
+
+    <!-- VERTICAL LAZY LOAD TRIGGER -->
+    <div class="vertical-loader" *ngIf="i === categoryShelves.length - 1" appIntersectionObserver
+      (visible)="loadNextCategoryShelf()">
     </div>
 
-  </ng-container>
-
-  <!-- NO PRODUCTS TEMPLATE -->
-  <ng-template #noProducts>
-    <div class="no-products">
-      <p>No products available</p>
-    </div>
-  </ng-template>
-
-  <!-- VERTICAL LAZY LOAD TRIGGER -->
-  <div
-    class="vertical-loader"
-    *ngIf="i === categoryShelves.length - 1"
-    appIntersectionObserver
-    (visible)="loadNextCategoryShelf()">
-  </div>
-
-</section>
+  </section>
 
 
 
@@ -138,7 +149,7 @@
     </div>
 
     <div class="store-carousel">
-      <div class="store-row">
+      <div class="store-row" (scroll)="onStoreScroll($event)">
         <div class="store-card" *ngFor="let store of stores" (click)="selectStore(store)">
           <div class="store-img">
             <img [src]="store.shop_image || 'assets/images/no-image.jpg'" alt="{{ store.name }}" />
@@ -147,7 +158,7 @@
           <div class="store-name">
             {{ store.name }}
           </div>
-          
+
           <!-- RATING ROW -->
           <div class="vendor-rating">`
             <i class="fas fa-star"></i>
@@ -155,7 +166,7 @@
             <span class="dot">•</span>
             <span class="time">{{ store.delivery_time || '7 mins' }}</span>
           </div>
-          
+
           <!-- VENDOR CATEGORY PILL -->
           <div class="vendor-category-pill">
             {{ store.category_name || 'Cafe' }}
@@ -172,5 +183,69 @@
       <img [src]="banner.image || 'assets/images/no-image.jpg'" />
     </div>
   </section>
+<ng-template #subscribeModal let-modal>
+    <div class="p-4">
+      <!-- Header -->
+      <h5 class="mb-3">Subscribe to Product</h5>
 
+      <!-- Product Info -->
+      <div class="d-flex align-items-center mb-3">
+        <img [src]="selectedProduct?.image || 'assets/images/no-image.jpg'" alt="Product Image"
+          style="width: 100px; height: 60px; object-fit: cover; border-radius: 4px; margin-right: 10px;" />
+
+        <div class="flex-grow-1 subscribe-product-name">
+          <div class="fw-bold">{{ selectedProduct?.name }}</div>
+          <div class="text-muted">Unit: {{selectedProduct?.unit.code}}</div>
+          <div class="text-muted small">₹{{ selectedProduct?.final_price }}</div>
+        </div>
+
+        <!-- Qty Controls -->
+        <div class="quantity-box d-flex align-items-center border rounded px-2 py-1"
+          style="width: fit-content; height: 38px;">
+          <button class="qty-btn" (click)="decreaseQty(selectedProduct)">−</button>
+          <input type="number" [(ngModel)]="selectedProduct.qty"
+            (ngModelChange)="selectedProduct.qty = selectedProduct.qty < 1 ? 1 : selectedProduct.qty"
+            class="qty-input mx-2" style="width: 50px; text-align: center; border: none; outline: none; height: 100%;"
+            min="1" />
+          <button class="qty-btn" (click)="increaseQty(selectedProduct)">+</button>
+        </div>
+      </div>
+
+      <!-- Subscription Options -->
+      <div class="mb-3">
+        <div class="form-floating mb-3">
+          <select class="form-select form-select-sm" [(ngModel)]="subscriptionPlan" id="subscription-select">
+            <option value="daily">Daily</option>
+            <option value="alternate_day">Alternate Day</option>
+            <option value="every_3_days">Every 3 Days</option>
+            <option value="weekly">Weekly</option>
+            <option value="biweekly">Biweekly</option>
+            <option value="monthly">Monthly</option>
+          </select>
+          <label for="subscription-select">Pick a Schedule</label>
+        </div>
+        <div class="form-floating mb-3">
+          <input type="date" [(ngModel)]="startDate" class="form-control form-control-sm mt-2"
+            placeholder="Pick a Start date" id="schedule-date" />
+          <label for="schedule-date">Pick a start date</label>
+        </div>
+      </div>
+
+      <!-- Terms -->
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Terms & Conditions</label>
+        <p class="small text-muted mb-0">
+          • You can cancel or reschedule your subscription at any time.<br />
+          • Minimum commitment of 7 days is required.<br />
+          • Delivery will be paused on public holidays.
+        </p>
+      </div>
+
+      <!-- Footer -->
+      <div class="text-end">
+        <button class="btn btn-secondary btn-sm me-2" (click)="modal.dismiss()">Cancel</button>
+        <button class="btn btn-success btn-sm" (click)="confirmSubscription()">Confirm</button>
+      </div>
+    </div>
+  </ng-template>
 </div>

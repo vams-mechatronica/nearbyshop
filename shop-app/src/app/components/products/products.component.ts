@@ -148,13 +148,6 @@ export class ProductsComponent implements OnInit {
         this.pageSize
       );
     }
-    // else if (pincode) {
-    //   request$ = this.productService.getProductsByPincode(
-    //     pincode,
-    //     this.currentPage,
-    //     this.pageSize
-    //   );
-    // }
     else {
       request$ = this.productService.getProductsPaginated(
         this.currentPage,

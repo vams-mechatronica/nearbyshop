@@ -86,7 +86,8 @@
       </button>
 
       <!-- PROFILE -->
-      <div class="profile profile-nav" *ngIf="isBrowser && (isLoggedIn$ | async)" (click)="toggleProfileDropdown($event)">
+      <div class="profile profile-nav" *ngIf="isBrowser && (isLoggedIn$ | async)"
+        (click)="toggleProfileDropdown($event)">
         <i class="fas fa-user-circle"></i>
 
         <div class="profile-dropdown" *ngIf="showProfileDropdown" (click)="$event.stopPropagation()">
@@ -110,8 +111,11 @@
       <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
     </div>
     <div class="modal-body">
+      <!-- <input type="text" class="form-control location-search" placeholder="Search a new address"
+        [(ngModel)]="locationSearch" /> -->
+
       <input type="text" class="form-control location-search" placeholder="Search a new address"
-        [(ngModel)]="locationSearch" />
+        [(ngModel)]="locationSearch" (input)="handleLocationSearch()" />
 
       <div class="use-location-card">
         <div class="use-location-icon">

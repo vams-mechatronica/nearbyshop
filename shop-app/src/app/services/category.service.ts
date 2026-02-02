@@ -13,11 +13,12 @@ export class CategoryService {
     return this.http.get(API_ENDPOINTS.CATEGORIES);
   }
 
-  getStores(): Observable<any> {
-    return this.http.get(API_ENDPOINTS.STORES);
+  getStores(url?: string): Observable<any> {
+    return this.http.get(url ?? API_ENDPOINTS.STORES_V2);
   }
 
-  getStoresByPincode(pincode: string) {
-  return this.http.get(API_ENDPOINTS.STORES_WITH_PINCODE_V2 + pincode);
+  getStoresByPincode(pincode: string, url?: string) {
+  return this.http.get(url ?? API_ENDPOINTS.STORES_WITH_PINCODE_V2 + pincode);
 }
+
 }

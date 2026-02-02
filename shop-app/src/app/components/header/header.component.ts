@@ -28,6 +28,7 @@ import { StorageService } from '../../services/storage.service';
 import { HeaderCountService } from '../../services/header.service';
 import { LoaderService } from '../../services/loader.service';
 import { AuthService } from '../../services/auth.service';
+import { LocationService } from '../../services/location.service';
 
 @Component({
   selector: 'app-header',
@@ -41,6 +42,9 @@ export class HeaderComponent implements OnInit {
   searchResults: any[] = []; // live search results
   searchSubject = new Subject<string>(); // input stream
   locationSearch = '';
+  locationSuggestions: any[] = [];
+  locationError = '';
+  checkingDelivery = false;
   selectedLocationName: string | null = null;
   userName = 'John Doe';
   showProfileDropdown = false;
@@ -57,7 +61,7 @@ export class HeaderComponent implements OnInit {
   deliveryTime: string = '';
   isBrowser = false;
   isLoggedIn$!: Observable<boolean>;
-  
+
   constructor(
     private router: Router,
     private modalService: NgbModal,
@@ -66,18 +70,19 @@ export class HeaderComponent implements OnInit {
     private http: HttpClient, // for search API calls
     private headerService: HeaderCountService,
     private authService: AuthService,
+    private locationService: LocationService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) { }
-  
+
   onLocationChange(event: any): void {
     const selectedId = event.target.value;
     console.log('Selected location ID:', selectedId);
     this.storage.setItem('selected_location_id', selectedId);
   }
-  
+
   loader = inject(LoaderService);
-  
-  
+
+
   onNavClick(): void {
     this.loader.show();
   }
@@ -195,6 +200,24 @@ export class HeaderComponent implements OnInit {
       backdrop: 'static',
     });
   }
+
+  handleLocationSearch(): void {
+    if (!this.locationSearch || this.locationSearch.length < 3) {
+      this.locationSuggestions = [];
+      return;
+    }
+
+    this.locationService.searchPlaces(this.locationSearch)
+      .subscribe({
+        next: (res) => {
+          this.locationSuggestions = res;
+        },
+        error: () => {
+          this.locationSuggestions = [];
+        }
+      });
+  }
+
 
   async useCurrentLocation(modal: any): Promise<void> {
     if (!navigator.geolocation) {

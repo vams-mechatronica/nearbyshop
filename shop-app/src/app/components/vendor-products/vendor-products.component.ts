@@ -59,6 +59,8 @@ export class VendorProductsComponent implements OnInit {
   selectedCategory: string | null = null;
   selectedStoreId: number | null = null;
   showCategories = false;
+  storesNext: string | null = null;
+  loadingStores = false;
 
 
   /* ---------------- VIEW ---------------- */
@@ -124,26 +126,63 @@ export class VendorProductsComponent implements OnInit {
     });
   }
 
-  getStoresList(): void {
+  getStoresList(loadMore: boolean = false): void {
+    if (this.loadingStores) return;
+    this.loaderService.show();
+    this.loadingStores = true;
+
     const postalCode = this.storageService.getItem('postal_code');
     let apiCall$;
 
-    if (postalCode) {
-      // console.log(`🔍 Fetching stores for pincode: ${postalCode}`);
-      apiCall$ = this.categoryService.getStoresByPincode(postalCode);
-    } else {
-      apiCall$ = this.categoryService.getStores();
+    // Load more (pagination)
+    if (loadMore && this.storesNext) {
+      apiCall$ = postalCode
+        ? this.categoryService.getStoresByPincode(postalCode, this.storesNext)
+        : this.categoryService.getStores(this.storesNext);
+    }
+    // Initial load
+    else {
+      apiCall$ = postalCode
+        ? this.categoryService.getStoresByPincode(postalCode)
+        : this.categoryService.getStores();
     }
 
     apiCall$.subscribe({
       next: (res: any) => {
-        this.stores = res.results || [];
+        this.stores = loadMore
+          ? [...this.stores, ...(res.results || [])]
+          : res.results || [];
+
+        this.storesNext = res.next;
         this.noStoresFound = this.stores.length === 0;
+        this.loadingStores = false;
+        this.loaderService.hide();
+
         this.cdr.markForCheck();
       },
-      error: (err) => { console.error('Error loading stores:', err); this.noStoresFound = true; this.cdr.markForCheck(); },
+      error: (err) => {
+        console.error('Error loading stores:', err);
+        this.noStoresFound = true;
+        this.loadingStores = false;
+        this.loaderService.hide();
+
+        this.cdr.markForCheck();
+      },
     });
   }
+
+
+  onStoresScroll(event: Event): void {
+    const el = event.target as HTMLElement;
+
+    const nearBottom =
+      el.scrollLeft + el.clientWidth >= el.scrollWidth - 120;
+
+    if (nearBottom && this.storesNext && !this.loadingStores) {
+      this.getStoresList(true);
+    }
+  }
+
 
   selectStore(store: any): void {
     if (!store?.slug) return;
@@ -335,24 +374,24 @@ export class VendorProductsComponent implements OnInit {
 
   openSubscribeModal(product: any): void {
 
-  // 🔐 Force login before subscription
-  if (!this.authService.isLoggedIn()) {
-    // save intent (optional but recommended)
-    localStorage.setItem('redirect_url', '/subscribe');
+    // 🔐 Force login before subscription
+    if (!this.authService.isLoggedIn()) {
+      // save intent (optional but recommended)
+      localStorage.setItem('redirect_url', '/subscribe');
 
-    // open login modal
-    this.authModal.openLogin();
-    return;
+      // open login modal
+      this.authModal.openLogin();
+      return;
+    }
+
+    // ✅ user is logged in → open subscribe modal
+    this.selectedProduct = { ...product, qty: product.qty || 1 };
+
+    this.subscribeModalRef = this.modal.open(this.subscribeModal, {
+      centered: true,
+      backdrop: 'static',
+    });
   }
-
-  // ✅ user is logged in → open subscribe modal
-  this.selectedProduct = { ...product, qty: product.qty || 1 };
-
-  this.subscribeModalRef = this.modal.open(this.subscribeModal, {
-    centered: true,
-    backdrop: 'static',
-  });
-}
 
 
   confirmSubscription(): void {
