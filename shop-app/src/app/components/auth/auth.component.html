@@ -1,53 +1,76 @@
-<div class="modal-header">
+<!-- <div class="modal-header">
   <h5 class="modal-title">Login</h5>
   <button type="button" class="btn-close" aria-label="Close" (click)="activeModal.dismiss()"></button>
-</div>
+</div> -->
 
-<div class="modal-body">
-  <form (ngSubmit)="showOtpInput ? login() : sendOtp()">
-    <!-- Phone input -->
-    <div *ngIf="!showOtpInput">
-      <label for="phone" class="form-label">
-        Phone Number
-        <i class="fab fa-whatsapp ms-1" style="color:#1ca34d;"></i>
-      </label>
+<!-- <div class="modal-body"> -->
+<div class="login-backdrop">
 
-      <div class="input-group mb-3">
-        <span class="input-group-text"><i class="fas fa-phone"></i></span>
-        <input type="tel" class="form-control" id="phone" [(ngModel)]="phone" name="phone"
-          placeholder="Enter phone number" required />
-      </div>
-      <div class="d-flex justify-content-center">
-      <button type="submit" class="btn btn-primary" [disabled]="isSendingOtp"> <!-- (click)="sendOtp()"> -->
-        <span *ngIf="!isSendingOtp">Send OTP</span>
-        <span *ngIf="isSendingOtp">
-          <span class="spinner-border spinner-border-sm me-2"></span>
-          Sending...
-        </span>
-      </button>
-      </div>
+  <div class="login-modal">
+    <!-- Left Section -->
+    <div class="login-left">
+      <div class="brand">The<span
+          class="brand-span">NearBy</span>Shop<span class="brand-com">.com</span></div>
 
-    </div>
+      <h2 class="headline">
+        Lowest Prices Everyday<br />
+        <span>in minutes</span>
+      </h2>
 
-    <!-- OTP input -->
-    <div *ngIf="showOtpInput">
-      <label for="otp" class="form-label">OTP</label>
-      <div class="d-flex justify-content-center gap-2 mb-3">
-        <input *ngFor="let ctrl of otpControls; let i = index" type="text" class="form-control otp-input" maxlength="1"
-          (input)="onOtpInput($event, i)" (keydown.backspace)="onOtpBackspace($event, i)" #otpInput />
-      </div>
-      <div class="d-flex justify-content-center">
-      <button type="submit" class="btn primary">Login</button>
-      </div>
+      <!-- Phone input -->
+      <form (ngSubmit)="showOtpInput ? login() : sendOtp()">
+        <div *ngIf="!showOtpInput" class="input-wrapper">
+          <div class="phone-input">
+            <span class="country-code">+91</span>
+            <input type="tel" placeholder="Enter Phone Number" [(ngModel)]="phone" name="phone" required />
+          </div>
 
-      <div class="text-center mt-3">
-        <small class="text-muted">
-          OTP sent to <i class="fab fa-whatsapp ms-1" style="color:#1ca34d;"></i><strong> {{ phone }}</strong>
-          <button type="button" class="btn btn-link p-0 ms-2" (click)="showOtpInput = false">
-            <i class="fas fa-edit"></i>
+          <button class="continue-btn" [disabled]="isSendingOtp">
+            <span *ngIf="!isSendingOtp">Continue</span>
+            <span *ngIf="isSendingOtp">
+              <span class="spinner"></span> Sending...
+            </span>
           </button>
-        </small>
+
+          <p class="terms">
+            By continuing, you agree to our
+            <a href="#">Terms of Service</a> & <a href="#">Privacy Policy</a>
+          </p>
+        </div>
+
+        <!-- OTP Section -->
+        <div *ngIf="showOtpInput" class="otp-section">
+          <h3>Enter OTP</h3>
+
+          <div class="otp-box">
+            <input *ngFor="let ctrl of otpControls; let i = index" maxlength="1" class="otp-input"
+              (input)="onOtpInput($event, i)" (keydown.backspace)="onOtpBackspace($event, i)" />
+          </div>
+
+          <button class="continue-btn">Login</button>
+
+          <p class="otp-info">
+            OTP sent to <strong>{{ phone }}</strong>
+            <span class="edit" (click)="showOtpInput = false">Edit</span>
+          </p>
+        </div>
+      </form>
+    </div>
+
+    <!-- Right Section -->
+    <div class="login-right">
+      <img [src]="'assets/undraw/mobile_app.png'" class="app-icon" />
+
+      <h2>Order faster & easier<br />everytime</h2>
+      <p>with the TheNearByShop App</p>
+
+      <div class="store-buttons">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" />
+        <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" />
       </div>
     </div>
-  </form>
+
+    <button class="close-btn" (click)="activeModal.dismiss()">✕</button>
+  </div>
+
 </div>
