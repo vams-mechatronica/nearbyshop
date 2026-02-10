@@ -1,35 +1,5 @@
 <div class="zepto-home">
 
-  <!-- <section class="hero-banner">
-    <div class="hero-content">
-      <h1>Shop Local. Support Your Community.</h1>
-      <p>Discover nearby shops offering fresh goods with fast delivery</p>
-      <div class="search-bar">
-        <input type="text" placeholder="Search for shops or products...">
-        <button>Search</button>
-      </div>
-    </div>
-    <div class="hero-image">
-      <img src="assets/images/hero-local-shop.jpg" alt="Local shopping">
-    </div>
-  </section>
-
-
-  <section class="trust-badges">
-    <div class="trust-badge">
-      <i class="fas fa-shield-alt"></i>
-      <span>100% Safe & Secure</span>
-    </div>
-    <div class="trust-badge">
-      <i class="fas fa-truck"></i>
-      <span>7-Min Delivery</span>
-    </div>
-    <div class="trust-badge">
-      <i class="fas fa-rupee-sign"></i>
-      <span>Best Prices</span>
-    </div>
-  </section> -->
-
   <section class="hero-banner">
 
     <div class="hero-content">
@@ -51,18 +21,6 @@
           <div class="stat-label">Avg. Delivery</div>
         </div>
       </div>
-
-      <!-- Search Bar -->
-      <!-- <div class="search-bar">
-        <div class="search-box">
-          <input type="text" placeholder="Search for shops or products...">
-          <i class="fas fa-search search-icon"></i>
-        </div>
-        <button>
-          <i class="fas fa-search"></i>
-          <span>Search</span>
-        </button>
-      </div> -->
 
       <div class="search-container">
         <div class="search-box-wrapper">
@@ -458,97 +416,6 @@
       </span>
     </div>
   </section>
-
-  <!-- HERO WITH SHOP INTEGRATION -->
-  <!-- <section class="hero-with-shops">
-    <div class="hero-content">
-      <h1>Shop From Your <span class="highlight">Neighbourhood</span></h1>
-      <p class="subtitle">Support local businesses with fast delivery</p>
-      
-      <div class="shop-search">
-        <div class="search-box">
-          <i class="fas fa-search"></i>
-          <input type="text" placeholder="Search shops by name or category...">
-        </div>
-        <button class="location-btn">
-          <i class="fas fa-map-marker-alt"></i>
-          <span>Near Me</span>
-        </button>
-      </div>
-      
-      <div class="quick-shop-buttons">
-        <button class="quick-shop-btn" *ngFor="let type of categories">
-          <i [class]="type.icon"></i>
-          <span>{{type.name}}</span>
-        </button>
-      </div>
-    </div>
-    
-    
-    <div class="featured-shops-preview">
-      <h3>Featured in your area</h3>
-      <div class="featured-shops-grid">
-        <div class="featured-shop" *ngFor="let shop of stores">
-          <div class="shop-avatar">
-            <img [src]="shop.logo" [alt]="shop.name">
-          </div>
-          <div class="shop-meta">
-            <strong>{{shop.name}}</strong>
-            <small>{{shop.category_name}}</small>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section> -->
-
-  <!-- <section class="shops-near-you">
-  <div class="section-header">
-    <h2>
-      <i class="fas fa-map-marker-alt"></i>
-      Shops Near You
-      <span class="location-badge">📍 Koramangala, Bangalore</span>
-    </h2>
-    <a href="/map-view" class="map-view-btn">
-      <i class="fas fa-map"></i> View on Map
-    </a>
-  </div>
-  
-  <div class="shop-map-preview">
-    <div class="map-container">
-      <div class="mini-map">
-        <div class="map-dots">
-          <div class="map-dot" *ngFor="let shop of stores" 
-               [style.left]="shop.mapX" 
-               [style.top]="shop.mapY"
-               [class.active]="shop.active">
-            <div class="dot-tooltip">{{shop.name}}</div>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <div class="nearby-shops-list">
-      <div class="shop-item" *ngFor="let shop of stores">
-        <div class="shop-distance">
-          <span class="distance">{{shop.distance}} km</span>
-          <div class="walk-time">
-            <i class="fas fa-walking"></i> {{shop.walkTime}} min
-          </div>
-        </div>
-        <div class="shop-details">
-          <h3>{{shop.name}}</h3>
-          <p class="shop-type">{{shop.type}}</p>
-          <div class="shop-tags">
-            <span class="tag" *ngFor="let tag of shop.tags">{{tag}}</span>
-          </div>
-        </div>
-        <button class="shop-action-btn">
-          Browse →
-        </button>
-      </div>
-    </div>
-  </div>
-</section> -->
 
   <!-- CATEGORY STRIP -->
   <section class="category-strip">
