@@ -1,5 +1,555 @@
 <div class="zepto-home">
 
+  <!-- <section class="hero-banner">
+    <div class="hero-content">
+      <h1>Shop Local. Support Your Community.</h1>
+      <p>Discover nearby shops offering fresh goods with fast delivery</p>
+      <div class="search-bar">
+        <input type="text" placeholder="Search for shops or products...">
+        <button>Search</button>
+      </div>
+    </div>
+    <div class="hero-image">
+      <img src="assets/images/hero-local-shop.jpg" alt="Local shopping">
+    </div>
+  </section>
+
+
+  <section class="trust-badges">
+    <div class="trust-badge">
+      <i class="fas fa-shield-alt"></i>
+      <span>100% Safe & Secure</span>
+    </div>
+    <div class="trust-badge">
+      <i class="fas fa-truck"></i>
+      <span>7-Min Delivery</span>
+    </div>
+    <div class="trust-badge">
+      <i class="fas fa-rupee-sign"></i>
+      <span>Best Prices</span>
+    </div>
+  </section> -->
+
+  <section class="hero-banner">
+
+    <div class="hero-content">
+      <h1>Shop Local. <span>Support Your Community.</span></h1>
+      <p>Discover nearby shops offering fresh goods with fast 7-min delivery</p>
+
+      <!-- Stats Bar -->
+      <div class="hero-stats">
+        <div class="stat-item">
+          <div class="stat-value">100+</div>
+          <div class="stat-label">Local Shops</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value green">4.9★</div>
+          <div class="stat-label">Avg. Rating</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value yellow">7 min</div>
+          <div class="stat-label">Avg. Delivery</div>
+        </div>
+      </div>
+
+      <!-- Search Bar -->
+      <!-- <div class="search-bar">
+        <div class="search-box">
+          <input type="text" placeholder="Search for shops or products...">
+          <i class="fas fa-search search-icon"></i>
+        </div>
+        <button>
+          <i class="fas fa-search"></i>
+          <span>Search</span>
+        </button>
+      </div> -->
+
+      <div class="search-container">
+        <div class="search-box-wrapper">
+          <i class="fas fa-search search-icon"></i>
+          <input type="text" [(ngModel)]="searchQuery" (input)="onSearchInput($event)" (keyup.enter)="performSearch()"
+            (focus)="showSuggestions = true" (blur)="onSearchBlur($event)"
+            placeholder="Search for shops, products, or categories..." class="search-input" #searchInput />
+          <button class="clear-search" *ngIf="searchQuery" (click)="clearSearch()">
+            <i class="fas fa-times"></i>
+          </button>
+          <button class="search-btn" (click)="performSearch()">
+            <i class="fas fa-search"></i>
+            <span>Search</span>
+          </button>
+        </div>
+
+        <!-- Search Suggestions Dropdown -->
+        <div class="search-suggestions-dropdown" *ngIf="showSuggestions && searchSuggestions.length > 0">
+          <div class="suggestions-header">
+            <h4>Suggestions</h4>
+            <span class="suggestion-count">{{ searchSuggestions.length }} results</span>
+          </div>
+
+          <div class="suggestions-list">
+            <!-- Recent Searches -->
+            <div class="suggestion-section" *ngIf="recentSearches.length > 0">
+              <div class="section-title">
+                <i class="fas fa-history"></i>
+                <span>Recent Searches</span>
+                <button class="clear-recent" (click)="clearRecentSearches()">Clear all</button>
+              </div>
+              <div class="suggestion-item" *ngFor="let recent of recentSearches" (click)="selectRecentSearch(recent)">
+                <i class="fas fa-clock"></i>
+                <span>{{ recent.query }}</span>
+                <span class="item-count">{{ recent.count }} items</span>
+              </div>
+            </div>
+
+            <!-- Popular Categories -->
+            <div class="suggestion-section" *ngIf="popularCategories.length > 0">
+              <div class="section-title">
+                <i class="fas fa-fire"></i>
+                <span>Popular Categories</span>
+              </div>
+              <div class="suggestion-item" *ngFor="let category of popularCategories"
+                (click)="selectCategory(category)">
+                <img [src]="category.image || 'assets/images/category-default.jpg'" [alt]="category.name">
+                <div class="item-info">
+                  <span class="item-name">{{ category.name }}</span>
+                  <span class="item-meta">{{ category.product_count }} products</span>
+                </div>
+                <i class="fas fa-chevron-right"></i>
+              </div>
+            </div>
+
+            <!-- Quick Suggestions -->
+            <div class="suggestion-section" *ngIf="quickSuggestions.length > 0">
+              <div class="section-title">
+                <i class="fas fa-bolt"></i>
+                <span>Quick Suggestions</span>
+              </div>
+              <div class="quick-suggestions">
+                <span class="quick-chip" *ngFor="let suggestion of quickSuggestions"
+                  (click)="selectQuickSuggestion(suggestion)">
+                  {{ suggestion }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Search Results -->
+            <div class="suggestion-section" *ngIf="searchSuggestions.length > 0">
+              <div class="section-title">
+                <i class="fas fa-search"></i>
+                <span>Search Results</span>
+              </div>
+              <div class="suggestion-item" *ngFor="let suggestion of searchSuggestions"
+                (click)="selectSuggestion(suggestion)">
+                <div class="item-icon">
+                  <i [class]="getSuggestionIcon(suggestion.type)"></i>
+                </div>
+                <div class="item-info">
+                  <span class="item-name">{{ suggestion.name }}</span>
+                  <span class="item-meta">{{ suggestion.type }} • {{ suggestion.shop_name }}</span>
+                </div>
+                <span class="item-price" *ngIf="suggestion.price">
+                  ₹{{ suggestion.price }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="suggestions-footer">
+            <button class="view-all-btn" (click)="performSearch()">
+              View all results for "{{ searchQuery }}"
+              <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Filters -->
+      <div class="quick-filters">
+        <button class="filter-btn active">
+          <i class="fas fa-store"></i>
+          <span>All Shops</span>
+        </button>
+        <button class="filter-btn">
+          <i class="fas fa-utensils"></i>
+          <span>Food</span>
+        </button>
+        <button class="filter-btn">
+          <i class="fas fa-shopping-basket"></i>
+          <span>Groceries</span>
+        </button>
+        <button class="filter-btn">
+          <i class="fas fa-pills"></i>
+          <span>Medicine</span>
+        </button>
+        <button class="filter-btn">
+          <i class="fas fa-home"></i>
+          <span>Home Needs</span>
+        </button>
+      </div>
+
+      <!-- Trust Badges -->
+      <div class="trust-badges">
+        <div class="trust-badge">
+          <i class="fas fa-shield-alt"></i>
+          <span>100% Safe & Secure</span>
+        </div>
+        <div class="trust-badge">
+          <i class="fas fa-truck yellow"></i>
+          <span>7-Min Delivery</span>
+        </div>
+        <div class="trust-badge">
+          <i class="fas fa-heart"></i>
+          <span>Support Local</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hero Image -->
+    <div class="hero-image">
+      <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1200&h=600&fit=crop&crop=center"
+        alt="Local shopping community">
+      <div class="image-overlay">
+        <h3>Meet Your Local Shop Owners</h3>
+        <p>Real people, real businesses, real community impact</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="search-results-overlay" *ngIf="showSearchResults">
+  <div class="search-results-container">
+    <div class="results-header">
+      <div class="back-btn" (click)="closeSearchResults()">
+        <i class="fas fa-arrow-left"></i>
+      </div>
+      <div class="search-box-header">
+        <input type="text" [(ngModel)]="searchQuery" (keyup.enter)="performSearch()" 
+               placeholder="Search..." class="header-search-input">
+        <button class="header-search-btn" (click)="performSearch()">
+          <i class="fas fa-search"></i>
+        </button>
+      </div>
+      <div class="filters-btn" (click)="openFilters()">
+        <i class="fas fa-sliders-h"></i>
+      </div>
+    </div>
+    
+    <div class="results-body">
+      <!-- Filters Sidebar -->
+      <div class="filters-sidebar" *ngIf="showFilters">
+        <div class="filters-header">
+          <h3>Filters</h3>
+          <button class="close-filters" (click)="closeFilters()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="filter-section">
+          <h4>Category</h4>
+          <div class="filter-options">
+            <label *ngFor="let category of allCategories">
+              <input type="checkbox" [(ngModel)]="category.selected">
+              <span class="checkmark"></span>
+              {{ category.name }}
+              <span class="count">({{ category.count }})</span>
+            </label>
+          </div>
+        </div>
+        <div class="filter-section">
+          <h4>Price Range</h4>
+          <div class="price-range">
+            <input type="range" min="0" max="5000" [(ngModel)]="priceRange[0]" class="range-min">
+            <input type="range" min="0" max="5000" [(ngModel)]="priceRange[1]" class="range-max">
+            <div class="price-values">
+              <span>₹{{ priceRange[0] }}</span>
+              <span>to</span>
+              <span>₹{{ priceRange[1] }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="filter-section">
+          <h4>Delivery Time</h4>
+          <div class="filter-options">
+            <label *ngFor="let time of deliveryTimes">
+              <input type="radio" name="deliveryTime" [(ngModel)]="selectedDeliveryTime" [value]="time.value">
+              <span class="radiomark"></span>
+              {{ time.label }}
+            </label>
+          </div>
+        </div>
+        <div class="filter-actions">
+          <button class="clear-filters" (click)="clearFilters()">Clear All</button>
+          <button class="apply-filters" (click)="applySearchFilters()">Apply Filters</button>
+        </div>
+      </div>
+      
+      <!-- Results Main Content -->
+      <div class="results-main">
+        <div class="results-info">
+          <h2>Search Results for "{{ searchQuery }}"</h2>
+          <span class="results-count">{{ totalResults }} results found</span>
+          <div class="sort-options">
+            <select [(ngModel)]="sortBy" (change)="sortResults()">
+              <option value="relevance">Sort by: Relevance</option>
+              <option value="price_low">Price: Low to High</option>
+              <option value="price_high">Price: High to Low</option>
+              <option value="rating">Rating</option>
+              <option value="delivery">Fastest Delivery</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="active-filters" *ngIf="activeFilters.length > 0">
+          <span class="filter-tag" *ngFor="let filter of activeFilters">
+            {{ filter }}
+            <i class="fas fa-times" (click)="removeFilter(filter)"></i>
+          </span>
+        </div>
+        
+        <!-- Results Grid -->
+        <div class="results-grid">
+          <div class="loading-spinner" *ngIf="loading">
+            <div class="spinner"></div>
+            <p>Searching...</p>
+          </div>
+          
+          <div class="no-results" *ngIf="!loading && searchResults.length === 0">
+            <i class="fas fa-search"></i>
+            <h3>No results found for "{{ searchQuery }}"</h3>
+            <p>Try different keywords or check out our popular categories</p>
+            <div class="suggestion-categories">
+              <button *ngFor="let category of suggestionCategories" 
+                      (click)="searchByCategory(category)">
+                {{ category.name }}
+              </button>
+            </div>
+          </div>
+          
+          <div class="results-list" *ngIf="!loading && searchResults.length > 0">
+            <!-- Product Results -->
+            <div class="product-card" *ngFor="let product of searchResults">
+              <div class="product-image">
+                <img [src]="product.image" [alt]="product.name">
+                <div class="product-badge" *ngIf="product.discount">
+                  {{ product.discount }}% OFF
+                </div>
+              </div>
+              <div class="product-info">
+                <h3 class="product-name">{{ product.name }}</h3>
+                <p class="product-description">{{ product.description }}</p>
+                <div class="product-meta">
+                  <span class="product-shop">
+                    <i class="fas fa-store"></i> {{ product.shop_name }}
+                  </span>
+                  <span class="product-rating">
+                    <i class="fas fa-star"></i> {{ product.rating }}
+                  </span>
+                  <span class="product-delivery">
+                    <i class="fas fa-clock"></i> {{ product.delivery_time }} min
+                  </span>
+                </div>
+                <div class="product-price">
+                  <span class="current-price">₹{{ product.price }}</span>
+                  <span class="original-price" *ngIf="product.original_price">
+                    ₹{{ product.original_price }}
+                  </span>
+                </div>
+                <button class="add-to-cart-btn" (click)="addToCart(product)">
+                  <i class="fas fa-plus"></i> Add to Cart
+                </button>
+              </div>
+            </div>
+            
+            <!-- Shop Results -->
+            <div class="shop-card" *ngFor="let shop of shopResults">
+              <div class="shop-image">
+                <img [src]="shop.image" [alt]="shop.name">
+                <div class="shop-status" [class.open]="shop.is_open">
+                  {{ shop.is_open ? 'Open Now' : 'Closed' }}
+                </div>
+              </div>
+              <div class="shop-info">
+                <h3 class="shop-name">{{ shop.name }}</h3>
+                <p class="shop-category">{{ shop.category }}</p>
+                <div class="shop-meta">
+                  <span class="shop-rating">
+                    <i class="fas fa-star"></i> {{ shop.rating }}
+                  </span>
+                  <span class="shop-delivery">
+                    <i class="fas fa-clock"></i> {{ shop.delivery_time }} min
+                  </span>
+                  <span class="shop-distance">
+                    <i class="fas fa-map-marker-alt"></i> {{ shop.distance }} km
+                  </span>
+                </div>
+                <div class="shop-tags">
+                  <span class="tag" *ngFor="let tag of shop.tags">{{ tag }}</span>
+                </div>
+                <button class="visit-shop-btn" (click)="selectStore(shop)">
+                  Visit Shop
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Pagination -->
+        <div class="pagination" *ngIf="totalPages > 1">
+          <button class="page-btn" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">
+            <i class="fas fa-chevron-left"></i> Previous
+          </button>
+          <div class="page-numbers">
+            <span *ngFor="let page of getPageNumbers()" 
+                  [class.active]="page === currentPage"
+                  (click)="goToPage(page)">
+              {{ page }}
+            </span>
+          </div>
+          <button class="page-btn" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">
+            Next <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <section class="local-shops-strip">
+    <div class="strip-header">
+      <h2><i class="fas fa-store"></i> Your Local Shops</h2>
+      <a href="/stores-view-all" class="view-all">View all shops →</a>
+    </div>
+
+    <div class="shops-scroll-container">
+      <div class="shops-row">
+        <div class="shop-card-featured" *ngFor="let shop of stores">
+          <div class="shop-badge">Popular</div>
+          <div class="shop-image">
+            <img [src]="shop.shop_image || 'assets/images/no-image.jpg'" [alt]="shop.name">
+            <div class="shop-overlay">
+              <span class="shop-rating">
+                <i class="fas fa-star"></i> {{shop.rating}}
+              </span>
+            </div>
+          </div>
+          <div class="shop-info">
+            <h3>{{shop.name}}</h3>
+            <p class="shop-category">{{shop.category}}</p>
+            <div class="shop-stats">
+              <span class="stat">
+                <i class="fas fa-clock"></i> {{shop.deliveryTime || 7}} min
+              </span>
+              <span class="dot">•</span>
+              <span class="stat">
+                <i class="fas fa-rupee-sign"></i> Min. {{shop.minOrder || 50}}
+              </span>
+            </div>
+          </div>
+          <button class="shop-visit-btn" (click)="selectStore(shop)">
+            Visit Shop
+          </button>
+        </div>
+      </div>
+      <button class="scroll-arrow right">›</button>
+    </div>
+
+    <div class="shop-categories-pills">
+      <span class="pill active">All Shops</span>
+      <span class="pill" *ngFor="let cat of categories">
+        {{cat.name}}
+      </span>
+    </div>
+  </section>
+
+  <!-- HERO WITH SHOP INTEGRATION -->
+  <!-- <section class="hero-with-shops">
+    <div class="hero-content">
+      <h1>Shop From Your <span class="highlight">Neighbourhood</span></h1>
+      <p class="subtitle">Support local businesses with fast delivery</p>
+      
+      <div class="shop-search">
+        <div class="search-box">
+          <i class="fas fa-search"></i>
+          <input type="text" placeholder="Search shops by name or category...">
+        </div>
+        <button class="location-btn">
+          <i class="fas fa-map-marker-alt"></i>
+          <span>Near Me</span>
+        </button>
+      </div>
+      
+      <div class="quick-shop-buttons">
+        <button class="quick-shop-btn" *ngFor="let type of categories">
+          <i [class]="type.icon"></i>
+          <span>{{type.name}}</span>
+        </button>
+      </div>
+    </div>
+    
+    
+    <div class="featured-shops-preview">
+      <h3>Featured in your area</h3>
+      <div class="featured-shops-grid">
+        <div class="featured-shop" *ngFor="let shop of stores">
+          <div class="shop-avatar">
+            <img [src]="shop.logo" [alt]="shop.name">
+          </div>
+          <div class="shop-meta">
+            <strong>{{shop.name}}</strong>
+            <small>{{shop.category_name}}</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section> -->
+
+  <!-- <section class="shops-near-you">
+  <div class="section-header">
+    <h2>
+      <i class="fas fa-map-marker-alt"></i>
+      Shops Near You
+      <span class="location-badge">📍 Koramangala, Bangalore</span>
+    </h2>
+    <a href="/map-view" class="map-view-btn">
+      <i class="fas fa-map"></i> View on Map
+    </a>
+  </div>
+  
+  <div class="shop-map-preview">
+    <div class="map-container">
+      <div class="mini-map">
+        <div class="map-dots">
+          <div class="map-dot" *ngFor="let shop of stores" 
+               [style.left]="shop.mapX" 
+               [style.top]="shop.mapY"
+               [class.active]="shop.active">
+            <div class="dot-tooltip">{{shop.name}}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="nearby-shops-list">
+      <div class="shop-item" *ngFor="let shop of stores">
+        <div class="shop-distance">
+          <span class="distance">{{shop.distance}} km</span>
+          <div class="walk-time">
+            <i class="fas fa-walking"></i> {{shop.walkTime}} min
+          </div>
+        </div>
+        <div class="shop-details">
+          <h3>{{shop.name}}</h3>
+          <p class="shop-type">{{shop.type}}</p>
+          <div class="shop-tags">
+            <span class="tag" *ngFor="let tag of shop.tags">{{tag}}</span>
+          </div>
+        </div>
+        <button class="shop-action-btn">
+          Browse →
+        </button>
+      </div>
+    </div>
+  </div>
+</section> -->
+
   <!-- CATEGORY STRIP -->
   <section class="category-strip">
     <div class="category-item" *ngFor="let cat of categories" (click)="selectCategory(cat)">
@@ -11,21 +561,160 @@
       </div>
     </div>
   </section>
+  <!-- VALUE PROPOSITION -->
+  <section class="value-proposition premium">
+    <div class="value-item">
+      <div class="value-icon">
+        <i class="fas fa-clock"></i>
+      </div>
+      <div class="value-text">Lightning Fast</div>
+      <div class="value-subtext">7-15 mins delivery</div>
+    </div>
+    <div class="value-item">
+      <div class="value-icon">
+        <i class="fas fa-hands-helping"></i>
+      </div>
+      <div class="value-text">Community First</div>
+      <div class="value-subtext">Support local economy</div>
+    </div>
+    <div class="value-item">
+      <div class="value-icon">
+        <i class="fas fa-award"></i>
+      </div>
+      <div class="value-text">Premium Quality</div>
+      <div class="value-subtext">Fresh & authentic</div>
+    </div>
+    <div class="value-item">
+      <div class="value-icon">
+        <i class="fas fa-lock"></i>
+      </div>
+      <div class="value-text">Safe & Secure</div>
+      <div class="value-subtext">Trusted vendors</div>
+    </div>
+  </section>
 
 
   <!-- OFFER BANNERS -->
   <section class="offer-section">
-    <div class="offer-card primary">
-      <h3>₹0 Convenience Fee</h3>
-      <p>On all nearby shop orders</p>
-      <button>Order now</button>
+    <!-- Card 1: Main Offer -->
+    <div class="offer-card interactive primary">
+      <div class="offer-header">
+        <div class="offer-tag">
+          <i class="fas fa-bolt"></i>
+          <span>POPULAR</span>
+        </div>
+        <div class="offer-stats">
+          <i class="fas fa-users"></i>
+          <span>458 used today</span>
+        </div>
+      </div>
+
+      <div class="offer-body">
+        <div class="offer-highlight">
+          <span class="amount">₹0</span>
+          <span class="label">Convenience Fee</span>
+        </div>
+        <p class="offer-description">
+          Skip delivery charges on all orders from local shops near you
+        </p>
+
+        <div class="progress-container">
+          <div class="progress-label">
+            <span>Limited slots remaining</span>
+            <span>82% claimed</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 82%"></div>
+          </div>
+        </div>
+      </div>
+
+      <button class="offer-cta">
+        <i class="fas fa-shopping-cart"></i>
+        <span>Claim Free Delivery</span>
+        <i class="fas fa-chevron-right"></i>
+      </button>
     </div>
 
-    <div class="offer-card secondary">
-      <h3>Lowest Prices Everyday</h3>
-      <p>No surge, no rain fee</p>
+    <!-- Card 2: Price Guarantee -->
+    <div class="offer-card interactive secondary">
+      <div class="offer-header">
+        <div class="offer-tag guarantee">
+          <i class="fas fa-shield-alt"></i>
+          <span>PRICE GUARANTEE</span>
+        </div>
+      </div>
+
+      <div class="offer-body">
+        <div class="price-comparison">
+          <div class="price-old">
+            <span class="strike">Other Apps</span>
+            <span class="amount">₹149</span>
+          </div>
+          <div class="price-arrow">
+            <i class="fas fa-arrow-right"></i>
+          </div>
+          <div class="price-new">
+            <span class="label">NearbyShop</span>
+            <span class="amount highlight">₹99</span>
+          </div>
+        </div>
+
+        <ul class="offer-benefits">
+          <li><i class="fas fa-check"></i> No surge pricing ever</li>
+          <li><i class="fas fa-check"></i> No rainy day charges</li>
+          <li><i class="fas fa-check"></i> Best price guaranteed</li>
+        </ul>
+      </div>
+
+      <button class="offer-cta outline">
+        <i class="fas fa-chart-line"></i>
+        <span>See Price Comparison</span>
+      </button>
+    </div>
+
+    <!-- Card 3: New User Bonus -->
+    <div class="offer-card interactive bonus">
+      <div class="offer-badge">NEW USER</div>
+
+      <div class="offer-body">
+        <div class="bonus-amount">
+          <span>₹100</span>
+          <small>OFF</small>
+        </div>
+
+        <div class="bonus-details">
+          <h3>Welcome Bonus</h3>
+          <p>Use code on your first 3 orders</p>
+
+          <div class="code-container">
+            <div class="code-display">
+              <span>WELCOME100</span>
+              <button class="copy-code">
+                <i class="far fa-copy"></i> Copy
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bonus-steps">
+        <div class="step active">
+          <div class="step-number">1</div>
+          <div class="step-text">Order ₹299+</div>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-text">Apply Code</div>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-text">Save ₹100</div>
+        </div>
+      </div>
     </div>
   </section>
+
 
   <section class="section" *ngFor="let shelf of categoryShelves; let i = index">
 
@@ -183,7 +872,7 @@
       <img [src]="banner.image || 'assets/images/no-image.jpg'" />
     </div>
   </section>
-<ng-template #subscribeModal let-modal>
+  <ng-template #subscribeModal let-modal>
     <div class="p-4">
       <!-- Header -->
       <h5 class="mb-3">Subscribe to Product</h5>

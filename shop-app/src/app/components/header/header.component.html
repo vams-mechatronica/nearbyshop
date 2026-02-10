@@ -68,7 +68,7 @@
     </div>
 
     <!-- RIGHT : ACTIONS -->
-    <div class="header-right">
+    <!-- <div class="header-right">
 
       <a class="icon-btn" [routerLink]="['/subscribe']" (click)="onNavClick()">
         <i class="fas fa-box-open"></i>
@@ -79,13 +79,10 @@
         <i class="fas fa-shopping-cart"></i>
         <span class="badge" *ngIf="cartCount">{{ cartCount }}</span>
       </a>
-
-      <!-- LOGIN -->
       <button class="login-btn" *ngIf="isBrowser && !(isLoggedIn$ | async)" (click)="loginSignup()">
         Login
       </button>
 
-      <!-- PROFILE -->
       <div class="profile profile-nav" *ngIf="isBrowser && (isLoggedIn$ | async)"
         (click)="toggleProfileDropdown($event)">
         <i class="fas fa-user-circle"></i>
@@ -97,6 +94,87 @@
         </div>
       </div>
 
+
+    </div> -->
+
+    <div class="header-right">
+
+      <!-- SUBSCRIPTIONS BUTTON -->
+      <!-- <div class="subscription-wrapper">
+        <a class="subscription-btn" [routerLink]="['/subscribe']" (click)="onNavClick()">
+          <div class="subscription-icon">
+            <i class="fas fa-box-open"></i>
+            <span class="subscription-badge" *ngIf="subscriptionCount">{{ subscriptionCount }}</span>
+          </div>
+          <div class="subscription-text">
+            <span class="subscription-label">Subscriptions</span>
+            <span class="subscription-count" *ngIf="subscriptionCount > 0">{{ subscriptionCount }} active</span>
+            <span class="subscription-count zero" *ngIf="subscriptionCount === 0">Add</span>
+          </div>
+        </a>
+      </div> -->
+
+      <!-- CART BUTTON -->
+      <div class="cart-wrapper">
+        <a class="cart-btn" [routerLink]="['/cart']" (click)="onNavClick()">
+          <div class="cart-icon">
+            <i class="fas fa-shopping-cart"></i>
+            <span class="cart-badge" *ngIf="cartCount">{{ cartCount }}</span>
+          </div>
+          <div class="cart-text">
+            <span class="cart-label">Cart</span>
+            <!-- <span class="cart-amount" *ngIf="cartTotal > 0">₹{{ cartTotal | number:'1.0-0' }}</span>
+        <span class="cart-amount zero" *ngIf="cartTotal === 0">₹0</span> -->
+          </div>
+        </a>
+      </div>
+
+      <!-- LOGIN -->
+      <button class="login-btn" *ngIf="isBrowser && !(isLoggedIn$ | async)" (click)="loginSignup()">
+        Login
+      </button>
+
+      <!-- PROFILE -->
+      <div class="profile profile-nav" *ngIf="isBrowser && (isLoggedIn$ | async)"
+        (click)="toggleProfileDropdown($event)">
+        <div class="profile-avatar">
+          <i class="fas fa-user-circle"></i>
+        </div>
+
+        <div class="profile-dropdown" *ngIf="showProfileDropdown" (click)="$event.stopPropagation()">
+          <div class="user-info">
+            <div class="user-avatar">
+              <i class="fas fa-user-circle"></i>
+            </div>
+            <div class="user-details">
+              <div class="user-name">{{ userName }}</div>
+              <!-- <div class="user-email">{{ userEmail }}</div> -->
+            </div>
+          </div>
+          <div class="dropdown-divider"></div>
+          <a (click)="userProfile()">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+          </a>
+          <!-- <a (click)="goToOrders()">
+                <i class="fas fa-shopping-bag"></i>
+                <span>My Orders</span>
+              </a>
+              <a (click)="goToAddresses()">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>Saved Addresses</span>
+              </a>
+              <a (click)="goToSubscriptions()">
+                <i class="fas fa-box-open"></i>
+                <span>My Subscriptions</span>
+              </a> -->
+          <div class="dropdown-divider"></div>
+          <a class="logout" (click)="logout()">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
+          </a>
+        </div>
+      </div>
 
     </div>
 

@@ -10,7 +10,7 @@ export const API_ENDPOINTS = {
   STORE_DETAILS: `${API_BASE_URL}/api/v1/vendors/stores/`,
   PRODUCT_DETAIL: `${API_BASE_URL}/api/v1/product/`,
   RELATED_PRODUCT: `${API_BASE_URL}/api/v1/products/`,
-  SEARCH: `${API_BASE_URL}/api/v1/products/?search=`,
+  SEARCH: `${API_BASE_URL}/api/v2/products/?search=`,
   GET_SUBSCRIBE: `${API_BASE_URL}/api/v1/subscriptions/`,
   POST_SUBSCRIBE: `${API_BASE_URL}/api/v1/subscriptions/create/`,
   GET_LOGIN_OTP: `${API_BASE_URL}/api/v1/login/request-otp`,
@@ -54,5 +54,7 @@ export const API_ENDPOINTS = {
   STORES_WITH_PINCODE_V2: `${API_BASE_URL}/api/v2/vendors/shop/?pincode=`,
   STORES_V2: `${API_BASE_URL}/api/v2/vendors/shop/`,
   STORE_PRODUCTS_V2: `${API_BASE_URL}/api/v2/vendors/stores/`,
+  SEARCH_SUGGESTIONS: `${API_BASE_URL}/api/v2/search/suggestions/`,
+  QUICK_SUGGESTIONS: `${API_BASE_URL}/api/v2/search/quick-suggestions/`,
 
 };
