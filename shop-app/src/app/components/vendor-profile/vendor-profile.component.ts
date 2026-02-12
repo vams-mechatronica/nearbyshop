@@ -1,11 +1,12 @@
 // vendor-profile.component.ts
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ShopService } from '../../services/shop.service';
 import { Shop } from '../../models/vendor.model';
 import { vProduct } from '../../models/product.model';
+import { API_ENDPOINTS } from '../../shared/constants/api.constants';
 
 
 
@@ -37,8 +38,6 @@ export class VendorProfileComponent implements OnInit {
   shopId!: number;
   shopSlug!: string;
   shop: Shop | null = null;
-  products: vProduct[] = [];
-  filteredProducts: vProduct[] = [];
   categories: any[] = [];
   reviews: any[] = [];
   ratingDistribution: any[] = [];
@@ -46,9 +45,24 @@ export class VendorProfileComponent implements OnInit {
   cartItemCount = 0;
   cartTotal = 0;
   vendorSlug: any;
-  selectedCategory: any;
+  products: vProduct[] = [];
+  filteredProducts: vProduct[] = [];
+  currentPage = 1;
+  hasNextPage = true;
+  isLoading = false;
+  selectedCategory: string = 'all';
+  activeTab: string = 'products';
+
+
+
 
   constructor(private route: ActivatedRoute, private shopService: ShopService) { }
+  @HostListener('window:scroll', [])
+  onScroll(): void {
+    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 200) {
+      this.loadProducts();
+    }
+  }
 
   ngOnInit(): void {
     this.route.params.subscribe(params => {
@@ -59,6 +73,10 @@ export class VendorProfileComponent implements OnInit {
       this.loadReviews();
       this.calculateCartTotal();
     });
+  }
+
+  setActiveTab(tabName: string) {
+    this.activeTab = tabName;
   }
 
   loadVendorData(): void {
@@ -74,14 +92,47 @@ export class VendorProfileComponent implements OnInit {
     })
   }
 
-  loadProducts(): void {
-    this.shopService.getShopProducts(this.vendorSlug).subscribe({
-      next: res => {
-        this.products = res;              
-        this.filteredProducts = [...res];
+  loadProducts(reset: boolean = false): void {
+    if (this.isLoading || !this.hasNextPage) return;
+
+    this.isLoading = true;
+
+    this.shopService.getShopProducts(
+      this.vendorSlug,
+      this.selectedCategory !== 'all'
+        ? { categoryId: Number(this.selectedCategory) }
+        : undefined,
+      this.currentPage
+    ).subscribe({
+      next: (res) => {
+        if (reset) {
+          this.products = res.results || [];
+        } else {
+          this.products = [...this.products, ...(res.results || [])];
+        }
+
+        this.filteredProducts = [...this.products];
+        this.hasNextPage = !!res.next;
+        this.currentPage++;
+        this.isLoading = false;
+      },
+
+      error: (err) => {
+        console.error('Failed to load products', err);
+
+        // If first load or filter change, show empty state
+        if (reset || this.currentPage === 1) {
+          this.products = [];
+          this.filteredProducts = [];
+        }
+
+        // Stop further calls to prevent infinite retry loop
+        this.hasNextPage = false;
+        this.isLoading = false;
       }
     });
   }
+
 
 
   loadCategories(): void {
@@ -123,22 +174,23 @@ export class VendorProfileComponent implements OnInit {
   }
 
   filterByCategory(categoryId: string): void {
-    if (categoryId === 'all') {
-      this.loadProducts();
-    } else {
-      this.shopService.getShopProducts(this.vendorSlug, {
-        categoryId: Number(categoryId)
-      }).subscribe(res => {
-        this.products = res;
-        this.filteredProducts = [...res];
-      });
-    }
+    this.selectedCategory = categoryId;
+
+    // Reset pagination
+    this.currentPage = 1;
+    this.hasNextPage = true;
+    this.products = [];
+    this.filteredProducts = [];
+
+    this.loadProducts(true);
   }
+
 
 
 
   toggleFavorite(): void {
     this.isFavorite = !this.isFavorite;
+    if (this.isFavorite) { this.shopService.addToFavorites(this.shopSlug).subscribe(); } else { this.shopService.removeFromFavorites(this.shopSlug).subscribe(); }
   }
 
   toggleProductWishlist(productId: number): void {
@@ -168,10 +220,30 @@ export class VendorProfileComponent implements OnInit {
     );
   }
 
-  shareShop(): void {
-    // Implement share functionality
-    console.log('Sharing shop');
+  private copyToClipboard(url: string): void {
+    navigator.clipboard.writeText(url).then(() => {
+      alert('Shop link copied to clipboard!');
+    }).catch(err => {
+      console.error('Failed to copy link:', err);
+    });
   }
+
+  shareShop(): void {
+    const shopUrl = `${API_ENDPOINTS.SHOP_PROFILE}${this.shopSlug}`; // adjust as needed
+
+    if (navigator.share) {
+      navigator.share({
+        title: 'Check out this shop!',
+        text: 'Have a look at this store I found',
+        url: shopUrl
+      })
+        .then(() => console.log('Shop shared successfully'))
+        .catch(err => console.error('Error sharing:', err));
+    } else {
+      this.copyToClipboard(shopUrl);
+    }
+  }
+
 
   viewCart(): void {
     // Navigate to cart page

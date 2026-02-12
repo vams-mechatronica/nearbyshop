@@ -15,7 +15,7 @@ export interface Shop {
   // Derived/sample fields
   tagline: string;
   description: string;
-  coverImage?: string;
+  cover_image?: string;
   address: Address;
   delivery_time_min: number;
   delivery_time_max: number;
@@ -48,7 +48,7 @@ export interface Address {
   state: string;
   postalCode: string;
   country: string;
-  fullAddress: string;
+  full_address: string;
 }
 
 export interface StoreHour {

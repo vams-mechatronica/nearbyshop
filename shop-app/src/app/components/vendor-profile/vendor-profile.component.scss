@@ -124,6 +124,10 @@
   color: var(--primary);
 }
 
+.meta-item span {
+  color: grey;
+}
+
 .vendor-actions {
   display: flex;
   gap: 10px;

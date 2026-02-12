@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { StorageService } from './storage.service';
-import { map, Observable, of, tap } from 'rxjs';
+import { catchError, map, Observable, of, tap } from 'rxjs';
 import { API_ENDPOINTS } from '../shared/constants/api.constants';
 import { ApiResponse } from '../models/api-response.model';
 import { Shop, ShopProfileResponse, ShopStats } from '../models/vendor.model';
@@ -21,6 +21,13 @@ interface Product {
   unit: string;
   inCart: number;
   isWishlisted: boolean;
+}
+
+interface LocalShopData {
+  favorites: {
+    vendorSlug: string;
+    addedAt: string;
+  }[];
 }
 @Injectable({ providedIn: 'root' })
 export class ShopService {
@@ -90,17 +97,40 @@ export class ShopService {
     );
   }
 
-  addToFavorites(vendorId: number): Observable<void> {
+  addToFavorites(vendorSlug: string): Observable<void> {
     return this.http.post<ApiResponse<void>>(
-      `${this.apiUrl}/${vendorId}/favorite`,
+      `${API_ENDPOINTS.SHOP}/${vendorSlug}/favorite/`,
       {}
-    ).pipe(map(() => { }));
+    ).pipe(
+      map((response) => {
+        // If your API has success flag
+        if (!response || response.success === false) {
+          this.storeFavoriteLocally(vendorSlug);
+        }
+      }),
+      catchError((error: HttpErrorResponse) => {
+        // Any HTTP error → store locally
+        this.storeFavoriteLocally(vendorSlug);
+        return of(void 0);
+      })
+    );
   }
 
-  removeFromFavorites(vendorId: number): Observable<void> {
+
+  removeFromFavorites(vendorSlug: string): Observable<void> {
     return this.http.delete<ApiResponse<void>>(
-      `${this.apiUrl}/${vendorId}/favorite`
-    ).pipe(map(() => { }));
+      `${API_ENDPOINTS.SHOP}/${vendorSlug}/favorite/`
+    ).pipe(
+      map((response) => {
+        if (!response || response.success === false) {
+          this.removeFavoriteLocally(vendorSlug);
+        }
+      }),
+      catchError((error: HttpErrorResponse) => {
+        this.removeFavoriteLocally(vendorSlug);
+        return of(void 0);
+      })
+    );
   }
 
   getFavoriteShops(): Observable<Shop[]> {
@@ -109,8 +139,13 @@ export class ShopService {
   }
 
   // Shop Products Methods
-  getShopProducts(shopSlug: string, filter?: ProductFilter): Observable<Product[]> {
-    let params = new HttpParams();
+  getShopProducts(
+    shopSlug: string,
+    filter?: ProductFilter,
+    page: number = 1
+  ): Observable<PaginatedResponse<Product>> {
+
+    let params = new HttpParams().set('page', page.toString());
 
     if (filter) {
       if (filter.categoryId) params = params.set('category', filter.categoryId.toString());
@@ -124,8 +159,9 @@ export class ShopService {
     return this.http.get<PaginatedResponse<Product>>(
       `${API_ENDPOINTS.SHOP}/${shopSlug}/products`,
       { params }
-    ).pipe(map(response => response.results));
+    );
   }
+
 
   getShopProductCategories(vendorId: string): Observable<Category[]> {
     return this.http.get<ShopCategoriesResponse>(
@@ -255,5 +291,35 @@ export class ShopService {
       { isAvailable }
     ).pipe(map(() => { }));
   }
+
+  private storeFavoriteLocally(vendorSlug: string): void {
+    const data = this.getLocalFavorites();
+
+    const exists = data.favorites.find(f => f.vendorSlug === vendorSlug);
+    if (!exists) {
+      data.favorites.push({
+        vendorSlug,
+        addedAt: new Date().toISOString()
+      });
+    }
+
+    localStorage.setItem('shop_data', JSON.stringify(data));
+  }
+
+  private removeFavoriteLocally(vendorSlug: string): void {
+    const data = this.getLocalFavorites();
+
+    data.favorites = data.favorites.filter(
+      f => f.vendorSlug !== vendorSlug
+    );
+
+    localStorage.setItem('shop_data', JSON.stringify(data));
+  }
+
+  private getLocalFavorites(): LocalShopData {
+    const stored = localStorage.getItem('shop_data');
+    return stored ? JSON.parse(stored) : { favorites: [] };
+  }
+
 }
 

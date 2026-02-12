@@ -3,7 +3,7 @@
   <!-- Vendor Header with Cover Image -->
   <div class="vendor-header">
     <div class="cover-image"
-      [style.backgroundImage]="'url(' + (shop?.coverImage || 'https://images.unsplash.com/photo-1560073267-305398e67638?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80') + ')'">
+      [style.backgroundImage]="'url(' + (shop?.cover_image || 'https://images.unsplash.com/photo-1560073267-305398e67638?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80') + ')'">
       <div class="cover-overlay"></div>
     </div>
 
@@ -58,16 +58,16 @@
   <div class="navigation-tabs">
     <nav>
       <div class="nav nav-tabs" id="nav-tab" role="tablist">
-        <button class="nav-link active" id="nav-products-tab" data-bs-toggle="tab" data-bs-target="#nav-products"
+        <button class="nav-link active" id="nav-products-tab" [class.active]="activeTab === 'products'" (click)="setActiveTab('products')" data-bs-toggle="tab" data-bs-target="#nav-products"
           type="button" role="tab">
           <i class="fas fa-shopping-basket me-2"></i>Products
           <span class="badge bg-primary ms-2">{{ products.length || 0 }}</span>
         </button>
-        <button class="nav-link" id="nav-about-tab" data-bs-toggle="tab" data-bs-target="#nav-about" type="button"
+        <button class="nav-link" id="nav-about-tab" [class.active]="activeTab === 'about'" (click)="setActiveTab('about')" data-bs-toggle="tab" data-bs-target="#nav-about" type="button"
           role="tab">
           <i class="fas fa-store me-2"></i>About Shop
         </button>
-        <button class="nav-link" id="nav-reviews-tab" data-bs-toggle="tab" data-bs-target="#nav-reviews" type="button"
+        <button class="nav-link" id="nav-reviews-tab" [class.active]="activeTab === 'reviews'" (click)="setActiveTab('reviews')" data-bs-toggle="tab" data-bs-target="#nav-reviews" type="button"
           role="tab">
           <i class="fas fa-star me-2"></i>Reviews
           <span class="badge bg-primary ms-2">{{ shop?.review_count || 0 }}</span>
@@ -79,7 +79,7 @@
   <!-- Tab Content -->
   <div class="tab-content mt-4" id="nav-tabContent">
     <!-- Products Tab -->
-    <div class="tab-pane fade show active" id="nav-products" role="tabpanel">
+    <div class="tab-pane fade" [class.show]="activeTab === 'products'" [class.active]="activeTab === 'products'" id="nav-products" role="tabpanel">
       <!-- Category Filter -->
       <div class="category-filter mb-4">
         <div class="category-scroll">
@@ -137,30 +137,33 @@
             </div>
           </div>
         </div>
+        <div class="text-center my-4" *ngIf="!hasNextPage && products.length">
+          <small>No more products</small>
+        </div>
       </div>
     </div>
 
     <!-- About Tab -->
-    <div class="tab-pane fade" id="nav-about" role="tabpanel">
+    <div class="tab-pane fade" [class.show]="activeTab === 'about'" [class.active]="activeTab === 'about'" id="nav-about" role="tabpanel">
       <div class="about-section">
         <div class="about-card">
           <h3><i class="fas fa-info-circle me-2"></i>About Us</h3>
-          <!-- <p>{{ shop?.about || 'We provide fresh groceries and daily essentials delivered to your doorstep in minutes. Quality and customer satisfaction are our top priorities.' }}</p> -->
+          <p>{{ shop?.description || 'We provide fresh groceries and daily essentials delivered to your doorstep in minutes. Quality and customer satisfaction are our top priorities.' }}</p>
         </div>
 
         <div class="about-card">
           <h3><i class="fas fa-clock me-2"></i>Store Hours</h3>
           <div class="timing-list">
             <div *ngFor="let timing of shop?.store_hours" class="timing-item">
-              <span>{{ timing.day }}</span>
-              <span>{{ timing.close_time }}</span>
+              <span>{{ timing.day_name }}</span>
+              <span>{{timing.open_time}} - {{ timing.close_time }}</span>
             </div>
           </div>
         </div>
 
         <div class="about-card">
           <h3><i class="fas fa-map-marker-alt me-2"></i>Location</h3>
-          <p>{{ shop?.address || '123, Main Street, City Center' }}</p>
+          <p>{{ shop?.address?.full_address || '123, Main Street, City Center' }}</p>
           <div class="mt-3">
             <button class="btn btn-outline-primary">
               <i class="fas fa-directions me-2"></i>Get Directions
@@ -189,7 +192,7 @@
     </div>
 
     <!-- Reviews Tab -->
-    <div class="tab-pane fade" id="nav-reviews" role="tabpanel">
+    <div class="tab-pane fade" [class.show]="activeTab === 'reviews'" [class.active]="activeTab === 'reviews'" id="nav-reviews" role="tabpanel">
       <div class="reviews-section">
         <div class="rating-summary">
           <div class="overall-rating">
