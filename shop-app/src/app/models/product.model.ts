@@ -1,3 +1,17 @@
+export interface vProduct {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  originalPrice?: number;
+  discount?: number;
+  image: string;
+  categoryId: number;
+  unit: string;
+  inCart: number;
+  isWishlisted: boolean;
+}
+
 export interface Product {
   id: number;
   name: string;
@@ -26,4 +40,21 @@ export interface PaginatedResponse<T> {
   next: string | null;
   previous: string | null;
   results: T[];
+}
+
+export interface NutritionalInfo {
+  calories?: number;
+  protein?: number;
+  carbs?: number;
+  fat?: number;
+  fiber?: number;
+}
+
+export interface ProductFilter {
+  categoryId?: number;
+  minPrice?: number;
+  maxPrice?: number;
+  inStock?: boolean;
+  sortBy?: 'price_asc' | 'price_desc' | 'rating' | 'newest';
+  search?: string;
 }

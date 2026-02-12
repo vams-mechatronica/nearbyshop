@@ -14,6 +14,7 @@ import { ProductDetailComponent } from './pages/product-detail/product-detail.co
 import { VendorProductsComponent } from './components/vendor-products/vendor-products.component';
 import { AuthGuard } from './core/gaurds/auth.gaurd';
 import { VendorListComponent } from './components/vendor-list/vendor-list.component';
+import { VendorProfileComponent } from './components/vendor-profile/vendor-profile.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -31,6 +32,7 @@ export const routes: Routes = [
   { path: 'products/:slug', component: ProductsComponent },
   { path: 'product/:slug', component: ProductDetailComponent },
   { path: 'stores/:slug', component: VendorProductsComponent },
+  { path: 'store/profile/:slug', component: VendorProfileComponent },
   { path: 'about-us', component: AboutUsComponent },
   { path: 'policy', component: PolicyComponent },
   { path: 'contact-us', component: ContactUsComponent },

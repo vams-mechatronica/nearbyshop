@@ -51,3 +51,14 @@ export interface AddToCartApiResponse {
   item: CartItemApi | null;
   cart: CartSummary;
 }
+
+export interface AddToCartRequest {
+  productId: number;
+  quantity: number;
+  vendorId: number;
+}
+
+export interface UpdateCartRequest {
+  productId: number;
+  quantity: number;
+}

@@ -56,5 +56,6 @@ export const API_ENDPOINTS = {
   STORE_PRODUCTS_V2: `${API_BASE_URL}/api/v2/vendors/stores/`,
   SEARCH_SUGGESTIONS: `${API_BASE_URL}/api/v2/search/suggestions/`,
   QUICK_SUGGESTIONS: `${API_BASE_URL}/api/v2/search/quick-suggestions/`,
+  SHOP: `${API_BASE_URL}/api/v2/shops`,
 
 };

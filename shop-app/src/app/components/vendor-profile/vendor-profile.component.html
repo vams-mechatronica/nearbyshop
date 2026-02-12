@@ -1,0 +1,251 @@
+<!-- shop-profile.component.html -->
+<div class="vendor-profile-container">
+  <!-- Vendor Header with Cover Image -->
+  <div class="vendor-header">
+    <div class="cover-image"
+      [style.backgroundImage]="'url(' + (shop?.coverImage || 'https://images.unsplash.com/photo-1560073267-305398e67638?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80') + ')'">
+      <div class="cover-overlay"></div>
+    </div>
+
+    <div class="vendor-info-section">
+      <div class="vendor-avatar">
+        <img
+          [src]="shop?.shop_image || 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80'"
+          alt="Vendor Logo" class="avatar-image">
+        <span class="verified-badge" *ngIf="shop?.vendor_is_verified">
+          <i class="fas fa-check-circle"></i>
+        </span>
+      </div>
+
+      <div class="vendor-details">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <h1 class="vendor-name">{{ shop?.name || 'Shop Name' }}</h1>
+          <span class="rating-badge">
+            <i class="fas fa-star"></i> {{ shop?.rating || '4.5' }}
+          </span>
+        </div>
+
+        <p class="vendor-tagline text-muted mb-3">{{ shop?.tagline || 'Fresh groceries delivered in minutes' }}</p>
+
+        <div class="vendor-meta">
+          <div class="meta-item">
+            <i class="fas fa-clock"></i>
+            <span>{{ shop?.delivery_time_min || '15-20' }} mins</span>
+          </div>
+          <div class="meta-item">
+            <i class="fas fa-rupee-sign"></i>
+            <span>Free delivery above ₹{{ shop?.minimum_order || '199' }}</span>
+          </div>
+          <div class="meta-item">
+            <i class="fas fa-map-marker-alt"></i>
+            <span>{{ shop?.distance || '0.5' }} km away</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="vendor-actions">
+        <button class="btn btn-favorite" [class.active]="isFavorite" (click)="toggleFavorite()">
+          <i class="fas" [class.fa-heart]="!isFavorite" [class.fa-heart]="isFavorite"></i>
+        </button>
+        <button class="btn btn-share" (click)="shareShop()">
+          <i class="fas fa-share-alt"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation Tabs -->
+  <div class="navigation-tabs">
+    <nav>
+      <div class="nav nav-tabs" id="nav-tab" role="tablist">
+        <button class="nav-link active" id="nav-products-tab" data-bs-toggle="tab" data-bs-target="#nav-products"
+          type="button" role="tab">
+          <i class="fas fa-shopping-basket me-2"></i>Products
+          <span class="badge bg-primary ms-2">{{ products.length || 0 }}</span>
+        </button>
+        <button class="nav-link" id="nav-about-tab" data-bs-toggle="tab" data-bs-target="#nav-about" type="button"
+          role="tab">
+          <i class="fas fa-store me-2"></i>About Shop
+        </button>
+        <button class="nav-link" id="nav-reviews-tab" data-bs-toggle="tab" data-bs-target="#nav-reviews" type="button"
+          role="tab">
+          <i class="fas fa-star me-2"></i>Reviews
+          <span class="badge bg-primary ms-2">{{ shop?.review_count || 0 }}</span>
+        </button>
+      </div>
+    </nav>
+  </div>
+
+  <!-- Tab Content -->
+  <div class="tab-content mt-4" id="nav-tabContent">
+    <!-- Products Tab -->
+    <div class="tab-pane fade show active" id="nav-products" role="tabpanel">
+      <!-- Category Filter -->
+      <div class="category-filter mb-4">
+        <div class="category-scroll">
+          <button class="category-btn active" (click)="filterByCategory('all')">
+            All Items
+          </button>
+          <button *ngFor="let category of categories" class="category-btn"
+            [class.active]="selectedCategory === category.id" (click)="filterByCategory(category.id)">
+            {{ category.name }}
+          </button>
+
+        </div>
+      </div>
+
+      <!-- Product Grid -->
+      <div class="product-grid">
+        <div *ngFor="let product of filteredProducts" class="product-card">
+          <div class="product-image-container">
+            <img [src]="product.image" [alt]="product.name" class="product-image">
+            <button class="btn-wishlist" (click)="toggleProductWishlist(product.id)">
+              <i class="fas fa-heart" [class.active]="product.isWishlisted"></i>
+            </button>
+            <span class="badge-discount" *ngIf="product.discount">
+              {{ product.discount }}% OFF
+            </span>
+          </div>
+
+          <div class="product-details">
+            <h3 class="product-name">{{ product.name }}</h3>
+            <p class="product-description">{{ product.description }}</p>
+
+            <div class="product-pricing">
+              <div class="d-flex align-items-center gap-2">
+                <span class="current-price">₹{{ product.price }}</span>
+                <span class="original-price" *ngIf="product.originalPrice">
+                  ₹{{ product.originalPrice }}
+                </span>
+              </div>
+              <span class="product-unit">{{ product.unit }}</span>
+            </div>
+
+            <div class="product-actions">
+              <div class="quantity-control" *ngIf="product.inCart > 0">
+                <button class="btn-qty" (click)="updateQuantity(product.id, -1)">
+                  <i class="fas fa-minus"></i>
+                </button>
+                <span class="qty-value">{{ product.inCart }}</span>
+                <button class="btn-qty" (click)="updateQuantity(product.id, 1)">
+                  <i class="fas fa-plus"></i>
+                </button>
+              </div>
+              <button class="btn-add-to-cart" *ngIf="product.inCart === 0" (click)="addToCart(product)">
+                <i class="fas fa-plus me-1"></i> Add
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- About Tab -->
+    <div class="tab-pane fade" id="nav-about" role="tabpanel">
+      <div class="about-section">
+        <div class="about-card">
+          <h3><i class="fas fa-info-circle me-2"></i>About Us</h3>
+          <!-- <p>{{ shop?.about || 'We provide fresh groceries and daily essentials delivered to your doorstep in minutes. Quality and customer satisfaction are our top priorities.' }}</p> -->
+        </div>
+
+        <div class="about-card">
+          <h3><i class="fas fa-clock me-2"></i>Store Hours</h3>
+          <div class="timing-list">
+            <div *ngFor="let timing of shop?.store_hours" class="timing-item">
+              <span>{{ timing.day }}</span>
+              <span>{{ timing.close_time }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="about-card">
+          <h3><i class="fas fa-map-marker-alt me-2"></i>Location</h3>
+          <p>{{ shop?.address || '123, Main Street, City Center' }}</p>
+          <div class="mt-3">
+            <button class="btn btn-outline-primary">
+              <i class="fas fa-directions me-2"></i>Get Directions
+            </button>
+          </div>
+        </div>
+
+        <div class="about-card">
+          <h3><i class="fas fa-award me-2"></i>Achievements</h3>
+          <div class="achievements">
+            <div class="achievement-item">
+              <i class="fas fa-bolt"></i>
+              <span>Superfast Delivery Partner</span>
+            </div>
+            <div class="achievement-item">
+              <i class="fas fa-star"></i>
+              <span>4.5+ Rating consistently</span>
+            </div>
+            <div class="achievement-item">
+              <i class="fas fa-shipping-fast"></i>
+              <span>5000+ Orders Delivered</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reviews Tab -->
+    <div class="tab-pane fade" id="nav-reviews" role="tabpanel">
+      <div class="reviews-section">
+        <div class="rating-summary">
+          <div class="overall-rating">
+            <h1>{{ shop?.rating || '4.5' }}</h1>
+            <div class="stars">
+              <ng-container *ngFor="let star of [1,2,3,4,5]">
+                <i class="fas fa-star" [class.filled]="star <= getRoundedRating()"></i>
+              </ng-container>
+            </div>
+            <p>{{ shop?.review_count || '124' }} reviews</p>
+          </div>
+
+          <div class="rating-bars">
+            <div *ngFor="let bar of ratingDistribution" class="rating-bar">
+              <span>{{ bar.stars }} <i class="fas fa-star"></i></span>
+              <div class="progress">
+                <div class="progress-bar" [style.width.%]="bar.percentage"></div>
+              </div>
+              <span>{{ bar.count }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="reviews-list">
+          <div *ngFor="let review of reviews" class="review-card">
+            <div class="review-header">
+              <img [src]="review.userAvatar" class="review-avatar" alt="User">
+              <div>
+                <h5>{{ review.userName }}</h5>
+                <div class="review-rating">
+                  <ng-container *ngFor="let star of [1,2,3,4,5]">
+                    <i class="fas fa-star" [class.filled]="star <= review.rating"></i>
+                  </ng-container>
+                </div>
+              </div>
+              <span class="review-time">{{ review.time }}</span>
+            </div>
+            <p class="review-content">{{ review.comment }}</p>
+            <div class="review-images" *ngIf="review.images?.length">
+              <img *ngFor="let img of review.images" [src]="img" alt="Review image">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Cart Button -->
+  <div class="floating-cart" *ngIf="cartTotal > 0" (click)="viewCart()">
+    <div class="cart-badge">{{ cartItemCount }}</div>
+    <div class="cart-content">
+      <i class="fas fa-shopping-basket"></i>
+      <div class="cart-info">
+        <span class="cart-text">View Cart</span>
+        <span class="cart-total">₹{{ cartTotal }}</span>
+      </div>
+    </div>
+  </div>
+</div>

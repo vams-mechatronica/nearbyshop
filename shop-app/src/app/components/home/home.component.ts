@@ -942,6 +942,11 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     if (store?.slug) this.router.navigate(['/stores', store.slug]);
   }
 
+  visitStore(store: any): void {
+    this.analytics.trackEvent('STORE_PROFILE_PAGE_REDIRECT_CLICKED', 'PAGE_VISIT', 1, `STORE: ${store.slug}`);
+    if (store?.slug) this.router.navigate(['/store/profile', store.slug]);
+  }
+
   /* STEP 1: LOAD CATEGORIES */
   loadCategories(): void {
     this.loadingCategories = true;
