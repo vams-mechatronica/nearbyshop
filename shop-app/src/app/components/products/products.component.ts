@@ -179,10 +179,14 @@ export class ProductsComponent implements OnInit {
 
   addToCart(product: any): void {
 
-    // 🔐 Force login
     if (!this.authService.isLoggedIn()) {
-      localStorage.setItem('redirect_url', '/cart');
       this.authModal.openLogin();
+
+      // Wait for login success
+      this.authService.isLoggedIn$.subscribe(() => {
+        this.addToCart(product);
+      });
+
       return;
     }
 
@@ -216,11 +220,12 @@ export class ProductsComponent implements OnInit {
 
     // 🔐 Force login before subscription
     if (!this.authService.isLoggedIn()) {
-      // save intent (optional but recommended)
-      localStorage.setItem('redirect_url', '/subscribe');
-
-      // open login modal
       this.authModal.openLogin();
+
+      // Wait for login success
+      this.authService.isLoggedIn$.subscribe(() => {
+        this.openSubscribeModal(product);
+      });
       return;
     }
 

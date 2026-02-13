@@ -174,201 +174,199 @@
   </section>
 
   <div class="search-results-overlay" *ngIf="showSearchResults">
-  <div class="search-results-container">
-    <div class="results-header">
-      <div class="back-btn" (click)="closeSearchResults()">
-        <i class="fas fa-arrow-left"></i>
-      </div>
-      <div class="search-box-header">
-        <input type="text" [(ngModel)]="searchQuery" (keyup.enter)="performSearch()" 
-               placeholder="Search..." class="header-search-input">
-        <button class="header-search-btn" (click)="performSearch()">
-          <i class="fas fa-search"></i>
-        </button>
-      </div>
-      <div class="filters-btn" (click)="openFilters()">
-        <i class="fas fa-sliders-h"></i>
-      </div>
-    </div>
-    
-    <div class="results-body">
-      <!-- Filters Sidebar -->
-      <div class="filters-sidebar" *ngIf="showFilters">
-        <div class="filters-header">
-          <h3>Filters</h3>
-          <button class="close-filters" (click)="closeFilters()">
-            <i class="fas fa-times"></i>
-          </button>
+    <div class="search-results-container">
+      <div class="results-header">
+        <div class="back-btn" (click)="closeSearchResults()">
+          <i class="fas fa-arrow-left"></i>
         </div>
-        <div class="filter-section">
-          <h4>Category</h4>
-          <div class="filter-options">
-            <label *ngFor="let category of allCategories">
-              <input type="checkbox" [(ngModel)]="category.selected">
-              <span class="checkmark"></span>
-              {{ category.name }}
-              <span class="count">({{ category.count }})</span>
-            </label>
-          </div>
-        </div>
-        <div class="filter-section">
-          <h4>Price Range</h4>
-          <div class="price-range">
-            <input type="range" min="0" max="5000" [(ngModel)]="priceRange[0]" class="range-min">
-            <input type="range" min="0" max="5000" [(ngModel)]="priceRange[1]" class="range-max">
-            <div class="price-values">
-              <span>₹{{ priceRange[0] }}</span>
-              <span>to</span>
-              <span>₹{{ priceRange[1] }}</span>
-            </div>
-          </div>
-        </div>
-        <div class="filter-section">
-          <h4>Delivery Time</h4>
-          <div class="filter-options">
-            <label *ngFor="let time of deliveryTimes">
-              <input type="radio" name="deliveryTime" [(ngModel)]="selectedDeliveryTime" [value]="time.value">
-              <span class="radiomark"></span>
-              {{ time.label }}
-            </label>
-          </div>
-        </div>
-        <div class="filter-actions">
-          <button class="clear-filters" (click)="clearFilters()">Clear All</button>
-          <button class="apply-filters" (click)="applySearchFilters()">Apply Filters</button>
-        </div>
-      </div>
-      
-      <!-- Results Main Content -->
-      <div class="results-main">
-        <div class="results-info">
-          <h2>Search Results for "{{ searchQuery }}"</h2>
-          <span class="results-count">{{ totalResults }} results found</span>
-          <div class="sort-options">
-            <select [(ngModel)]="sortBy" (change)="sortResults()">
-              <option value="relevance">Sort by: Relevance</option>
-              <option value="price_low">Price: Low to High</option>
-              <option value="price_high">Price: High to Low</option>
-              <option value="rating">Rating</option>
-              <option value="delivery">Fastest Delivery</option>
-            </select>
-          </div>
-        </div>
-        
-        <div class="active-filters" *ngIf="activeFilters.length > 0">
-          <span class="filter-tag" *ngFor="let filter of activeFilters">
-            {{ filter }}
-            <i class="fas fa-times" (click)="removeFilter(filter)"></i>
-          </span>
-        </div>
-        
-        <!-- Results Grid -->
-        <div class="results-grid">
-          <div class="loading-spinner" *ngIf="loading">
-            <div class="spinner"></div>
-            <p>Searching...</p>
-          </div>
-          
-          <div class="no-results" *ngIf="!loading && searchResults.length === 0">
+        <div class="search-box-header">
+          <input type="text" [(ngModel)]="searchQuery" (keyup.enter)="performSearch()" placeholder="Search..."
+            class="header-search-input">
+          <button class="header-search-btn" (click)="performSearch()">
             <i class="fas fa-search"></i>
-            <h3>No results found for "{{ searchQuery }}"</h3>
-            <p>Try different keywords or check out our popular categories</p>
-            <div class="suggestion-categories">
-              <button *ngFor="let category of suggestionCategories" 
-                      (click)="searchByCategory(category)">
+          </button>
+        </div>
+        <div class="filters-btn" (click)="openFilters()">
+          <i class="fas fa-sliders-h"></i>
+        </div>
+      </div>
+
+      <div class="results-body">
+        <!-- Filters Sidebar -->
+        <div class="filters-sidebar" *ngIf="showFilters">
+          <div class="filters-header">
+            <h3>Filters</h3>
+            <button class="close-filters" (click)="closeFilters()">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="filter-section">
+            <h4>Category</h4>
+            <div class="filter-options">
+              <label *ngFor="let category of allCategories">
+                <input type="checkbox" [(ngModel)]="category.selected">
+                <span class="checkmark"></span>
                 {{ category.name }}
-              </button>
+                <span class="count">({{ category.count }})</span>
+              </label>
             </div>
           </div>
-          
-          <div class="results-list" *ngIf="!loading && searchResults.length > 0">
-            <!-- Product Results -->
-            <div class="product-card" *ngFor="let product of searchResults">
-              <div class="product-image">
-                <img [src]="product.image" [alt]="product.name">
-                <div class="product-badge" *ngIf="product.discount">
-                  {{ product.discount }}% OFF
-                </div>
-              </div>
-              <div class="product-info">
-                <h3 class="product-name">{{ product.name }}</h3>
-                <p class="product-description">{{ product.description }}</p>
-                <div class="product-meta">
-                  <span class="product-shop">
-                    <i class="fas fa-store"></i> {{ product.shop_name }}
-                  </span>
-                  <span class="product-rating">
-                    <i class="fas fa-star"></i> {{ product.rating }}
-                  </span>
-                  <span class="product-delivery">
-                    <i class="fas fa-clock"></i> {{ product.delivery_time }} min
-                  </span>
-                </div>
-                <div class="product-price">
-                  <span class="current-price">₹{{ product.price }}</span>
-                  <span class="original-price" *ngIf="product.original_price">
-                    ₹{{ product.original_price }}
-                  </span>
-                </div>
-                <button class="add-to-cart-btn" (click)="addToCart(product)">
-                  <i class="fas fa-plus"></i> Add to Cart
-                </button>
+          <div class="filter-section">
+            <h4>Price Range</h4>
+            <div class="price-range">
+              <input type="range" min="0" max="5000" [(ngModel)]="priceRange[0]" class="range-min">
+              <input type="range" min="0" max="5000" [(ngModel)]="priceRange[1]" class="range-max">
+              <div class="price-values">
+                <span>₹{{ priceRange[0] }}</span>
+                <span>to</span>
+                <span>₹{{ priceRange[1] }}</span>
               </div>
             </div>
-            
-            <!-- Shop Results -->
-            <div class="shop-card" *ngFor="let shop of shopResults">
-              <div class="shop-image">
-                <img [src]="shop.image" [alt]="shop.name">
-                <div class="shop-status" [class.open]="shop.is_open">
-                  {{ shop.is_open ? 'Open Now' : 'Closed' }}
-                </div>
-              </div>
-              <div class="shop-info">
-                <h3 class="shop-name">{{ shop.name }}</h3>
-                <p class="shop-category">{{ shop.category }}</p>
-                <div class="shop-meta">
-                  <span class="shop-rating">
-                    <i class="fas fa-star"></i> {{ shop.rating }}
-                  </span>
-                  <span class="shop-delivery">
-                    <i class="fas fa-clock"></i> {{ shop.delivery_time }} min
-                  </span>
-                  <span class="shop-distance">
-                    <i class="fas fa-map-marker-alt"></i> {{ shop.distance }} km
-                  </span>
-                </div>
-                <div class="shop-tags">
-                  <span class="tag" *ngFor="let tag of shop.tags">{{ tag }}</span>
-                </div>
-                <button class="visit-shop-btn" (click)="selectStore(shop)">
-                  Visit Shop
-                </button>
-              </div>
+          </div>
+          <div class="filter-section">
+            <h4>Delivery Time</h4>
+            <div class="filter-options">
+              <label *ngFor="let time of deliveryTimes">
+                <input type="radio" name="deliveryTime" [(ngModel)]="selectedDeliveryTime" [value]="time.value">
+                <span class="radiomark"></span>
+                {{ time.label }}
+              </label>
             </div>
+          </div>
+          <div class="filter-actions">
+            <button class="clear-filters" (click)="clearFilters()">Clear All</button>
+            <button class="apply-filters" (click)="applySearchFilters()">Apply Filters</button>
           </div>
         </div>
-        
-        <!-- Pagination -->
-        <div class="pagination" *ngIf="totalPages > 1">
-          <button class="page-btn" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">
-            <i class="fas fa-chevron-left"></i> Previous
-          </button>
-          <div class="page-numbers">
-            <span *ngFor="let page of getPageNumbers()" 
-                  [class.active]="page === currentPage"
-                  (click)="goToPage(page)">
-              {{ page }}
+
+        <!-- Results Main Content -->
+        <div class="results-main">
+          <div class="results-info">
+            <h2>Search Results for "{{ searchQuery }}"</h2>
+            <span class="results-count">{{ totalResults }} results found</span>
+            <div class="sort-options">
+              <select [(ngModel)]="sortBy" (change)="sortResults()">
+                <option value="relevance">Sort by: Relevance</option>
+                <option value="price_low">Price: Low to High</option>
+                <option value="price_high">Price: High to Low</option>
+                <option value="rating">Rating</option>
+                <option value="delivery">Fastest Delivery</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="active-filters" *ngIf="activeFilters.length > 0">
+            <span class="filter-tag" *ngFor="let filter of activeFilters">
+              {{ filter }}
+              <i class="fas fa-times" (click)="removeFilter(filter)"></i>
             </span>
           </div>
-          <button class="page-btn" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">
-            Next <i class="fas fa-chevron-right"></i>
-          </button>
+
+          <!-- Results Grid -->
+          <div class="results-grid">
+            <div class="loading-spinner" *ngIf="loading">
+              <div class="spinner"></div>
+              <p>Searching...</p>
+            </div>
+
+            <div class="no-results" *ngIf="!loading && searchResults.length === 0">
+              <i class="fas fa-search"></i>
+              <h3>No results found for "{{ searchQuery }}"</h3>
+              <p>Try different keywords or check out our popular categories</p>
+              <div class="suggestion-categories">
+                <button *ngFor="let category of suggestionCategories" (click)="searchByCategory(category)">
+                  {{ category.name }}
+                </button>
+              </div>
+            </div>
+
+            <div class="results-list" *ngIf="!loading && searchResults.length > 0">
+              <!-- Product Results -->
+              <div class="product-card" *ngFor="let product of searchResults">
+                <div class="product-image">
+                  <img [src]="product.image" [alt]="product.name">
+                  <div class="product-badge" *ngIf="product.discount">
+                    {{ product.discount }}% OFF
+                  </div>
+                </div>
+                <div class="product-info">
+                  <h3 class="product-name">{{ product.name }}</h3>
+                  <p class="product-description">{{ product.description }}</p>
+                  <div class="product-meta">
+                    <span class="product-shop">
+                      <i class="fas fa-store"></i> {{ product.shop_name }}
+                    </span>
+                    <span class="product-rating">
+                      <i class="fas fa-star"></i> {{ product.rating }}
+                    </span>
+                    <span class="product-delivery">
+                      <i class="fas fa-clock"></i> {{ product.delivery_time }} min
+                    </span>
+                  </div>
+                  <div class="product-price">
+                    <span class="current-price">₹{{ product.price }}</span>
+                    <span class="original-price" *ngIf="product.original_price">
+                      ₹{{ product.original_price }}
+                    </span>
+                  </div>
+                  <button class="add-to-cart-btn" (click)="addToCart(product)">
+                    <i class="fas fa-plus"></i> Add to Cart
+                  </button>
+                </div>
+              </div>
+
+              <!-- Shop Results -->
+              <div class="shop-card" *ngFor="let shop of shopResults">
+                <div class="shop-image">
+                  <img [src]="shop.image" [alt]="shop.name">
+                  <div class="shop-status" [class.open]="shop.is_open">
+                    {{ shop.is_open ? 'Open Now' : 'Closed' }}
+                  </div>
+                </div>
+                <div class="shop-info">
+                  <h3 class="shop-name">{{ shop.name }}</h3>
+                  <p class="shop-category">{{ shop.category }}</p>
+                  <div class="shop-meta">
+                    <span class="shop-rating">
+                      <i class="fas fa-star"></i> {{ shop.rating }}
+                    </span>
+                    <span class="shop-delivery">
+                      <i class="fas fa-clock"></i> {{ shop.delivery_time }} min
+                    </span>
+                    <span class="shop-distance">
+                      <i class="fas fa-map-marker-alt"></i> {{ shop.distance }} km
+                    </span>
+                  </div>
+                  <div class="shop-tags">
+                    <span class="tag" *ngFor="let tag of shop.tags">{{ tag }}</span>
+                  </div>
+                  <button class="visit-shop-btn" (click)="selectStore(shop)">
+                    Visit Shop
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pagination -->
+          <div class="pagination" *ngIf="totalPages > 1">
+            <button class="page-btn" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">
+              <i class="fas fa-chevron-left"></i> Previous
+            </button>
+            <div class="page-numbers">
+              <span *ngFor="let page of getPageNumbers()" [class.active]="page === currentPage"
+                (click)="goToPage(page)">
+                {{ page }}
+              </span>
+            </div>
+            <button class="page-btn" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">
+              Next <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
         </div>
       </div>
     </div>
   </div>
-</div>
 
   <section class="local-shops-strip">
     <div class="strip-header">
@@ -409,12 +407,12 @@
       <button class="scroll-arrow right">›</button>
     </div>
 
-    <div class="shop-categories-pills">
+    <!-- <div class="shop-categories-pills">
       <span class="pill active">All Shops</span>
       <span class="pill" *ngFor="let cat of categories">
         {{cat.name}}
       </span>
-    </div>
+    </div> -->
   </section>
 
   <!-- CATEGORY STRIP -->
@@ -556,19 +554,21 @@
 
           <div class="code-container">
             <div class="code-display">
-              <span>WELCOME100</span>
-              <button class="copy-code">
-                <i class="far fa-copy"></i> Copy
+              <span #couponCode>WELCOME100</span>
+              <button class="copy-code" (click)="copyCode(couponCode.innerText)">
+                <i class="far fa-copy"></i>
+                {{ copied ? 'Copied!' : 'Copy' }}
               </button>
             </div>
           </div>
+
         </div>
       </div>
 
       <div class="bonus-steps">
         <div class="step active">
           <div class="step-number">1</div>
-          <div class="step-text">Order ₹299+</div>
+          <div class="step-text">Order ₹499+</div>
         </div>
         <div class="step">
           <div class="step-number">2</div>

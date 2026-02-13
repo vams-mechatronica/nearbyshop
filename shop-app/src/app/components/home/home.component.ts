@@ -116,7 +116,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   searchSuggestions: SearchSuggestion[] = [];
   recentSearches: RecentSearch[] = [];
   quickSuggestions: string[] = ['Milk', 'Bread', 'Eggs', 'Vegetables', 'Fruits', 'Snacks'];
-  
+
   // Search Results
   showSearchResults: boolean = false;
   searchResults: SearchResult[] = [];
@@ -126,7 +126,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   totalPages: number = 1;
   currentPage: number = 1;
   pageSize: number = 20;
-  
+
   // Filters
   showFilters: boolean = false;
   activeFilter: string = '';
@@ -135,7 +135,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   selectedDeliveryTime: string = '';
   activeFilters: string[] = [];
   selectedCategories: number[] = [];
-  
+
   // Data
   quickFilters: FilterOption[] = [
     { id: 'all', name: 'All', icon: 'fas fa-th' },
@@ -144,14 +144,14 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     { id: 'medicine', name: 'Medicine', icon: 'fas fa-pills' },
     { id: 'home', name: 'Home', icon: 'fas fa-home' }
   ];
-  
+
   popularCategories = [
     { id: 1, name: 'Dairy & Eggs', image: 'assets/images/dairy.jpg', product_count: 45 },
     { id: 2, name: 'Fruits & Vegetables', image: 'assets/images/fruits.jpg', product_count: 78 },
     { id: 3, name: 'Snacks & Beverages', image: 'assets/images/snacks.jpg', product_count: 62 },
     { id: 4, name: 'Home Essentials', image: 'assets/images/home.jpg', product_count: 34 }
   ];
-  
+
   allCategories = [
     { id: 1, name: 'Groceries', count: 156, selected: false },
     { id: 2, name: 'Dairy & Eggs', count: 45, selected: false },
@@ -160,24 +160,24 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     { id: 5, name: 'Home Essentials', count: 34, selected: false },
     { id: 6, name: 'Personal Care', count: 28, selected: false }
   ];
-  
+
   deliveryTimes = [
     { label: 'Within 15 mins', value: '15' },
     { label: 'Within 30 mins', value: '30' },
     { label: 'Within 45 mins', value: '45' },
     { label: 'Any time', value: 'any' }
   ];
-  
+
   suggestionCategories = [
     { id: 1, name: 'Groceries' },
     { id: 2, name: 'Dairy Products' },
     { id: 3, name: 'Fresh Vegetables' },
     { id: 4, name: 'Bakery Items' }
   ];
-  
+
   // Search subject for debouncing
   private searchSubject = new Subject<string>();
-  
+
   /** Carousel References */
   @ViewChild('heroCarousel') heroCarousel!: ElementRef;
   @ViewChild('categoryCarousel') categoryCarousel!: ElementRef;
@@ -203,7 +203,9 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   selectedProduct: any;
   subscriptionPlan = 'daily';
   startDate: string = '';
-  
+  copied: boolean = false;
+
+
   // For search results overlay
   @ViewChild('searchResultsOverlay') searchResultsOverlay!: TemplateRef<any>;
   private searchModalRef!: NgbModalRef;
@@ -233,7 +235,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     private analytics: AnalyticsService,
     private modal: NgbModal,
     private http: HttpClient,
-    
+
     @Inject(PLATFORM_ID) private platformId: Object
   ) { }
 
@@ -253,9 +255,13 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     });
 
+
+
+
+
     // Load recent searches from localStorage
     this.loadRecentSearches();
-    
+
     // Setup search debouncing
     this.searchSubject.pipe(
       debounceTime(300),
@@ -267,24 +273,55 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
         this.searchSuggestions = [];
       }
     });
-    
+
     // Load quick suggestions
     this.fetchQuickSuggestions();
   }
 
   // ========== SEARCH FUNCTIONALITY ==========
-  
+
   onSearchInput(event: Event): void {
     const query = (event.target as HTMLInputElement).value;
     this.searchQuery = query;
     this.searchSubject.next(query);
-    
+
     if (query.trim().length >= 2) {
       this.showSuggestions = true;
     } else {
       this.showSuggestions = false;
       this.searchSuggestions = [];
     }
+  }
+  copyCode(text: string) {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text).then(() => {
+        this.showCopiedFeedback();
+      }).catch(() => {
+        this.fallbackCopy(text);
+      });
+    } else {
+      this.fallbackCopy(text);
+    }
+  }
+
+  fallbackCopy(text: string) {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textarea);
+
+    this.showCopiedFeedback();
+  }
+
+  showCopiedFeedback() {
+    this.copied = true;
+    setTimeout(() => {
+      this.copied = false;
+    }, 2000);
   }
 
   onSearchBlur(event: FocusEvent): void {
@@ -342,39 +379,39 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   private generateFallbackSuggestions(query: string): Observable<SearchSuggestion[]> {
     // Generate mock suggestions with proper type casting
     const mockSuggestions: SearchSuggestion[] = [
-      { 
-        id: 1, 
-        name: `${query} - Product`, 
-        type: 'product' as SuggestionType, 
-        shop_name: 'Local Store', 
-        price: 99, 
-        rating: 4.5, 
-        delivery_time: 15 
+      {
+        id: 1,
+        name: `${query} - Product`,
+        type: 'product' as SuggestionType,
+        shop_name: 'Local Store',
+        price: 99,
+        rating: 4.5,
+        delivery_time: 15
       },
-      { 
-        id: 2, 
-        name: `${query} - Shop`, 
-        type: 'shop' as SuggestionType, 
-        shop_name: 'Local Shop', 
-        rating: 4.2, 
-        delivery_time: 20 
+      {
+        id: 2,
+        name: `${query} - Shop`,
+        type: 'shop' as SuggestionType,
+        shop_name: 'Local Shop',
+        rating: 4.2,
+        delivery_time: 20
       },
-      { 
-        id: 3, 
-        name: `${query} - Category`, 
-        type: 'category' as SuggestionType 
+      {
+        id: 3,
+        name: `${query} - Category`,
+        type: 'category' as SuggestionType
       },
-      { 
-        id: 4, 
-        name: `${query} Premium`, 
-        type: 'product' as SuggestionType, 
-        shop_name: 'Premium Store', 
-        price: 149, 
-        rating: 4.7, 
-        delivery_time: 10 
+      {
+        id: 4,
+        name: `${query} Premium`,
+        type: 'product' as SuggestionType,
+        shop_name: 'Premium Store',
+        price: 149,
+        rating: 4.7,
+        delivery_time: 10
       },
     ].slice(0, 5);
-    
+
     return of(mockSuggestions);
   }
 
@@ -400,7 +437,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
 
   saveRecentSearch(query: string, count: number): void {
     const existingIndex = this.recentSearches.findIndex(s => s.query === query);
-    
+
     if (existingIndex >= 0) {
       this.recentSearches[existingIndex].timestamp = Date.now();
       this.recentSearches[existingIndex].count = count;
@@ -410,13 +447,13 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
         timestamp: Date.now(),
         count
       });
-      
+
       // Keep only last 5 searches
       if (this.recentSearches.length > 5) {
         this.recentSearches.pop();
       }
     }
-    
+
     this.storageService.setItem('recentSearches', JSON.stringify(this.recentSearches));
   }
 
@@ -447,7 +484,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   selectSuggestion(suggestion: SearchSuggestion): void {
     this.searchQuery = suggestion.name;
     this.showSuggestions = false;
-    
+
     if (suggestion.type === 'product') {
       this.router.navigate(['/product', suggestion.id]);
     } else if (suggestion.type === 'shop') {
@@ -468,17 +505,17 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
 
   performSearch(): void {
     const query = this.searchQuery.trim();
-    
+
     if (!query) {
       return;
     }
 
     // Save to recent searches
     this.saveRecentSearch(query, 0);
-    
+
     // Show search results overlay
     this.openSearchResultsOverlay();
-    
+
     // Perform search
     this.searchResults = [];
     this.shopResults = [];
@@ -513,7 +550,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
         this.totalResults = response.total_results || 0;
         this.totalPages = response.total_pages || 1;
         this.loading = false;
-        
+
         // Update recent search count
         this.updateRecentSearchCount(query, this.totalResults);
         this.cdr.markForCheck();
@@ -596,7 +633,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
       backdrop: 'static',
       modalDialogClass: 'search-results-modal'
     });
-    
+
     this.searchModalRef.result.then(
       () => this.closeSearchResults(),
       () => this.closeSearchResults()
@@ -631,25 +668,25 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   applySearchFilters(): void {
     this.showFilters = false;
     this.activeFilters = [];
-    
+
     // Add active filters to display
     if (this.priceRange[0] > 0 || this.priceRange[1] < 5000) {
       this.activeFilters.push(`Price: ₹${this.priceRange[0]} - ₹${this.priceRange[1]}`);
     }
-    
+
     if (this.selectedDeliveryTime && this.selectedDeliveryTime !== 'any') {
       const timeLabel = this.deliveryTimes.find(t => t.value === this.selectedDeliveryTime)?.label;
       if (timeLabel) {
         this.activeFilters.push(`Delivery: ${timeLabel}`);
       }
     }
-    
+
     const selectedCategories = this.allCategories.filter(c => c.selected);
     selectedCategories.forEach(category => {
       this.activeFilters.push(category.name);
       this.selectedCategories.push(category.id);
     });
-    
+
     // Perform search with new filters
     this.performSearch();
   }
@@ -663,7 +700,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     this.selectedCategories = [];
     this.activeFilters = [];
     this.showFilters = false;
-    
+
     if (this.searchQuery && this.showSearchResults) {
       this.performSearch();
     }
@@ -671,7 +708,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
 
   removeFilter(filter: string): void {
     this.activeFilters = this.activeFilters.filter(f => f !== filter);
-    
+
     // Update corresponding filter values
     if (filter.startsWith('Price:')) {
       this.priceRange = [0, 5000];
@@ -684,7 +721,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
         this.selectedCategories = this.selectedCategories.filter(id => id !== category.id);
       }
     }
-    
+
     // Re-search if in results view
     if (this.showSearchResults) {
       this.performSearch();
@@ -695,7 +732,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     if (page < 1 || page > this.totalPages || page === this.currentPage) {
       return;
     }
-    
+
     this.currentPage = page;
     this.performSearch();
   }
@@ -703,18 +740,18 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   getPageNumbers(): number[] {
     const pages: number[] = [];
     const maxVisible = 5;
-    
+
     let start = Math.max(1, this.currentPage - Math.floor(maxVisible / 2));
     let end = Math.min(this.totalPages, start + maxVisible - 1);
-    
+
     if (end - start + 1 < maxVisible) {
       start = Math.max(1, end - maxVisible + 1);
     }
-    
+
     for (let i = start; i <= end; i++) {
       pages.push(i);
     }
-    
+
     return pages;
   }
 
@@ -1019,7 +1056,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
       this.loadProductsForCategory(categorySlug);
     }
   }
-  
+
   scrollRight(carousel: HTMLElement, categorySlug: string) {
     carousel.scrollBy({
       left: 300,
@@ -1061,8 +1098,13 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // 🔐 Force login
     if (!this.authService.isLoggedIn()) {
-      localStorage.setItem('redirect_url', '/cart');
       this.authModal.openLogin();
+
+      // Wait for login success
+      this.authService.isLoggedIn$.subscribe(() => {
+        this.addToCart(product);
+      });
+
       return;
     }
 
@@ -1096,11 +1138,12 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   openSubscribeModal(product: any): void {
     // 🔐 Force login before subscription
     if (!this.authService.isLoggedIn()) {
-      // save intent (optional but recommended)
-      localStorage.setItem('redirect_url', '/subscribe');
-
-      // open login modal
       this.authModal.openLogin();
+
+      // Wait for login success
+      this.authService.isLoggedIn$.subscribe(() => {
+        this.openSubscribeModal(product);
+      });
       return;
     }
 
@@ -1205,7 +1248,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
       delivery_time: result.delivery_time,
       qty: 0
     };
-    
+
     this.addToCart(product);
   }
 

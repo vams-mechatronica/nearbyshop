@@ -1,12 +1,16 @@
 // vendor-profile.component.ts
 import { Component, HostListener, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ShopService } from '../../services/shop.service';
 import { Shop } from '../../models/vendor.model';
 import { vProduct } from '../../models/product.model';
 import { API_ENDPOINTS } from '../../shared/constants/api.constants';
+import { AuthModalService } from '../../services/auth-modal.service';
+import { AuthService } from '../../services/auth.service';
+import { CartService } from '../../services/cart.service';
+import { HeaderCountService } from '../../services/header.service';
 
 
 
@@ -56,7 +60,15 @@ export class VendorProfileComponent implements OnInit {
 
 
 
-  constructor(private route: ActivatedRoute, private shopService: ShopService) { }
+  constructor(private route: ActivatedRoute,
+    private shopService: ShopService,
+    private authModal: AuthModalService,
+    private authService: AuthService,
+    private cartService: CartService,
+    private headerService: HeaderCountService,
+    private router: Router,
+
+  ) { }
   @HostListener('window:scroll', [])
   onScroll(): void {
     if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 200) {
@@ -201,23 +213,96 @@ export class VendorProfileComponent implements OnInit {
   }
 
   addToCart(product: vProduct): void {
-    product.inCart = 1;
-    this.calculateCartTotal();
+    // product.inCart = 1;
+
+    if (!this.authService.isLoggedIn()) {
+      this.authModal.openLogin();
+
+      // Wait for login success
+      this.authService.isLoggedIn$.subscribe(() => {
+        this.addToCart(product);
+      });
+
+      return;
+    }
+
+    product.inCart += 1;
+    // this.calculateCartTotal();
+
+    const body = {
+      product_id: product.id,
+      quantity: 1
+    };
+
+    this.cartService.addToCart(body).subscribe({
+      next: (res) => {
+        if (!res.success) return;
+
+        if (res.action === 'removed') {
+          product.inCart = 0;
+        } else if (res.item) {
+          product.inCart = res.item.quantity;
+        }
+        this.cartTotal = res.cart.final_total;
+
+        this.headerService.updateCartSummary(res.cart);
+      },
+      error: () => {
+        product.inCart -= 1;
+      }
+    });
   }
 
   updateQuantity(productId: number, change: number): void {
+
+    if (!this.authService.isLoggedIn()) {
+      this.authModal.openLogin();
+
+      // Wait for login success
+      this.authService.isLoggedIn$.subscribe(() => {
+        this.updateQuantity(productId, change);
+      });
+
+      return;
+    }
     const product = this.products.find(p => p.id === productId);
     if (product) {
-      product.inCart = Math.max(0, product.inCart + change);
-      this.calculateCartTotal();
+      product.inCart += 1;
+      // this.calculateCartTotal()
+
+      this.cartService.updateCartItem(productId, product.inCart).subscribe({
+        next: (res) => {
+          if (!res.success) return;
+
+          if (res.action === 'removed') {
+            product.inCart = 0;
+          } else if (res.item) {
+            product.inCart = res.item.quantity;
+          }
+          this.cartTotal = res.cart.final_total;
+
+          this.headerService.updateCartSummary(res.cart);
+        },
+        error: () => {
+          product.inCart -= 1;
+        }
+      });
     }
   }
 
   calculateCartTotal(): void {
-    this.cartItemCount = this.products.reduce((sum, product) => sum + product.inCart, 0);
-    this.cartTotal = this.products.reduce(
-      (sum, product) => sum + (product.price * product.inCart), 0
-    );
+
+    this.cartService.getCart().subscribe({
+      next: res => {
+        this.cartTotal = res.cart.final_total;
+      },
+      error: err => {
+        this.cartItemCount = this.products.reduce((sum, product) => sum + product.inCart, 0);
+        this.cartTotal = this.products.reduce(
+          (sum, product) => sum + (product.price * product.inCart), 0
+        );
+      }
+    })
   }
 
   private copyToClipboard(url: string): void {
@@ -247,7 +332,7 @@ export class VendorProfileComponent implements OnInit {
 
   viewCart(): void {
     // Navigate to cart page
-    console.log('View cart');
+    this.router.navigate(['/cart']);
   }
 
   getRoundedRating(): number {

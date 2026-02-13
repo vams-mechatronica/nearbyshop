@@ -58,17 +58,18 @@
   <div class="navigation-tabs">
     <nav>
       <div class="nav nav-tabs" id="nav-tab" role="tablist">
-        <button class="nav-link active" id="nav-products-tab" [class.active]="activeTab === 'products'" (click)="setActiveTab('products')" data-bs-toggle="tab" data-bs-target="#nav-products"
-          type="button" role="tab">
+        <button class="nav-link active" id="nav-products-tab" [class.active]="activeTab === 'products'"
+          (click)="setActiveTab('products')" data-bs-toggle="tab" data-bs-target="#nav-products" type="button"
+          role="tab">
           <i class="fas fa-shopping-basket me-2"></i>Products
           <span class="badge bg-primary ms-2">{{ products.length || 0 }}</span>
         </button>
-        <button class="nav-link" id="nav-about-tab" [class.active]="activeTab === 'about'" (click)="setActiveTab('about')" data-bs-toggle="tab" data-bs-target="#nav-about" type="button"
-          role="tab">
+        <button class="nav-link" id="nav-about-tab" [class.active]="activeTab === 'about'"
+          (click)="setActiveTab('about')" data-bs-toggle="tab" data-bs-target="#nav-about" type="button" role="tab">
           <i class="fas fa-store me-2"></i>About Shop
         </button>
-        <button class="nav-link" id="nav-reviews-tab" [class.active]="activeTab === 'reviews'" (click)="setActiveTab('reviews')" data-bs-toggle="tab" data-bs-target="#nav-reviews" type="button"
-          role="tab">
+        <button class="nav-link" id="nav-reviews-tab" [class.active]="activeTab === 'reviews'"
+          (click)="setActiveTab('reviews')" data-bs-toggle="tab" data-bs-target="#nav-reviews" type="button" role="tab">
           <i class="fas fa-star me-2"></i>Reviews
           <span class="badge bg-primary ms-2">{{ shop?.review_count || 0 }}</span>
         </button>
@@ -79,17 +80,20 @@
   <!-- Tab Content -->
   <div class="tab-content mt-4" id="nav-tabContent">
     <!-- Products Tab -->
-    <div class="tab-pane fade" [class.show]="activeTab === 'products'" [class.active]="activeTab === 'products'" id="nav-products" role="tabpanel">
+    <div class="tab-pane fade" [class.show]="activeTab === 'products'" [class.active]="activeTab === 'products'"
+      id="nav-products" role="tabpanel">
       <!-- Category Filter -->
       <div class="category-filter mb-4">
         <div class="category-scroll">
-          <button class="category-btn active" (click)="filterByCategory('all')">
+          <button class="category-btn" [class.active]="selectedCategory === 'all'" (click)="filterByCategory('all')">
             All Items
           </button>
+
           <button *ngFor="let category of categories" class="category-btn"
             [class.active]="selectedCategory === category.id" (click)="filterByCategory(category.id)">
             {{ category.name }}
           </button>
+
 
         </div>
       </div>
@@ -144,11 +148,13 @@
     </div>
 
     <!-- About Tab -->
-    <div class="tab-pane fade" [class.show]="activeTab === 'about'" [class.active]="activeTab === 'about'" id="nav-about" role="tabpanel">
+    <div class="tab-pane fade" [class.show]="activeTab === 'about'" [class.active]="activeTab === 'about'"
+      id="nav-about" role="tabpanel">
       <div class="about-section">
         <div class="about-card">
           <h3><i class="fas fa-info-circle me-2"></i>About Us</h3>
-          <p>{{ shop?.description || 'We provide fresh groceries and daily essentials delivered to your doorstep in minutes. Quality and customer satisfaction are our top priorities.' }}</p>
+          <p>{{ shop?.description || 'We provide fresh groceries and daily essentials delivered to your doorstep in
+            minutes. Quality and customer satisfaction are our top priorities.' }}</p>
         </div>
 
         <div class="about-card">
@@ -192,7 +198,8 @@
     </div>
 
     <!-- Reviews Tab -->
-    <div class="tab-pane fade" [class.show]="activeTab === 'reviews'" [class.active]="activeTab === 'reviews'" id="nav-reviews" role="tabpanel">
+    <div class="tab-pane fade" [class.show]="activeTab === 'reviews'" [class.active]="activeTab === 'reviews'"
+      id="nav-reviews" role="tabpanel">
       <div class="reviews-section">
         <div class="rating-summary">
           <div class="overall-rating">
