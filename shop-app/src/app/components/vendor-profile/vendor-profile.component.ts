@@ -11,6 +11,7 @@ import { AuthModalService } from '../../services/auth-modal.service';
 import { AuthService } from '../../services/auth.service';
 import { CartService } from '../../services/cart.service';
 import { HeaderCountService } from '../../services/header.service';
+import { SeoService } from '../../services/seo.service';
 
 
 
@@ -67,6 +68,7 @@ export class VendorProfileComponent implements OnInit {
     private cartService: CartService,
     private headerService: HeaderCountService,
     private router: Router,
+    private seoService: SeoService
 
   ) { }
   @HostListener('window:scroll', [])
@@ -97,6 +99,9 @@ export class VendorProfileComponent implements OnInit {
         this.shop = res;
         this.shopSlug = res?.slug;
         this.shopId = res?.id;
+
+        this.seoService.setVendorSEO(this.shop);
+        this.seoService.setVendorSchema(this.shop);
       },
       error: () => {
 
@@ -243,7 +248,7 @@ export class VendorProfileComponent implements OnInit {
         } else if (res.item) {
           product.inCart = res.item.quantity;
         }
-        this.cartTotal = res.cart.final_total;
+        this.cartTotal = res.cart.total;
 
         this.headerService.updateCartSummary(res.cart);
       },
@@ -279,7 +284,7 @@ export class VendorProfileComponent implements OnInit {
           } else if (res.item) {
             product.inCart = res.item.quantity;
           }
-          this.cartTotal = res.cart.final_total;
+          this.cartTotal = res.cart.total;
 
           this.headerService.updateCartSummary(res.cart);
         },
@@ -294,7 +299,7 @@ export class VendorProfileComponent implements OnInit {
 
     this.cartService.getCart().subscribe({
       next: res => {
-        this.cartTotal = res.cart.final_total;
+        this.cartTotal = res.total;
       },
       error: err => {
         this.cartItemCount = this.products.reduce((sum, product) => sum + product.inCart, 0);

@@ -981,7 +981,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
 
   visitStore(store: any): void {
     this.analytics.trackEvent('STORE_PROFILE_PAGE_REDIRECT_CLICKED', 'PAGE_VISIT', 1, `STORE: ${store.slug}`);
-    if (store?.slug) this.router.navigate(['/store/profile', store.slug]);
+    if (store?.slug) this.router.navigate(['/shop', store.slug]);
   }
 
   /* STEP 1: LOAD CATEGORIES */

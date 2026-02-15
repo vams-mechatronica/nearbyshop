@@ -86,6 +86,12 @@
   margin: 0;
   color: white;
 }
+@media (max-width: 768px) {
+  .vendor-name {
+    color: var(--primary);
+  }
+}
+
 
 .rating-badge {
   background: rgba(255,255,255,0.2);
@@ -101,6 +107,11 @@
   margin-right: 4px;
 }
 
+@media (max-width: 768px) {
+  .rating-badge {
+    color: var(--primary);
+  }
+}
 .vendor-tagline {
   font-size: 1rem;
   opacity: 0.9;

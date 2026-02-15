@@ -9,6 +9,13 @@ import { StorageService } from '../../services/storage.service';
 import { LoaderService } from '../../services/loader.service';
 import { LocationService } from '../../services/location.service';
 
+// Define interface for location validation response
+interface LocationValidationResponse {
+    available?: boolean;
+    message?: string;
+    error?: string;
+    estimatedTime?: string;
+}
 
 @Component({
   selector: 'app-auth',
@@ -36,7 +43,8 @@ export class AuthComponent implements OnInit {
     private loaderService: LoaderService,
     private locationService: LocationService,
     private toastrService: ToastrService,
-    private storage: StorageService
+    private storage: StorageService,
+    
   ) { }
 
   ngOnInit(): void {
@@ -189,6 +197,25 @@ export class AuthComponent implements OnInit {
       }
     });
   }
+
+  validateUserLocation(): void {
+        this.locationService.getAndValidateLocation().subscribe({
+            next: (data: LocationValidationResponse) => {
+                console.log('Location validation:', data);
+                if (data.available) {
+                    // Location is serviceable
+                    console.log('Delivery available at this location');
+                } else {
+                    // Location not serviceable
+                    console.log('Delivery not available at this location:', data.message);
+                }
+            },
+            error: (error: any) => {
+                console.error('Error validating location:', error);
+                // Handle error appropriately
+            }
+        });
+    }
 
 }
 

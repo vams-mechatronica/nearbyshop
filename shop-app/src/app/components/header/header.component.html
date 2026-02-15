@@ -8,9 +8,8 @@
       <a class="navbar-brand" [routerLink]="['/']" (click)="onNavClick()">The<span
           class="brand-span">NearBy</span>Shop<span class="brand-com">.com</span></a>
 
-      <div class="location-select" (click)="openLocationModal()">
+      <!-- <div class="location-select" (click)="openLocationModal()">
 
-        <!-- ADDRESS LINE -->
         <div class="delivery-address" *ngIf="selectedLocationName; else selectLoc">
           <span class="sector">
             {{ sectorName }}
@@ -21,7 +20,7 @@
           <i class="fas fa-chevron-down chevron"></i>
         </div>
 
-        <!-- FALLBACK -->
+
         <ng-template #selectLoc>
           <div class="delivery-address">
             <span class="sector muted">Select location</span>
@@ -29,7 +28,33 @@
           </div>
         </ng-template>
 
+      </div> -->
+      <!-- location.component.html -->
+      <div class="location-select" (click)="openLocationModal()">
+        <div class="delivery-address" *ngIf="currentLocation; else selectLoc">
+          <span class="sector">
+            {{ currentLocation.sectorName }}
+          </span>
+          <span class="address-rest">
+            {{ currentLocation.addressRest }}
+          </span>
+          <span class="delivery-time" *ngIf="deliveryInfo?.available">
+            <i class="fas fa-clock"></i> {{ deliveryInfo?.estimatedTime }}
+          </span>
+          <span class="delivery-time unavailable" *ngIf="deliveryInfo?.available === false">
+            <i class="fas fa-exclamation-circle"></i> Not deliverable
+          </span>
+          <i class="fas fa-chevron-down chevron"></i>
+        </div>
+
+        <ng-template #selectLoc>
+          <div class="delivery-address">
+            <span class="sector muted">Select location</span>
+            <i class="fas fa-chevron-down chevron"></i>
+          </div>
+        </ng-template>
       </div>
+
 
 
     </div>
@@ -182,20 +207,38 @@
 
 </header>
 
+
+<!-- Main Location Modal -->
 <ng-template #locationModal let-modal>
   <div class="location-modal">
     <div class="modal-header">
-      <h5>Your Location</h5>
+      <h5>Choose your location</h5>
       <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
     </div>
+
     <div class="modal-body">
-      <!-- <input type="text" class="form-control location-search" placeholder="Search a new address"
-        [(ngModel)]="locationSearch" /> -->
+      <!-- Search Box -->
+      <div class="search-container">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" class="form-control location-search" placeholder="Search for area, street name..."
+          [formControl]="locationSearchControl" (focus)="showSuggestions = true" />
+        <i class="fas fa-spinner fa-spin loading-icon" *ngIf="isLoading"></i>
 
-      <input type="text" class="form-control location-search" placeholder="Search a new address"
-        [(ngModel)]="locationSearch" (input)="handleLocationSearch()" />
+        <!-- Suggestions Dropdown -->
+        <div class="suggestions-dropdown" *ngIf="showSuggestions && locationSuggestions.length > 0">
+          <div class="suggestion-item" *ngFor="let suggestion of locationSuggestions"
+            (click)="selectSuggestion(suggestion)">
+            <i class="fas fa-map-marker-alt"></i>
+            <div class="suggestion-text">
+              <span class="main-text">{{ suggestion.structured_formatting?.main_text }}</span>
+              <span class="secondary-text">{{ suggestion.structured_formatting?.secondary_text }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
 
-      <div class="use-location-card">
+      <!-- Current Location Card -->
+      <div class="use-location-card" (click)="useCurrentLocation(modal)">
         <div class="use-location-icon">
           <i class="fas fa-crosshairs text-danger"></i>
         </div>
@@ -203,12 +246,190 @@
           <h6>Use My Current Location</h6>
           <p>Enable your current location for better services</p>
         </div>
-        <button class="btn btn-outline-danger" (click)="useCurrentLocation(modal)">Enable</button>
+        <button class="btn btn-outline-danger" (click)="$event.stopPropagation()">
+          <i class="fas fa-location-arrow"></i> Enable
+        </button>
       </div>
 
-      <div class="map-placeholder">
+      <!-- Saved Addresses Section -->
+      <div class="saved-addresses-section" *ngIf="savedAddresses.length > 0">
+        <div class="section-header">
+          <h6>Saved Addresses</h6>
+          <button class="btn btn-link" (click)="openAddressModal()">
+            <i class="fas fa-plus"></i> Add New
+          </button>
+        </div>
+
+        <div class="addresses-list">
+          <div class="address-card" *ngFor="let address of savedAddresses"
+            [class.selected]="selectedAddress?.id === address.id" (click)="selectSavedAddress(address)">
+            <div class="address-icon">
+              <i class="fas" [ngClass]="{
+                'fa-home': address.type === 'home',
+                'fa-briefcase': address.type === 'work',
+                'fa-map-pin': address.type === 'other'
+              }"></i>
+            </div>
+
+            <div class="address-details">
+              <div class="address-header">
+                <span class="address-label">{{ address.name || address.type }}</span>
+                <span class="badge-default" *ngIf="address.isDefault">Default</span>
+              </div>
+              <p class="address-line">{{ address.addressLine1 }}</p>
+              <p class="address-line" *ngIf="address.addressLine2">{{ address.addressLine2 }}</p>
+              <p class="address-location">{{ address.city }}, {{ address.state }} - {{ address.pincode }}</p>
+            </div>
+
+            <div class="address-actions" (click)="$event.stopPropagation()">
+              <button class="btn-icon" (click)="openAddressModal(address)" title="Edit">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="btn-icon" (click)="deleteAddress(address.id, $event)" title="Delete">
+                <i class="fas fa-trash"></i>
+              </button>
+              <button class="btn-icon" *ngIf="!address.isDefault" (click)="setDefaultAddress(address, $event)"
+                title="Set as default">
+                <i class="fas fa-check-circle"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add First Address CTA -->
+      <div class="no-addresses" *ngIf="savedAddresses.length === 0">
+        <!-- <img src="assets/images/address-illustration.svg" alt="No addresses" /> -->
+        <p>Save your addresses for faster checkout</p>
+        <button class="btn btn-primary" (click)="openAddressModal()">
+          <i class="fas fa-plus"></i> Add New Address
+        </button>
+      </div>
+
+      <!-- Map Illustration -->
+      <div class="map-illustration">
         <img src="assets/images/location_illustration.png" alt="Location Illustration" />
       </div>
+    </div>
+  </div>
+</ng-template>
+
+<!-- Add/Edit Address Modal -->
+<ng-template #addressModal let-modal>
+  <div class="address-modal">
+    <div class="modal-header">
+      <h5>{{ isEditingAddress ? 'Edit Address' : 'Add New Address' }}</h5>
+      <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+    </div>
+
+    <div class="modal-body">
+      <form (ngSubmit)="saveAddress()">
+        <!-- Address Type -->
+        <div class="form-group">
+          <label>Address Type</label>
+          <div class="address-type-selector">
+            <button type="button" class="type-btn" [class.active]="addressForm.type === 'home'"
+              (click)="addressForm.type = 'home'">
+              <i class="fas fa-home"></i>
+              Home
+            </button>
+            <button type="button" class="type-btn" [class.active]="addressForm.type === 'work'"
+              (click)="addressForm.type = 'work'">
+              <i class="fas fa-briefcase"></i>
+              Work
+            </button>
+            <button type="button" class="type-btn" [class.active]="addressForm.type === 'other'"
+              (click)="addressForm.type = 'other'">
+              <i class="fas fa-map-pin"></i>
+              Other
+            </button>
+          </div>
+        </div>
+
+        <!-- Address Name/Label -->
+        <div class="form-group">
+          <label>Address Label (Optional)</label>
+          <input type="text" class="form-control" placeholder="e.g., My Apartment, Office"
+            [(ngModel)]="addressForm.name" [ngModelOptions]="{standalone: true}" />
+        </div>
+
+        <!-- Address Line 1 -->
+        <div class="form-group">
+          <label>Address Line 1 *</label>
+          <input type="text" class="form-control" placeholder="House/Flat No., Building Name"
+            [(ngModel)]="addressForm.addressLine1" [ngModelOptions]="{standalone: true}" required />
+        </div>
+
+        <!-- Address Line 2 -->
+        <div class="form-group">
+          <label>Address Line 2</label>
+          <input type="text" class="form-control" placeholder="Street, Area, Landmark"
+            [(ngModel)]="addressForm.addressLine2" [ngModelOptions]="{standalone: true}" />
+        </div>
+
+        <!-- City and State -->
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>City *</label>
+              <input type="text" class="form-control" [(ngModel)]="addressForm.city"
+                [ngModelOptions]="{standalone: true}" required />
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>State *</label>
+              <input type="text" class="form-control" [(ngModel)]="addressForm.state"
+                [ngModelOptions]="{standalone: true}" required />
+            </div>
+          </div>
+        </div>
+
+        <!-- Pincode -->
+        <div class="form-group">
+          <label>Pincode *</label>
+          <input type="text" class="form-control" [(ngModel)]="addressForm.pincode"
+            [ngModelOptions]="{standalone: true}" required pattern="[0-9]{6}" />
+        </div>
+
+        <!-- Contact Information -->
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>Recipient Name</label>
+              <input type="text" class="form-control" placeholder="Full name" [(ngModel)]="addressForm.recipientName"
+                [ngModelOptions]="{standalone: true}" />
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>Phone Number</label>
+              <input type="tel" class="form-control" placeholder="10 digit mobile" [(ngModel)]="addressForm.phone"
+                [ngModelOptions]="{standalone: true}" pattern="[0-9]{10}" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Set as Default -->
+        <div class="form-check">
+          <input type="checkbox" class="form-check-input" id="setDefault" [(ngModel)]="addressForm.isDefault"
+            [ngModelOptions]="{standalone: true}" />
+          <label class="form-check-label" for="setDefault">
+            Set as default address
+          </label>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button type="button" class="btn btn-outline-secondary" (click)="modal.dismiss()">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="isLoading">
+            <i class="fas fa-spinner fa-spin" *ngIf="isLoading"></i>
+            {{ isEditingAddress ? 'Update Address' : 'Save Address' }}
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </ng-template>

@@ -41,7 +41,7 @@ export interface CartSummary {
   total_before_discount: number;
   total_discount: number;
   total_after_discount: number;
-  final_total: number;
+  total: number;
   coupon: string | null;
 }
 

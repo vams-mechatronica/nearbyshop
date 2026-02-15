@@ -13,10 +13,10 @@ export interface Shop {
   updated_at: string;
   
   // Derived/sample fields
-  tagline: string;
-  description: string;
+  tagline?: string;
+  description?: string;
   cover_image?: string;
-  address: Address;
+  address: string;
   delivery_time_min: number;
   delivery_time_max: number;
   delivery_fee: number;

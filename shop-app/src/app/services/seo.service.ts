@@ -110,4 +110,85 @@ export class SeoService {
 
         this.document.head.appendChild(script);
     }
+    setVendorSEO(vendor: any) {
+        if (!vendor) return;
+
+        const title = `${vendor.name} | TheNearByShop`;
+
+        const description =
+            vendor.description ||
+            `Shop online from ${vendor.name}. Order groceries, food, and daily essentials near you.`;
+
+        const image = vendor.banner || vendor.shop_image || '';
+        const url = `${this.document.location.origin}/shop/${vendor.slug}`;
+
+        // 🔥 TITLE
+        this.title.setTitle(title);
+
+        // 🔥 BASIC META
+        this.meta.updateTag({ name: 'description', content: description });
+
+        // 🔥 OPEN GRAPH (WhatsApp uses this)
+        this.meta.updateTag({ property: 'og:title', content: title });
+        this.meta.updateTag({ property: 'og:description', content: description });
+        this.meta.updateTag({ property: 'og:type', content: 'website' });
+        this.meta.updateTag({ property: 'og:url', content: url });
+
+        if (image) {
+            this.meta.updateTag({ property: 'og:image', content: image });
+        }
+
+        // 🔥 TWITTER
+        this.meta.updateTag({ name: 'twitter:card', content: 'summary_large_image' });
+        this.meta.updateTag({ name: 'twitter:title', content: title });
+        this.meta.updateTag({ name: 'twitter:description', content: description });
+
+        if (image) {
+            this.meta.updateTag({ name: 'twitter:image', content: image });
+        }
+
+        // 🔥 Canonical
+        this.setCanonicalUrl(url);
+    }
+
+    setVendorSchema(vendor: any) {
+        if (!vendor) return;
+
+        const schema = {
+            "@context": "https://schema.org",
+            "@type": "LocalBusiness",
+            "name": vendor.name,
+            "description": vendor.description || "",
+            "image": vendor.banner || vendor.shop_image || "",
+            "url": this.document.location.href,
+            "telephone": vendor.phone || "",
+            "address": {
+                "@type": "PostalAddress",
+                "streetAddress": vendor.address || "",
+                "addressLocality": vendor.city || "",
+                "addressRegion": vendor.state || "",
+                "postalCode": vendor.pincode || "",
+                "addressCountry": "IN"
+            },
+            "geo": vendor.latitude && vendor.longitude ? {
+                "@type": "GeoCoordinates",
+                "latitude": vendor.latitude,
+                "longitude": vendor.longitude
+            } : undefined
+        };
+
+        // Remove old schema
+        const existingScript = this.document.getElementById('vendor-schema');
+        if (existingScript) {
+            existingScript.remove();
+        }
+
+        const script = this.document.createElement('script');
+        script.type = 'application/ld+json';
+        script.id = 'vendor-schema';
+        script.text = JSON.stringify(schema);
+
+        this.document.head.appendChild(script);
+    }
+
 }

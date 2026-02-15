@@ -10,16 +10,16 @@ import {
 } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
-import { FormsModule } from '@angular/forms';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { AuthComponent } from '../auth/auth.component';
 import { UserService } from '../../services/user.service';
 import {
-  BehaviorSubject,
   Observable,
   Subject,
   debounceTime,
   distinctUntilChanged,
+  of,
   switchMap,
 } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
@@ -29,20 +29,20 @@ import { HeaderCountService } from '../../services/header.service';
 import { LoaderService } from '../../services/loader.service';
 import { AuthService } from '../../services/auth.service';
 import { LocationService } from '../../services/location.service';
+import { CurrentLocation, DeliveryInfo, LocationSuggestion, SavedAddress } from '../../types/location.types';
 
 @Component({
   selector: 'app-header',
   standalone: true,
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss'],
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink],
 })
 export class HeaderComponent implements OnInit {
   searchQuery = '';
-  searchResults: any[] = []; // live search results
-  searchSubject = new Subject<string>(); // input stream
+  searchResults: any[] = [];
+  searchSubject = new Subject<string>();
   locationSearch = '';
-  locationSuggestions: any[] = [];
   locationError = '';
   checkingDelivery = false;
   selectedLocationName: string | null = null;
@@ -62,41 +62,66 @@ export class HeaderComponent implements OnInit {
   isBrowser = false;
   isLoggedIn$!: Observable<boolean>;
 
+  @ViewChild('locationModal') locationModal!: TemplateRef<any>;
+  @ViewChild('addressModal') addressModal!: TemplateRef<any>;
+
+  // Current location data
+  currentLocation: CurrentLocation | null = null;
+  deliveryInfo: DeliveryInfo | null = null;
+
+  // Saved addresses
+  savedAddresses: SavedAddress[] = [];
+  selectedAddress: SavedAddress | null = null;
+
+  // UI state
+  locationSearchControl = new FormControl('');
+  locationSuggestions: LocationSuggestion[] = [];
+  showSuggestions = false;
+  isLoading = false;
+  isSavingAddress = false;
+
+  // Address form
+  addressForm: Partial<SavedAddress> = {
+    type: 'home',
+    isDefault: false,
+    addressLine1: '',
+    addressLine2: '',
+    city: '',
+    state: '',
+    pincode: '',
+    name: '',
+    recipientName: '',
+    phone: ''
+  };
+  isEditingAddress = false;
+  editingAddressId: string | null = null;
+
+  loader = inject(LoaderService);
+
   constructor(
     private router: Router,
     private modalService: NgbModal,
     private userService: UserService,
     private storage: StorageService,
-    private http: HttpClient, // for search API calls
+    private http: HttpClient,
     private headerService: HeaderCountService,
     private authService: AuthService,
     private locationService: LocationService,
     @Inject(PLATFORM_ID) private platformId: Object
-  ) { }
+  ) {}
 
-  onLocationChange(event: any): void {
-    const selectedId = event.target.value;
-    console.log('Selected location ID:', selectedId);
-    this.storage.setItem('selected_location_id', selectedId);
-  }
-
-  loader = inject(LoaderService);
-
-
+  // Add the missing onNavClick method
   onNavClick(): void {
     this.loader.show();
   }
+
   ngOnInit(): void {
     this.isBrowser = isPlatformBrowser(this.platformId);
     this.isLoggedIn$ = this.authService.isLoggedIn$;
+    
     if (!this.authService.hasValidToken()) {
       this.authService.logout();
     }
-
-    this.selectedLocation = this.storage.getItem('selected_location_id');
-    this.selectedLocationName = this.storage.getItem('selected_location');
-    this.sectorName = this.storage.getItem('sector_name');
-    this.addressRest = this.storage.getItem('address_rest');
 
     this.headerService.counts$.subscribe((counts) => {
       this.cartCount = counts.cart_count;
@@ -105,14 +130,13 @@ export class HeaderComponent implements OnInit {
 
     this.headerService.fetchCounts();
 
-    // 🔹 setup live search stream
+    // Setup live search stream
     this.searchSubject
       .pipe(
-        debounceTime(300), // wait 300ms after typing
-        distinctUntilChanged(), // only trigger if query changes
-        switchMap(
-          (query: string) =>
-            this.http.get<any[]>(`${API_ENDPOINTS.SEARCH}${query}`) // call your backend API
+        debounceTime(300),
+        distinctUntilChanged(),
+        switchMap((query: string) =>
+          this.http.get<any[]>(`${API_ENDPOINTS.SEARCH}${query}`)
         )
       )
       .subscribe({
@@ -124,13 +148,60 @@ export class HeaderComponent implements OnInit {
           this.searchResults = [];
         },
       });
+
+    // Subscribe to location changes
+    this.locationService.currentLocation$.subscribe(location => {
+      this.currentLocation = location;
+      if (location) {
+        this.updateDisplayLocation();
+      }
+    });
+
+    // Subscribe to saved addresses
+    this.locationService.savedAddresses$.subscribe(addresses => {
+      this.savedAddresses = addresses;
+      this.selectedAddress = addresses.find(addr => addr.isDefault) || null;
+    });
+
+    // Subscribe to delivery info
+    this.locationService.deliveryInfo$.subscribe(info => {
+      this.deliveryInfo = info;
+    });
+
+    // Setup location search with debounce
+    this.locationSearchControl.valueChanges.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap(query => {
+        if (query && query.length >= 3) {
+          this.isLoading = true;
+          return this.locationService.searchPlaces(query);
+        }
+        return of([]);
+      })
+    ).subscribe({
+      next: (suggestions) => {
+        this.locationSuggestions = suggestions;
+        this.showSuggestions = suggestions.length > 0;
+        this.isLoading = false;
+      },
+      error: () => {
+        this.locationSuggestions = [];
+        this.showSuggestions = false;
+        this.isLoading = false;
+      }
+    });
+
+    // Load saved location on init
+    if (this.isBrowser) {
+      this.loadSavedLocation();
+    }
   }
 
   getUserInfo() {
     this.userService.getUserInfo().subscribe({
       next: (res) => {
         this.userName = res.username;
-        // this.showProfileDropdown = true;
       },
       error: (err) => console.error(err),
     });
@@ -159,7 +230,6 @@ export class HeaderComponent implements OnInit {
   }
 
   selectResult(item: any): void {
-    // Example: navigate to product details
     this.router.navigate(['/product', item.id]);
     this.searchResults = [];
     this.searchQuery = '';
@@ -170,16 +240,13 @@ export class HeaderComponent implements OnInit {
     this.showProfileDropdown = !this.showProfileDropdown;
   }
 
-
   userProfile(): void {
     this.showProfileDropdown = false;
     this.router.navigate(['/profile']);
   }
 
   logout(): void {
-    // this.storage.removeItem('access_token');
     this.showProfileDropdown = false;
-    // this.router.navigate(['/']);
     this.authService.logout();
   }
 
@@ -189,152 +256,287 @@ export class HeaderComponent implements OnInit {
     if (!target.closest('.profile-nav')) {
       this.showProfileDropdown = false;
     }
+    if (!target.closest('.search-bar')) {
+      this.searchResults = [];
+    }
+    if (!target.closest('.search-container')) {
+      this.showSuggestions = false;
+    }
   }
 
-
-  // ✅ Open Location Modal
+  // Open main location modal
   openLocationModal(): void {
-    const modalRef = this.modalService.open(this.locationModal, {
-      centered: true,
-      size: 'md',
+    this.modalService.open(this.locationModal, {
+      size: 'lg',
       backdrop: 'static',
+      centered: true,
+      windowClass: 'location-modal'
     });
   }
 
-  handleLocationSearch(): void {
-    if (!this.locationSearch || this.locationSearch.length < 3) {
-      this.locationSuggestions = [];
-      return;
+  // Open add/edit address modal
+  openAddressModal(address?: SavedAddress): void {
+    if (address) {
+      this.isEditingAddress = true;
+      this.editingAddressId = address.id;
+      this.addressForm = { ...address };
+    } else {
+      this.isEditingAddress = false;
+      this.editingAddressId = null;
+      this.addressForm = {
+        type: 'home',
+        isDefault: false,
+        addressLine1: '',
+        addressLine2: '',
+        city: '',
+        state: '',
+        pincode: '',
+        name: '',
+        recipientName: '',
+        phone: ''
+      };
     }
 
-    this.locationService.searchPlaces(this.locationSearch)
-      .subscribe({
-        next: (res) => {
-          this.locationSuggestions = res;
+    this.modalService.open(this.addressModal, {
+      size: 'md',
+      centered: true,
+      backdrop: 'static'
+    });
+  }
+
+  // Use current location
+  async useCurrentLocation(modal: any): Promise<void> {
+    if (!this.isBrowser) return;
+
+    try {
+      const permissionState = await this.locationService.checkLocationPermission();
+
+      if (permissionState === 'denied') {
+        this.showPermissionDeniedMessage();
+        return;
+      }
+
+      this.isLoading = true;
+
+      this.locationService.getUserLocation().pipe(
+        switchMap(position =>
+          this.locationService.getAddressFromLatLng(
+            position.coords.latitude,
+            position.coords.longitude
+          )
+        ),
+        switchMap(location => {
+          if (location) {
+            return this.locationService.setCurrentLocation(location);
+          }
+          throw new Error('Could not get address');
+        })
+      ).subscribe({
+        next: () => {
+          this.isLoading = false;
+          modal.close();
+          this.showSuccessMessage('Location updated successfully');
         },
-        error: () => {
-          this.locationSuggestions = [];
+        error: (error) => {
+          this.isLoading = false;
+          this.handleLocationError(error);
         }
       });
+    } catch (error) {
+      this.isLoading = false;
+      console.error('Location error:', error);
+    }
   }
 
+  // Select from search suggestions
+  selectSuggestion(suggestion: LocationSuggestion): void {
+    if (!suggestion.placeId) return;
 
-  async useCurrentLocation(modal: any): Promise<void> {
-    if (!navigator.geolocation) {
-      alert('Geolocation is not supported on this browser.');
+    this.isLoading = true;
+    this.showSuggestions = false;
+    this.locationSearchControl.setValue(suggestion.description);
+
+    this.locationService.getPlaceDetails(suggestion.placeId).pipe(
+      switchMap(details => {
+        if (details?.geometry?.location) {
+          const lat = details.geometry.location.lat;
+          const lng = details.geometry.location.lng;
+          return this.locationService.getAddressFromLatLng(lat, lng);
+        }
+        return of(null);
+      }),
+      switchMap(location => {
+        if (location) {
+          return this.locationService.setCurrentLocation(location);
+        }
+        throw new Error('Could not get location details');
+      })
+    ).subscribe({
+      next: () => {
+        this.isLoading = false;
+        this.modalService.dismissAll();
+        this.showSuccessMessage('Location updated successfully');
+      },
+      error: (error) => {
+        this.isLoading = false;
+        console.error('Suggestion error:', error);
+        this.showErrorMessage('Failed to set location');
+      }
+    });
+  }
+
+  // Select saved address
+  selectSavedAddress(address: SavedAddress): void {
+    this.selectedAddress = address;
+
+    // Create a current location from saved address
+    const location: CurrentLocation = {
+      address: `${address.addressLine1}${address.addressLine2 ? ', ' + address.addressLine2 : ''}, ${address.city}, ${address.state} - ${address.pincode}`,
+      sectorName: address.city,
+      addressRest: address.addressLine1,
+      latitude: address.latitude || 0,
+      longitude: address.longitude || 0,
+      pincode: address.pincode,
+      city: address.city,
+      state: address.state
+    };
+
+    this.locationService.setCurrentLocation(location).subscribe({
+      next: () => {
+        this.modalService.dismissAll();
+        this.showSuccessMessage('Address selected');
+      },
+      error: (error) => {
+        console.error('Error selecting address:', error);
+        this.showErrorMessage('Failed to select address');
+      }
+    });
+  }
+
+  // Save address from form
+  saveAddress(): void {
+    if (!this.validateAddressForm()) {
       return;
     }
 
-    // 🔹 STEP 1: Check permission state (Modern Browsers)
-    if ((navigator as any).permissions) {
-      try {
-        const permission = await (navigator as any).permissions.query({
-          name: 'geolocation'
-        });
+    this.isSavingAddress = true;
 
-        if (permission.state === 'denied') {
-          alert(
-            'Location access is blocked.\n\nPlease enable location permission from browser settings and try again.'
-          );
-          return;
-        }
-        // If "prompt" → browser will ask
-        // If "granted" → directly fetch
-      } catch (err) {
-        console.warn('Permission API not supported, continuing...');
-      }
+    // Prepare address data - FIXED: Handle null case for editingAddressId
+    const addressData: Partial<SavedAddress> = {
+      ...this.addressForm,
+    };
+
+    // Only add id if editing or if we need to generate one
+    if (this.isEditingAddress && this.editingAddressId) {
+      addressData.id = this.editingAddressId;
     }
 
-    // 🔹 STEP 2: Request location (this triggers permission popup)
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
+    if (this.isEditingAddress && this.editingAddressId) {
+      this.locationService.updateSavedAddress(this.editingAddressId, addressData);
+      this.showSuccessMessage('Address updated successfully');
+    } else {
+      this.locationService.addSavedAddress(addressData as Omit<SavedAddress, 'id'>);
+      this.showSuccessMessage('Address saved successfully');
+    }
 
-        const apiKey = 'AIzaSyC6k0JqOh3qzhxjiWO-ua0uRYLuR7KBzRI';
-        const geocodeUrl =
-          `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`;
-
-        try {
-          const response = await fetch(geocodeUrl);
-          const data = await response.json();
-
-          if (data.status !== 'OK' || !data.results.length) {
-            throw new Error('No address found');
-          }
-
-          const result = data.results[0];
-
-          let postalCode = '';
-          let locality = '';
-          let sector = '';
-          const formattedAddress = result.formatted_address;
-
-          result.address_components.forEach((component: any) => {
-            if (component.types.includes('postal_code')) {
-              postalCode = component.long_name;
-            }
-            if (
-              component.types.includes('sublocality_level_1') ||
-              component.types.includes('sublocality')
-            ) {
-              sector = component.long_name;
-            }
-            if (component.types.includes('locality')) {
-              locality = component.long_name;
-            }
-          });
-
-          if (!sector && locality) sector = locality;
-
-          const addressRest = formattedAddress
-            .replace(sector, '')
-            .replace(/^,/, '')
-            .trim();
-
-          // ✅ Store
-          this.storage.setItem('selected_location', formattedAddress);
-          this.storage.setItem('sector_name', sector);
-          this.storage.setItem('address_rest', addressRest);
-          this.storage.setItem('latitude', lat.toString());
-          this.storage.setItem('longitude', lng.toString());
-          this.storage.setItem('postal_code', postalCode);
-          this.storage.setItem('locality', locality);
-          this.storage.setItem('selected_location_id', postalCode);
-
-          // ✅ Update UI
-          this.selectedLocationName = formattedAddress;
-          this.sectorName = sector;
-          this.addressRest = addressRest;
-          this.deliveryTime = '6 minutes';
-
-          modal.close();
-        } catch (err) {
-          console.error('Location error:', err);
-          alert('Unable to fetch location details.');
-          modal.close();
-        }
-      },
-      (error) => {
-        console.error('Geolocation error:', error);
-
-        if (error.code === error.PERMISSION_DENIED) {
-          alert(
-            'Location permission denied.\nPlease allow location access to use this feature.'
-          );
-        } else {
-          alert('Unable to retrieve your location.');
-        }
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0
-      }
-    );
+    this.isSavingAddress = false;
+    this.modalService.dismissAll();
   }
 
+  // Delete address
+  deleteAddress(addressId: string, event: Event): void {
+    event.stopPropagation();
+    if (confirm('Are you sure you want to delete this address?')) {
+      this.locationService.deleteSavedAddress(addressId);
+      this.showSuccessMessage('Address deleted successfully');
+    }
+  }
 
-  // reference to modal template
-  @ViewChild('locationModal') locationModal!: TemplateRef<any>;
+  // Set as default address
+  setDefaultAddress(address: SavedAddress, event: Event): void {
+    event.stopPropagation();
+    this.locationService.updateSavedAddress(address.id, { isDefault: true });
+    this.showSuccessMessage('Default address updated');
+  }
+
+  // Validate address form
+  private validateAddressForm(): boolean {
+    if (!this.addressForm.addressLine1 || !this.addressForm.addressLine1.trim()) {
+      this.showErrorMessage('Address line 1 is required');
+      return false;
+    }
+    if (!this.addressForm.city || !this.addressForm.city.trim()) {
+      this.showErrorMessage('City is required');
+      return false;
+    }
+    if (!this.addressForm.state || !this.addressForm.state.trim()) {
+      this.showErrorMessage('State is required');
+      return false;
+    }
+    if (!this.addressForm.pincode || !this.addressForm.pincode.trim()) {
+      this.showErrorMessage('Pincode is required');
+      return false;
+    }
+    if (!/^\d{6}$/.test(this.addressForm.pincode)) {
+      this.showErrorMessage('Please enter a valid 6-digit pincode');
+      return false;
+    }
+    return true;
+  }
+
+  // Generate unique address ID
+  private generateAddressId(): string {
+    return 'addr_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+  }
+
+  // Update display location in header
+  private updateDisplayLocation(): void {
+    if (this.currentLocation && this.isBrowser) {
+      this.storage.setItem('selected_location', this.currentLocation.address);
+      this.storage.setItem('sector_name', this.currentLocation.sectorName);
+      this.storage.setItem('address_rest', this.currentLocation.addressRest);
+      this.storage.setItem('latitude', this.currentLocation.latitude.toString());
+      this.storage.setItem('longitude', this.currentLocation.longitude.toString());
+      this.storage.setItem('postal_code', this.currentLocation.pincode);
+    }
+  }
+
+  // Load saved location from storage - FIXED: Proper type handling
+  private loadSavedLocation(): void {
+    const savedLocation = this.storage.getItem('current_location');
+    if (savedLocation && typeof savedLocation === 'object') {
+      // Ensure it matches CurrentLocation interface
+      const location = savedLocation as CurrentLocation;
+      if (location.address && location.pincode) {
+        this.currentLocation = location;
+      }
+    }
+  }
+
+  // Helper methods for user feedback
+  private showPermissionDeniedMessage(): void {
+    alert('Location access is blocked. Please enable location permission from browser settings and try again.');
+  }
+
+  private handleLocationError(error: any): void {
+    if (error && error.code === error.PERMISSION_DENIED) {
+      alert('Location permission denied. Please allow location access to use this feature.');
+    } else {
+      alert('Unable to retrieve your location. Please try again or search manually.');
+    }
+  }
+
+  private showSuccessMessage(message: string): void {
+    // You can replace with a toast service
+    console.log('Success:', message);
+    // For now, use alert for demo
+    alert(message);
+  }
+
+  private showErrorMessage(message: string): void {
+    // You can replace with a toast service
+    console.error('Error:', message);
+    // For now, use alert for demo
+    alert(message);
+  }
 }
