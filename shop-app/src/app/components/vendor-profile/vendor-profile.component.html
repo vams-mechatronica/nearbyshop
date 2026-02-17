@@ -163,7 +163,7 @@
           <div class="timing-list">
             <div *ngFor="let timing of shop?.store_hours" class="timing-item">
               <span>{{ timing.day_name }}</span>
-              <span>{{timing.open_time}} - {{ timing.close_time }}</span>
+              <span>{{formatTime(timing.opening_time)}} - {{ formatTime(timing.closing_time) }}</span>
             </div>
           </div>
         </div>
@@ -187,7 +187,7 @@
             </div>
             <div class="achievement-item">
               <i class="fas fa-star"></i>
-              <span>4.5+ Rating consistently</span>
+              <span>{{shop?.rating || 4.5}}+ Rating consistently</span>
             </div>
             <div class="achievement-item">
               <i class="fas fa-shipping-fast"></i>

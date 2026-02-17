@@ -30,6 +30,7 @@ import { LoaderService } from '../../services/loader.service';
 import { AuthService } from '../../services/auth.service';
 import { LocationService } from '../../services/location.service';
 import { CurrentLocation, DeliveryInfo, LocationSuggestion, SavedAddress } from '../../types/location.types';
+import { AnalyticsService } from '../../services/analytics.service';
 
 @Component({
   selector: 'app-header',
@@ -107,12 +108,14 @@ export class HeaderComponent implements OnInit {
     private headerService: HeaderCountService,
     private authService: AuthService,
     private locationService: LocationService,
+    private analytics: AnalyticsService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
   // Add the missing onNavClick method
   onNavClick(): void {
     this.loader.show();
+    this.analytics.trackEvent('CART_REDIRECT_CLICKED', 'PAGE_VISIT', 1);
   }
 
   ngOnInit(): void {
@@ -208,6 +211,7 @@ export class HeaderComponent implements OnInit {
   }
 
   loginSignup(): void {
+    this.analytics.trackEvent('LOGIN_CLICKED', 'EVENT_TRIGGERED', 1);
     this.modalService.open(AuthComponent, { centered: true, size: 'sm' });
   }
 
@@ -272,6 +276,7 @@ export class HeaderComponent implements OnInit {
       centered: true,
       windowClass: 'location-modal'
     });
+    this.analytics.trackEvent('SELECT_LOCATION_CLICKED', 'EVENT_TRIGGERED', 1);
   }
 
   // Open add/edit address modal

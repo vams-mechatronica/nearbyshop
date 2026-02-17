@@ -52,11 +52,11 @@ export interface Address {
 }
 
 export interface StoreHour {
-  day: number;
+  day_of_week: number;
   day_name: string;
-  open_time: string;
-  close_time: string;
-  is_closed: boolean;
+  opening_time: string;
+  closing_time: string;
+  is_open: boolean;
 }
 
 export interface Category {

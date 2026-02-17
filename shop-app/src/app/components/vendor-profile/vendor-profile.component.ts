@@ -203,6 +203,21 @@ export class VendorProfileComponent implements OnInit {
   }
 
 
+  formatTime(time: string): string {
+    if (!time) return '';
+
+    // Convert "09:15:13" → Date object
+    const [hours, minutes] = time.split(':');
+    const date = new Date();
+    date.setHours(+hours, +minutes);
+
+    return date.toLocaleTimeString([], {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+  }
+
 
 
   toggleFavorite(): void {
