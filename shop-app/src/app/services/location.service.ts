@@ -12,7 +12,6 @@ import { environment } from '../../environments/environment';
   providedIn: 'root'
 })
 export class LocationService {
-  private apiKey = environment.googleMapsApiKey;
 
   // State management
   private currentLocationSubject = new BehaviorSubject<CurrentLocation | null>(null);
@@ -63,10 +62,10 @@ export class LocationService {
 
   // Reverse geocoding to get address from coordinates
   getAddressFromLatLng(lat: number, lng: number): Observable<CurrentLocation | null> {
-    const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${this.apiKey}`;
+    const url = `${API_ENDPOINTS.REVERSE_GEOCODE}?lat=${lat}&lng=${lng}`;
 
     return this.http.get<any>(url).pipe(
-      map(response => this.parseGeocodeResponse(response, lat, lng)),
+      map(response => this.parseGeocodeResponse(response)),
       catchError(error => {
         console.error('Geocoding error:', error);
         return of(null);
@@ -74,25 +73,27 @@ export class LocationService {
     );
   }
 
-  private parseGeocodeResponse(response: any, lat: number, lng: number): CurrentLocation | null {
-    if (response.status !== 'OK' || !response.results.length) {
-      return null;
-    }
+  private parseGeocodeResponse(response: any): CurrentLocation | null {
+  if (!response || !response.address || !response.latitude || !response.longitude) {
+    return null;
+  }
 
-    const result = response.results[0];
-    let postalCode = '';
-    let locality = '';
-    let sector = '';
-    let state = '';
-    let country = '';
-    const formattedAddress = result.formatted_address;
+  const formattedAddress = response.address;
+  const lat = response.latitude;
+  const lng = response.longitude;
 
-    result.address_components.forEach((component: any) => {
+  let postalCode = '';
+  let locality = '';
+  let sector = '';
+  let state = '';
+  let country = '';
+
+  if (Array.isArray(response.components)) {
+    response.components.forEach((component: any) => {
       if (component.types.includes('postal_code')) {
         postalCode = component.long_name;
       }
-      if (component.types.includes('sublocality_level_1') ||
-        component.types.includes('sublocality')) {
+      if (component.types.includes('sublocality_level_1') || component.types.includes('sublocality')) {
         sector = component.long_name;
       }
       if (component.types.includes('locality')) {
@@ -105,25 +106,27 @@ export class LocationService {
         country = component.long_name;
       }
     });
-
-    if (!sector && locality) sector = locality;
-
-    const addressRest = formattedAddress
-      .replace(sector, '')
-      .replace(/^,/, '')
-      .trim();
-
-    return {
-      address: formattedAddress,
-      sectorName: sector,
-      addressRest: addressRest,
-      latitude: lat,
-      longitude: lng,
-      pincode: postalCode,
-      city: locality,
-      state: state
-    };
   }
+
+  // Fallback: if no sector, use locality
+  if (!sector && locality) sector = locality;
+
+  const addressRest = formattedAddress
+    .replace(sector, '')
+    .replace(/^,/, '')
+    .trim();
+
+  return {
+    address: formattedAddress,
+    sectorName: sector,
+    addressRest: addressRest,
+    latitude: lat,
+    longitude: lng,
+    pincode: postalCode,
+    city: locality,
+    state: state
+  };
+}
 
   // Set current location
   setCurrentLocation(location: CurrentLocation): Observable<DeliveryInfo> {
@@ -165,10 +168,7 @@ export class LocationService {
       return of([]);
     }
 
-    const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json` +
-      `?input=${encodeURIComponent(query)}` +
-      `&components=country:in` +
-      `&key=${this.apiKey}`;
+    const url = `${environment.apiUrl}/api/location/place-autocomplete/?input=${encodeURIComponent(query)}`;
 
     return this.http.get<any>(url).pipe(
       map(res => res.predictions.map((p: any) => ({
@@ -182,10 +182,7 @@ export class LocationService {
 
   // Get place details from place ID
   getPlaceDetails(placeId: string): Observable<any> {
-    const url = `https://maps.googleapis.com/maps/api/place/details/json` +
-      `?place_id=${placeId}` +
-      `&fields=formatted_address,geometry,address_component` +
-      `&key=${this.apiKey}`;
+    const url = `${environment.apiUrl}/api/location/place-details/?place_id=${placeId}`;
 
     return this.http.get<any>(url).pipe(
       map(response => response.result),
@@ -229,7 +226,7 @@ export class LocationService {
 
 
   getPincodeFromLatLng(lat: number, lng: number): Observable<string | null> {
-    const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${this.apiKey}`;
+    const url = `${API_ENDPOINTS.REVERSE_GEOCODE}?lat=${lat}&lng=${lng}`;
     return this.http.get<any>(url).pipe(
       map(res => {
         if (res.results && res.results.length) {

@@ -20,6 +20,7 @@ import { HeaderCountService } from '../../services/header.service';
 import { forkJoin } from 'rxjs';
 import { CartFullResponse } from '../../models/cart.model';
 import { environment } from '../../../environments/environment';
+import { API_ENDPOINTS } from '../../shared/constants/api.constants';
 
 declare var Razorpay: any;
 
@@ -170,8 +171,7 @@ export class CartComponent implements OnInit {
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
 
-        const apiKey = environment.googleMapsApiKey;
-        const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`;
+        const url = `${API_ENDPOINTS.REVERSE_GEOCODE}?lat=${lat}&lng=${lng}`;
 
         try {
           const response = await fetch(url);

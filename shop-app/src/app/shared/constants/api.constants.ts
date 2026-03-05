@@ -47,7 +47,7 @@ export const API_ENDPOINTS = {
   USER_PROFILE_UPDATE: `${API_BASE_URL}/api/v1/user/update/`,
   STORES: `${API_BASE_URL}/api/v1/vendors/stores/`,
   STORES_WITH_PINCODE: `${API_BASE_URL}/api/v1/vendors/stores/?pincode=`,
-
+  
   PRODUCTS_V2: `${API_BASE_URL}/api/v2/products/`,
   PRODUCT_DETAIL_V2: `${API_BASE_URL}/api/v2/product/`,
   RELATED_PRODUCT_V2: `${API_BASE_URL}/api/v2/products/`,
@@ -58,5 +58,6 @@ export const API_ENDPOINTS = {
   QUICK_SUGGESTIONS: `${API_BASE_URL}/api/v2/search/quick-suggestions/`,
   SHOP: `${API_BASE_URL}/api/v2/shops`,
   SHOP_PROFILE: `${API_BASE_URL}/api/v2/store/profile/`,
+  REVERSE_GEOCODE: `${API_BASE_URL}/api/v2/location/reverse-geocode/`,
 
 };
