@@ -7,7 +7,7 @@ import { API_ENDPOINTS } from '../shared/constants/api.constants';
   providedIn: 'root',
 })
 export class CategoryService {
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getCategories(): Observable<any> {
     return this.http.get(API_ENDPOINTS.CATEGORIES);
@@ -18,7 +18,21 @@ export class CategoryService {
   }
 
   getStoresByPincode(pincode: string, url?: string) {
-  return this.http.get(url ?? API_ENDPOINTS.STORES_WITH_PINCODE_V2 + pincode);
-}
+    return this.http.get(url ?? API_ENDPOINTS.STORES_WITH_PINCODE_V2 + pincode);
+  }
+  getStoresByLocation(lat: string, lng: string, radius: string, nextUrl?: string) {
+
+    if (nextUrl) {
+      return this.http.get(nextUrl);
+    }
+
+    return this.http.get(`${API_ENDPOINTS.STORES_V2}`, {
+      params: {
+        lat,
+        lng,
+        radius
+      }
+    });
+  }
 
 }

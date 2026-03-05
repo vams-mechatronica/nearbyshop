@@ -255,7 +255,7 @@
       </div>
 
       <!-- Search Radius Section -->
-      <!-- <div class="radius-selector">
+      <div class="radius-selector">
         <div class="radius-header">
           <h6>Search Radius</h6>
           <span>{{ radius }} km</span>
@@ -267,13 +267,14 @@
           max="10"
           step="1"
           [(ngModel)]="radius"
+          (change)="onRadiusChange()"
         />
 
         <div class="range-labels">
           <span>1 km</span>
           <span>10 km</span>
         </div>
-      </div> -->
+      </div>
 
       <!-- Saved Addresses Section -->
       <div class="saved-addresses-section" *ngIf="savedAddresses.length > 0">

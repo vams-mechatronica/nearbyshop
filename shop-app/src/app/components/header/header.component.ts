@@ -31,7 +31,7 @@ import { AuthService } from '../../services/auth.service';
 import { LocationService } from '../../services/location.service';
 import { CurrentLocation, DeliveryInfo, LocationSuggestion, SavedAddress } from '../../types/location.types';
 import { AnalyticsService } from '../../services/analytics.service';
-
+import { ShopService } from '../../services/shop.service';
 @Component({
   selector: 'app-header',
   standalone: true,
@@ -107,11 +107,13 @@ export class HeaderComponent implements OnInit {
     private modalService: NgbModal,
     private userService: UserService,
     private storage: StorageService,
+    private storageService: StorageService,
     private http: HttpClient,
     private headerService: HeaderCountService,
     private authService: AuthService,
     private locationService: LocationService,
     private analytics: AnalyticsService,
+    private shopService: ShopService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) { }
 
@@ -325,49 +327,73 @@ export class HeaderComponent implements OnInit {
 
 
   // Use current location
-  async useCurrentLocation(modal: any): Promise<void> {
-    if (!this.isBrowser) return;
+  async useCurrentLocation(modal: any, radius: number = 1): Promise<void> {
+  if (!this.isBrowser) return;
 
-    try {
-      const permissionState = await this.locationService.checkLocationPermission();
+  try {
+    const permissionState = await this.locationService.checkLocationPermission();
 
-      if (permissionState === 'denied') {
-        this.showPermissionDeniedMessage();
-        return;
-      }
-
-      this.isLoading = true;
-
-      this.locationService.getUserLocation().pipe(
-        switchMap(position =>
-          this.locationService.getAddressFromLatLng(
-            position.coords.latitude,
-            position.coords.longitude
-          )
-        ),
-        switchMap(location => {
-          if (location) {
-            return this.locationService.setCurrentLocation(location);
-          }
-          throw new Error('Could not get address');
-        })
-      ).subscribe({
-        next: () => {
-          this.isLoading = false;
-          modal.close();
-          this.showSuccessMessage('Location updated successfully');
-        },
-        error: (error) => {
-          this.isLoading = false;
-          this.handleLocationError(error);
-        }
-      });
-    } catch (error) {
-      this.isLoading = false;
-      console.error('Location error:', error);
+    if (permissionState === 'denied') {
+      this.showPermissionDeniedMessage();
+      return;
     }
-  }
 
+    this.isLoading = true;
+
+    this.locationService.getUserLocation().pipe(
+
+      switchMap(position =>
+        this.locationService.getAddressFromLatLng(
+          position.coords.latitude,
+          position.coords.longitude,
+          radius
+        )
+      ),
+
+      switchMap(location => {
+        if (location) {
+          return this.locationService.setCurrentLocation(location);
+        }
+        throw new Error('Could not get address');
+      })
+
+    ).subscribe({
+      next: () => {
+        this.isLoading = false;
+        modal.close();
+        this.showSuccessMessage('Location updated successfully');
+
+        this.shopService.setRadius(this.radius);
+
+      },
+      error: (error) => {
+        this.isLoading = false;
+        this.handleLocationError(error);
+      }
+    });
+
+  } catch (error) {
+    this.isLoading = false;
+    console.error('Location error:', error);
+  }
+}
+
+onRadiusChange(): void {
+  if (!this.currentLocation) return;
+
+  this.isLoading = true;
+
+  const { latitude, longitude } = this.currentLocation;
+
+  // Store the latest radius and location
+  this.storageService.setItem('radius', this.radius.toString());
+  this.storageService.setItem('latitude', latitude.toString());
+  this.storageService.setItem('longitude', longitude.toString());
+
+  // Reset stores and fetch again with new radius
+  this.shopService.setRadius(this.radius);
+  this.isLoading = false;
+}
   // Select from search suggestions
   selectSuggestion(suggestion: LocationSuggestion): void {
     if (!suggestion.placeId) return;

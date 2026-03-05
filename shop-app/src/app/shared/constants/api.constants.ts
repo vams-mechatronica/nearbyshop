@@ -59,5 +59,7 @@ export const API_ENDPOINTS = {
   SHOP: `${API_BASE_URL}/api/v2/shops`,
   SHOP_PROFILE: `${API_BASE_URL}/api/v2/store/profile/`,
   REVERSE_GEOCODE: `${API_BASE_URL}/api/v2/location/reverse-geocode/`,
+  PLACE_AUTOCOMPLETE: `${API_BASE_URL}/api/v2/location/place-autocomplete/`,
+  PLACE_DETAILS: `${API_BASE_URL}/api/v2/location/place-details/`,
 
 };

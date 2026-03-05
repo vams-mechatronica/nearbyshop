@@ -43,7 +43,7 @@ export class LocationService {
     }
   }
 
-  
+
 
   // Get user's current position
   getUserLocation(): Observable<GeolocationPosition> {
@@ -60,9 +60,14 @@ export class LocationService {
     }));
   }
 
-  // Reverse geocoding to get address from coordinates
-  getAddressFromLatLng(lat: number, lng: number): Observable<CurrentLocation | null> {
-    const url = `${API_ENDPOINTS.REVERSE_GEOCODE}?lat=${lat}&lng=${lng}`;
+  getAddressFromLatLng(
+    lat: number,
+    lng: number,
+    radius?: number
+  ): Observable<CurrentLocation | null> {
+
+    const finalRadius = radius ?? 1;
+    const url = `${API_ENDPOINTS.REVERSE_GEOCODE}?lat=${lat}&lng=${lng}&radius=${finalRadius}`;
 
     return this.http.get<any>(url).pipe(
       map(response => this.parseGeocodeResponse(response)),
@@ -74,59 +79,59 @@ export class LocationService {
   }
 
   private parseGeocodeResponse(response: any): CurrentLocation | null {
-  if (!response || !response.address || !response.latitude || !response.longitude) {
-    return null;
+    if (!response || !response.address || !response.latitude || !response.longitude) {
+      return null;
+    }
+
+    const formattedAddress = response.address;
+    const lat = response.latitude;
+    const lng = response.longitude;
+
+    let postalCode = '';
+    let locality = '';
+    let sector = '';
+    let state = '';
+    let country = '';
+
+    if (Array.isArray(response.components)) {
+      response.components.forEach((component: any) => {
+        if (component.types.includes('postal_code')) {
+          postalCode = component.long_name;
+        }
+        if (component.types.includes('sublocality_level_1') || component.types.includes('sublocality')) {
+          sector = component.long_name;
+        }
+        if (component.types.includes('locality')) {
+          locality = component.long_name;
+        }
+        if (component.types.includes('administrative_area_level_1')) {
+          state = component.long_name;
+        }
+        if (component.types.includes('country')) {
+          country = component.long_name;
+        }
+      });
+    }
+
+    // Fallback: if no sector, use locality
+    if (!sector && locality) sector = locality;
+
+    const addressRest = formattedAddress
+      .replace(sector, '')
+      .replace(/^,/, '')
+      .trim();
+
+    return {
+      address: formattedAddress,
+      sectorName: sector,
+      addressRest: addressRest,
+      latitude: lat,
+      longitude: lng,
+      pincode: postalCode,
+      city: locality,
+      state: state
+    };
   }
-
-  const formattedAddress = response.address;
-  const lat = response.latitude;
-  const lng = response.longitude;
-
-  let postalCode = '';
-  let locality = '';
-  let sector = '';
-  let state = '';
-  let country = '';
-
-  if (Array.isArray(response.components)) {
-    response.components.forEach((component: any) => {
-      if (component.types.includes('postal_code')) {
-        postalCode = component.long_name;
-      }
-      if (component.types.includes('sublocality_level_1') || component.types.includes('sublocality')) {
-        sector = component.long_name;
-      }
-      if (component.types.includes('locality')) {
-        locality = component.long_name;
-      }
-      if (component.types.includes('administrative_area_level_1')) {
-        state = component.long_name;
-      }
-      if (component.types.includes('country')) {
-        country = component.long_name;
-      }
-    });
-  }
-
-  // Fallback: if no sector, use locality
-  if (!sector && locality) sector = locality;
-
-  const addressRest = formattedAddress
-    .replace(sector, '')
-    .replace(/^,/, '')
-    .trim();
-
-  return {
-    address: formattedAddress,
-    sectorName: sector,
-    addressRest: addressRest,
-    latitude: lat,
-    longitude: lng,
-    pincode: postalCode,
-    city: locality,
-    state: state
-  };
-}
 
   // Set current location
   setCurrentLocation(location: CurrentLocation): Observable<DeliveryInfo> {
@@ -245,9 +250,9 @@ export class LocationService {
     );
   }
 
- 
 
-  
+
+
 
   deleteSavedAddress(id: string): void {
     const currentAddresses = this.savedAddressesSubject.value;
@@ -314,17 +319,17 @@ export class LocationService {
 
   fetchUserAddresses(): Observable<SavedAddress[]> {
 
-  return this.http.get<SavedAddress[]>(API_ENDPOINTS.GET_USERADDRESS).pipe(
+    return this.http.get<SavedAddress[]>(API_ENDPOINTS.GET_USERADDRESS).pipe(
 
-    tap(addresses => {
+      tap(addresses => {
 
-      this.savedAddressesSubject.next(addresses);
+        this.savedAddressesSubject.next(addresses);
 
-      this.storage.setItemA('saved_addresses', addresses);
+        this.storage.setItemA('saved_addresses', addresses);
 
-    }),
+      }),
 
-    catchError(() => of([]))
-  );
-}
+      catchError(() => of([]))
+    );
+  }
 }

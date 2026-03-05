@@ -376,6 +376,7 @@
 
     <div class="shops-scroll-container">
       <div class="shops-row">
+        <div *ngIf="stores.length > 0; else noShops">
         <div class="shop-card-featured" *ngFor="let shop of stores">
           <div class="shop-badge">Popular</div>
           <div class="shop-image">
@@ -402,7 +403,15 @@
           <button class="shop-visit-btn" (click)="visitStore(shop)">
             Visit Shop
           </button>
-        </div>
+        </div></div>
+        <ng-template #noShops>
+          <div class="no-products">
+            <p>No shops found in your area</p>
+            <button class="refresh-btn" (click)="fetchStores()" style="background-color: var(--primary)">
+              <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+          </div>
+        </ng-template>
       </div>
       <button class="scroll-arrow right">›</button>
     </div>

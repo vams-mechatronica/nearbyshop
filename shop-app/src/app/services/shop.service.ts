@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { StorageService } from './storage.service';
-import { catchError, map, Observable, of, tap } from 'rxjs';
+import { BehaviorSubject, catchError, map, Observable, of, tap } from 'rxjs';
 import { API_ENDPOINTS } from '../shared/constants/api.constants';
 import { ApiResponse } from '../models/api-response.model';
 import { Shop, ShopProfileResponse, ShopStats } from '../models/vendor.model';
@@ -31,10 +31,23 @@ interface LocalShopData {
 }
 @Injectable({ providedIn: 'root' })
 export class ShopService {
+  private refreshStoresSubject = new BehaviorSubject<void>(undefined);
+  refreshStores$ = this.refreshStoresSubject.asObservable();
+
+  private radiusSubject = new BehaviorSubject<number>(1); // default 1 km
+  radius$ = this.radiusSubject.asObservable();
   private apiUrl = `${environment.apiUrl}/vendors`;
 
 
   constructor(private http: HttpClient, private storage: StorageService) { }
+  triggerRefresh() {
+    this.refreshStoresSubject.next();
+  }
+
+  setRadius(radius: number) {
+    this.radiusSubject.next(radius);
+    this.triggerRefresh(); // optional: auto-refresh on radius change
+  }
 
   getShopDetails(slug: string): Observable<any> {
     return this.http.get(API_ENDPOINTS.STORE_DETAILS + slug + '/');

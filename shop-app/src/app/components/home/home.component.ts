@@ -29,10 +29,11 @@ import { AuthModalService } from '../../services/auth-modal.service';
 import { AnalyticsService } from '../../services/analytics.service';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule } from '@angular/forms';
-import { debounceTime, distinctUntilChanged, Subject, Observable, of } from 'rxjs';
+import { debounceTime, distinctUntilChanged, Subject, Observable, of, Subscription } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { catchError, map } from 'rxjs/operators';
 import { API_ENDPOINTS } from '../../shared/constants/api.constants';
+import { ShopService } from '../../services/shop.service';
 
 interface CategoryShelf {
   categoryId: number;
@@ -213,9 +214,10 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   /** Utilities */
   private interval!: ReturnType<typeof setInterval>;
   private observer!: IntersectionObserver;
-
+  private subscriptions = new Subscription();
   @ViewChild('subscribeModal') subscribeModal!: TemplateRef<any>;
   private subscribeModalRef!: NgbModalRef;
+  radius: number = 1;
 
   constructor(
     private router: Router,
@@ -235,6 +237,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     private analytics: AnalyticsService,
     private modal: NgbModal,
     private http: HttpClient,
+    private shopService: ShopService,
 
     @Inject(PLATFORM_ID) private platformId: Object
   ) { }
@@ -255,9 +258,19 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     });
 
+    // Subscribe to radius changes
+    this.subscriptions.add(
+      this.shopService.radius$.subscribe(radius => {
+        this.radius = radius;
+      })
+    );
 
-
-
+    // Subscribe to refresh trigger
+    this.subscriptions.add(
+      this.shopService.refreshStores$.subscribe(() => {
+        this.fetchStores();
+      })
+    );
 
     // Load recent searches from localStorage
     this.loadRecentSearches();
@@ -818,9 +831,9 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   fetchStores(loadMore = false): void {
+
     if (this.loadingStores) return;
 
-    // ✅ RESET state on first load
     if (!loadMore) {
       this.stores = [];
       this.storesNext = null;
@@ -828,23 +841,45 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     this.loadingStores = true;
+    this.loaderService.show();
 
     const postalCode = this.storageService.getItem('postal_code');
+    const lat = this.storageService.getItem('latitude');
+    const lng = this.storageService.getItem('longitude');
+    const radius = this.storageService.getItem('radius') || '1';
 
     let apiCall$;
 
-    if (loadMore && this.storesNext) {
-      apiCall$ = postalCode
+    // ✅ PRIORITY 1 : LAT LNG SEARCH
+    if (lat && lng) {
+
+      apiCall$ = loadMore && this.storesNext
+        ? this.categoryService.getStoresByLocation(lat, lng, radius, this.storesNext)
+        : this.categoryService.getStoresByLocation(lat, lng, radius);
+
+    }
+
+    // ✅ PRIORITY 2 : PINCODE SEARCH
+    else if (postalCode) {
+
+      apiCall$ = loadMore && this.storesNext
         ? this.categoryService.getStoresByPincode(postalCode, this.storesNext)
-        : this.categoryService.getStores(this.storesNext);
-    } else {
-      apiCall$ = postalCode
-        ? this.categoryService.getStoresByPincode(postalCode)
+        : this.categoryService.getStoresByPincode(postalCode);
+
+    }
+
+    // ✅ PRIORITY 3 : DEFAULT
+    else {
+
+      apiCall$ = loadMore && this.storesNext
+        ? this.categoryService.getStores(this.storesNext)
         : this.categoryService.getStores();
+
     }
 
     apiCall$.subscribe({
       next: (res: any) => {
+
         this.stores = loadMore
           ? [...this.stores, ...(res.results || [])]
           : res.results || [];
@@ -852,11 +887,16 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
         this.storesNext = res.next;
         this.noStoresFound = this.stores.length === 0;
         this.loadingStores = false;
+        this.loaderService.hide();
+
         this.cdr.markForCheck();
       },
       error: () => {
+
         this.noStoresFound = true;
         this.loadingStores = false;
+        this.loaderService.hide();
+
         this.cdr.markForCheck();
       }
     });
