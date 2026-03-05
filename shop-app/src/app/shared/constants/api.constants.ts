@@ -51,7 +51,7 @@ export const API_ENDPOINTS = {
   PRODUCTS_V2: `${API_BASE_URL}/api/v2/products/`,
   PRODUCT_DETAIL_V2: `${API_BASE_URL}/api/v2/product/`,
   RELATED_PRODUCT_V2: `${API_BASE_URL}/api/v2/products/`,
-  STORES_WITH_PINCODE_V2: `${API_BASE_URL}/api/v2/vendors/shop/?pincode=`,
+  STORES_WITH_PINCODE_V2: `${API_BASE_URL}/api/v2/vendors/shop/?address__pincode=`,
   STORES_V2: `${API_BASE_URL}/api/v2/vendors/shop/`,
   STORE_PRODUCTS_V2: `${API_BASE_URL}/api/v2/vendors/stores/`,
   SEARCH_SUGGESTIONS: `${API_BASE_URL}/api/v2/search/suggestions/`,

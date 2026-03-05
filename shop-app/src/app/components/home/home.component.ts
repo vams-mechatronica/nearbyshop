@@ -1263,7 +1263,8 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // Host Listener for ESC key
   @HostListener('document:keydown.escape', ['$event'])
-  handleEscapeKey(event: KeyboardEvent): void {
+  handleEscapeKey(event: Event): void {
+    const keyboardEvent = event as KeyboardEvent;
     if (this.showSearchResults) {
       this.closeSearchResults();
     }

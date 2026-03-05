@@ -256,6 +256,37 @@
     }
   }
 
+  .radius-selector {
+
+    margin-bottom: 20px;
+    padding: 16px;
+    background: #fff5f5;
+    border-radius: 12px;
+
+    .radius-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+
+      span {
+        color: #dc3545;
+        font-weight: 600;
+      }
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: #dc3545;
+    }
+
+    .range-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: #777;
+    }
+  }
+
   .saved-addresses-section {
     margin-bottom: 24px;
 

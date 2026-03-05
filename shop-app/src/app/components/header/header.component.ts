@@ -81,6 +81,8 @@ export class HeaderComponent implements OnInit {
   isLoading = false;
   isSavingAddress = false;
 
+  radius = 1;
+
   // Address form
   addressForm: Partial<SavedAddress> = {
     type: 'home',
@@ -96,6 +98,7 @@ export class HeaderComponent implements OnInit {
   };
   isEditingAddress = false;
   editingAddressId: string | null = null;
+  private locationChecked = false;
 
   loader = inject(LoaderService);
 
@@ -110,7 +113,7 @@ export class HeaderComponent implements OnInit {
     private locationService: LocationService,
     private analytics: AnalyticsService,
     @Inject(PLATFORM_ID) private platformId: Object
-  ) {}
+  ) { }
 
   // Add the missing onNavClick method
   onNavClick(): void {
@@ -121,7 +124,7 @@ export class HeaderComponent implements OnInit {
   ngOnInit(): void {
     this.isBrowser = isPlatformBrowser(this.platformId);
     this.isLoggedIn$ = this.authService.isLoggedIn$;
-    
+
     if (!this.authService.hasValidToken()) {
       this.authService.logout();
     }
@@ -198,6 +201,7 @@ export class HeaderComponent implements OnInit {
     // Load saved location on init
     if (this.isBrowser) {
       this.loadSavedLocation();
+      this.checkUserLocation();
     }
   }
 
@@ -270,13 +274,22 @@ export class HeaderComponent implements OnInit {
 
   // Open main location modal
   openLocationModal(): void {
-    this.modalService.open(this.locationModal, {
+    if (this.locationChecked) return;
+    this.locationChecked = true;
+    const modalRef = this.modalService.open(this.locationModal, {
       size: 'lg',
       backdrop: 'static',
       centered: true,
       windowClass: 'location-modal'
     });
     this.analytics.trackEvent('SELECT_LOCATION_CLICKED', 'EVENT_TRIGGERED', 1);
+    modalRef.result
+      .then(() => {
+        this.locationChecked = false;
+      })
+      .catch(() => {
+        this.locationChecked = false;
+      });
   }
 
   // Open add/edit address modal
@@ -308,6 +321,8 @@ export class HeaderComponent implements OnInit {
       backdrop: 'static'
     });
   }
+
+
 
   // Use current location
   async useCurrentLocation(modal: any): Promise<void> {
@@ -543,5 +558,52 @@ export class HeaderComponent implements OnInit {
     console.error('Error:', message);
     // For now, use alert for demo
     alert(message);
+  }
+
+  private checkUserLocation(): void {
+
+    // 1️⃣ Check local storage
+    const storedLocation = this.storage.getItemA('current_location');
+
+    if (storedLocation) {
+      this.currentLocation = storedLocation;
+      return;
+    }
+
+    // 2️⃣ If logged in → check DB
+    if (this.authService.hasValidToken()) {
+
+      this.locationService.fetchUserAddresses().subscribe({
+        next: (addresses) => {
+
+          if (addresses && addresses.length > 0) {
+
+            const defaultAddress =
+              addresses.find(a => a.isDefault) || addresses[0];
+
+            this.selectSavedAddress(defaultAddress);
+
+          } else {
+
+            // 3️⃣ No address → show modal
+            setTimeout(() => {
+              this.openLocationModal();
+            }, 500);
+          }
+        },
+        error: () => {
+          setTimeout(() => {
+            this.openLocationModal();
+          }, 500);
+        }
+      });
+
+    } else {
+
+      // 4️⃣ Guest user without location
+      setTimeout(() => {
+        this.openLocationModal();
+      }, 500);
+    }
   }
 }

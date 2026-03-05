@@ -44,6 +44,8 @@ export class LocationService {
     }
   }
 
+  
+
   // Get user's current position
   getUserLocation(): Observable<GeolocationPosition> {
     return from(new Promise<GeolocationPosition>((resolve, reject) => {
@@ -312,4 +314,20 @@ export class LocationService {
       })
     );
   }
+
+  fetchUserAddresses(): Observable<SavedAddress[]> {
+
+  return this.http.get<SavedAddress[]>(API_ENDPOINTS.GET_USERADDRESS).pipe(
+
+    tap(addresses => {
+
+      this.savedAddressesSubject.next(addresses);
+
+      this.storage.setItemA('saved_addresses', addresses);
+
+    }),
+
+    catchError(() => of([]))
+  );
+}
 }
