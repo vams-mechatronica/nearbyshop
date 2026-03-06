@@ -4,6 +4,7 @@ import {
   inject,
   Inject,
   OnInit,
+  OnDestroy,
   PLATFORM_ID,
   TemplateRef,
   ViewChild,
@@ -17,6 +18,7 @@ import { UserService } from '../../services/user.service';
 import {
   Observable,
   Subject,
+  Subscription,
   debounceTime,
   distinctUntilChanged,
   of,
@@ -39,7 +41,8 @@ import { ShopService } from '../../services/shop.service';
   styleUrls: ['./header.component.scss'],
   imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink],
 })
-export class HeaderComponent implements OnInit {
+export class HeaderComponent implements OnInit, OnDestroy {
+  private subscriptions = new Subscription();
   searchQuery = '';
   searchResults: any[] = [];
   searchSubject = new Subject<string>();
@@ -106,7 +109,6 @@ export class HeaderComponent implements OnInit {
     private router: Router,
     private modalService: NgbModal,
     private userService: UserService,
-    private storage: StorageService,
     private storageService: StorageService,
     private http: HttpClient,
     private headerService: HeaderCountService,
@@ -131,19 +133,22 @@ export class HeaderComponent implements OnInit {
       this.authService.logout();
     }
 
-    this.headerService.counts$.subscribe((counts) => {
-      this.cartCount = counts.cart_count;
-      this.subscriptionCount = counts.subscription_count;
-    });
+    this.subscriptions.add(
+      this.headerService.counts$.subscribe((counts) => {
+        this.cartCount = counts.cart_count;
+        this.subscriptionCount = counts.subscription_count;
+      })
+    );
 
     this.headerService.fetchCounts();
 
     // Setup live search stream
-    this.searchSubject
-      .pipe(
-        debounceTime(300),
-        distinctUntilChanged(),
-        switchMap((query: string) =>
+    this.subscriptions.add(
+      this.searchSubject
+        .pipe(
+          debounceTime(300),
+          distinctUntilChanged(),
+          switchMap((query: string) =>
           this.http.get<any[]>(`${API_ENDPOINTS.SEARCH}${query}`)
         )
       )
@@ -155,26 +160,33 @@ export class HeaderComponent implements OnInit {
           console.error('Search error:', err);
           this.searchResults = [];
         },
-      });
+      })
+    );
 
     // Subscribe to location changes
-    this.locationService.currentLocation$.subscribe(location => {
-      this.currentLocation = location;
-      if (location) {
-        this.updateDisplayLocation();
-      }
-    });
+    this.subscriptions.add(
+      this.locationService.currentLocation$.subscribe(location => {
+        this.currentLocation = location;
+        if (location) {
+          this.updateDisplayLocation();
+        }
+      })
+    );
 
     // Subscribe to saved addresses
-    this.locationService.savedAddresses$.subscribe(addresses => {
-      this.savedAddresses = addresses;
-      this.selectedAddress = addresses.find(addr => addr.isDefault) || null;
-    });
+    this.subscriptions.add(
+      this.locationService.savedAddresses$.subscribe(addresses => {
+        this.savedAddresses = addresses;
+        this.selectedAddress = addresses.find(addr => addr.isDefault) || null;
+      })
+    );
 
     // Subscribe to delivery info
-    this.locationService.deliveryInfo$.subscribe(info => {
-      this.deliveryInfo = info;
-    });
+    this.subscriptions.add(
+      this.locationService.deliveryInfo$.subscribe(info => {
+        this.deliveryInfo = info;
+      })
+    );
 
     // Setup location search with debounce
     this.locationSearchControl.valueChanges.pipe(
@@ -205,6 +217,10 @@ export class HeaderComponent implements OnInit {
       this.loadSavedLocation();
       this.checkUserLocation();
     }
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
   }
 
   getUserInfo() {
@@ -538,18 +554,18 @@ onRadiusChange(): void {
   // Update display location in header
   private updateDisplayLocation(): void {
     if (this.currentLocation && this.isBrowser) {
-      this.storage.setItem('selected_location', this.currentLocation.address);
-      this.storage.setItem('sector_name', this.currentLocation.sectorName);
-      this.storage.setItem('address_rest', this.currentLocation.addressRest);
-      this.storage.setItem('latitude', this.currentLocation.latitude.toString());
-      this.storage.setItem('longitude', this.currentLocation.longitude.toString());
-      this.storage.setItem('postal_code', this.currentLocation.pincode);
+      this.storageService.setItem('selected_location', this.currentLocation.address);
+      this.storageService.setItem('sector_name', this.currentLocation.sectorName);
+      this.storageService.setItem('address_rest', this.currentLocation.addressRest);
+      this.storageService.setItem('latitude', this.currentLocation.latitude.toString());
+      this.storageService.setItem('longitude', this.currentLocation.longitude.toString());
+      this.storageService.setItem('postal_code', this.currentLocation.pincode);
     }
   }
 
   // Load saved location from storage - FIXED: Proper type handling
   private loadSavedLocation(): void {
-    const savedLocation = this.storage.getItem('current_location');
+    const savedLocation = this.storageService.getItem('current_location');
     if (savedLocation && typeof savedLocation === 'object') {
       // Ensure it matches CurrentLocation interface
       const location = savedLocation as CurrentLocation;
@@ -589,7 +605,7 @@ onRadiusChange(): void {
   private checkUserLocation(): void {
 
     // 1️⃣ Check local storage
-    const storedLocation = this.storage.getItemA('current_location');
+    const storedLocation = this.storageService.getItemA('current_location');
 
     if (storedLocation) {
       this.currentLocation = storedLocation;

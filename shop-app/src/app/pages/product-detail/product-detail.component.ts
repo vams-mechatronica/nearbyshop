@@ -1,53 +1,30 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, Injectable, TemplateRef, ViewChild } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ChangeDetectorRef, Component } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ProductsService } from '../../services/products.service';
-import { ProductsComponent } from '../../components/products/products.component';
-import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
-import { ToastrService } from 'ngx-toastr';
-import { SubscriptionService } from '../../services/subscribe.service';
-import { CartService } from '../../services/cart.service';
+import { CartActionsService } from '../../shared/services/cart-actions.service';
 import { FormsModule } from '@angular/forms';
-import { AuthModalService } from '../../services/auth-modal.service';
-import { AuthService } from '../../services/auth.service';
-import { HeaderCountService } from '../../services/header.service';
 import { Meta, Title } from '@angular/platform-browser';
 import { SeoService } from '../../services/seo.service';
+import { ProductCardComponent } from '../../shared/components/product-card/product-card.component';
 
 @Component({
   selector: 'app-product-detail',
   templateUrl: './product-detail.component.html',
   styleUrls: ['./product-detail.component.scss'],
-  imports: [CommonModule, FormsModule, RouterLink]
+  imports: [CommonModule, FormsModule, ProductCardComponent]
 })
-@Injectable({ providedIn: 'root' })
 export class ProductDetailComponent {
   product: any;
   selectedImage: string = '';
   relatedProducts: any[] = [];
-  products: any[] = [];
-  categoryName: string = 'Darity';
-  categories: any[] = [];
-  selectedProduct: any;
-  subscriptionPlan = 'daily';
-  startDate: string = '';
-
-  @ViewChild('subscribeModal') subscribeModal!: TemplateRef<any>;
-  private subscribeModalRef!: NgbModalRef;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private productService: ProductsService,
     private cdRef: ChangeDetectorRef,
-    private productComp: ProductsComponent,
-    private toastr: ToastrService,
-    private modal: NgbModal,
-    private subscribeService: SubscriptionService,
-    private cartService: CartService,
-    private authModal: AuthModalService,
-    private authService: AuthService,
-    private headerService: HeaderCountService,
+    public cartActions: CartActionsService,
     private meta: Meta,
     private title: Title,
     private seoService: SeoService,
@@ -112,50 +89,11 @@ export class ProductDetailComponent {
   }
 
   addToCart(product: any) {
-    this.productComp.addToCart(product);
+    this.cartActions.addToCart(product);
   }
 
   openSubscribeModal(product: any): void {
-
-    // 🔐 Force login before subscription
-    if (!this.authService.isLoggedIn()) {
-      // save intent (optional but recommended)
-      localStorage.setItem('redirect_url', '/subscribe');
-
-      // open login modal
-      this.authModal.openLogin();
-      return;
-    }
-
-    // ✅ user is logged in → open subscribe modal
-    this.selectedProduct = { ...product, qty: product.qty || 1 };
-
-    this.subscribeModalRef = this.modal.open(this.subscribeModal, {
-      centered: true,
-      backdrop: 'static',
-    });
-  }
-
-
-  confirmSubscription() {
-    if (!this.selectedProduct) return;
-
-    this.subscribeService
-      .addSubscription(
-        this.selectedProduct,
-        this.subscriptionPlan,
-        this.startDate,
-        this.selectedProduct.qty
-      )
-      .subscribe({
-        next: (res) => {
-          console.log('Subscription confirmed:', res);
-          this.subscribeModalRef?.close();
-        },
-        error: (err) => {
-          this.toastr.error(err.error.message, 'Subscription Failed');
-        },
-      });
+    this.cartActions.openSubscribeModal(product);
   }
 
   viewProduct(id: number) {
@@ -163,52 +101,11 @@ export class ProductDetailComponent {
   }
 
   decreaseQty(product: any): void {
-    const currentQty = product.qty || 1;
-    if (currentQty <= 1) {
-      product.qty = 0;
-      this.cartService.deleteCartItem(product.id).subscribe({
-        next: () => {
-          this.headerService.fetchCounts();
-        },
-        error: () => {
-          product.qty += 1;
-        }
-      });
-      return;
-    }
-    const newQty = currentQty - 1;
-    product.qty -= 1;
-    this.cartService.updateCartItem(product.id, newQty).subscribe({
-      next: (res) => {
-        if (!res.success) return;
-        if (res.item) {
-          product.qty = res.item.quantity;
-        }
-        this.headerService.updateCartSummary(res.cart);
-      },
-      error: (err) => {
-        product.qty += 1;
-      }
-    });
+    this.cartActions.decreaseQty(product);
   }
 
   increaseQty(product: any): void {
-
-    const newQty = (product.qty || 0) + 1;
-    product.qty += 1;
-
-    this.cartService.updateCartItem(product.id, newQty).subscribe({
-      next: (res) => {
-        if (!res.success) return;
-        if (res.item) {
-          product.qty = res.item.quantity;
-        }
-        this.headerService.updateCartSummary(res.cart);
-      },
-      error: () => {
-        product.qty -= 1;
-      }
-    });
+    this.cartActions.increaseQty(product);
   }
 
 }

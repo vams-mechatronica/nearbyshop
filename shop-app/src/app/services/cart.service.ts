@@ -35,8 +35,17 @@ export class CartService {
     if (this.authService.hasToken()) {
       return this.http.get<any>(API_ENDPOINTS.GET_CART);
     } else {
-      const cart = JSON.parse(this.storage.getItem('cart') || '[]');
-      return of(cart);
+      const cart = this.getGuestCartData();
+      // Normalize guest cart to match API structure
+      return of({
+        items: cart.items || [],
+        total: cart.total || 0,
+        total_discount: 0,
+        total_price_after_discount: cart.total || 0,
+        total_price_before_discount: cart.total || 0,
+        id: 0,
+        user: 0,
+      });
     }
   }
 
@@ -95,6 +104,115 @@ export class CartService {
       coupon_code: coupon
     }
     return this.http.post<any>(API_ENDPOINTS.CREATE_ORDER, body);
+  }
+
+  /* ─── Guest Cart Helpers ─── */
+
+  getGuestCartData(): any {
+    const stored = this.storage.getItem('cart');
+    if (!stored) return { items: [], total: 0 };
+    try {
+      const parsed = JSON.parse(stored);
+      return parsed && parsed.items ? parsed : { items: [], total: 0 };
+    } catch {
+      return { items: [], total: 0 };
+    }
+  }
+
+  private saveGuestCart(cart: any): void {
+    this.storage.setItem('cart', JSON.stringify(cart));
+  }
+
+  private calcGuestTotal(cart: any): number {
+    return cart.items.reduce(
+      (sum: number, item: any) =>
+        sum + Number(item.product?.final_price || item.product?.price || 0) * item.quantity,
+      0
+    );
+  }
+
+  addToCartGuest(product: any): { quantity: number; totalItems: number } {
+    const cart = this.getGuestCartData();
+    const existing = cart.items.find((i: any) => i.product.id === product.id);
+
+    if (existing) {
+      existing.quantity += 1;
+      existing.price = String(
+        Number(product.final_price || product.price) * existing.quantity
+      );
+    } else {
+      cart.items.push({
+        product: {
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          final_price: product.final_price,
+          image: product.image,
+          slug: product.slug,
+          unit: product.unit,
+          shop: product.shop,
+          discount_value: product.discount_value,
+          discount_type: product.discount_type,
+          stock: product.stock,
+        },
+        quantity: 1,
+        price: String(product.final_price || product.price),
+      });
+    }
+
+    cart.total = this.calcGuestTotal(cart);
+    this.saveGuestCart(cart);
+
+    const item = cart.items.find((i: any) => i.product.id === product.id);
+    return {
+      quantity: item.quantity,
+      totalItems: cart.items.reduce((s: number, i: any) => s + i.quantity, 0),
+    };
+  }
+
+  updateCartItemGuest(
+    productId: number,
+    quantity: number
+  ): { quantity: number; totalItems: number } {
+    const cart = this.getGuestCartData();
+    const item = cart.items.find((i: any) => i.product.id === productId);
+
+    if (item) {
+      item.quantity = quantity;
+      item.price = String(
+        Number(item.product.final_price || item.product.price) * quantity
+      );
+    }
+
+    cart.total = this.calcGuestTotal(cart);
+    this.saveGuestCart(cart);
+
+    return {
+      quantity: item?.quantity || 0,
+      totalItems: cart.items.reduce((s: number, i: any) => s + i.quantity, 0),
+    };
+  }
+
+  deleteCartItemGuest(productId: number): number {
+    const cart = this.getGuestCartData();
+    cart.items = cart.items.filter((i: any) => i.product.id !== productId);
+    cart.total = this.calcGuestTotal(cart);
+    this.saveGuestCart(cart);
+    return cart.items.reduce((s: number, i: any) => s + i.quantity, 0);
+  }
+
+  /** Merge guest cart quantities into a product array */
+  mergeGuestQty(products: any[]): void {
+    if (this.authService.hasToken()) return;
+    const cart = this.getGuestCartData();
+    if (!cart.items?.length) return;
+
+    products.forEach((p: any) => {
+      const item = cart.items.find((i: any) => i.product.id === p.id);
+      if (item) {
+        p.qty = item.quantity;
+      }
+    });
   }
 
   syncGuestCart(): Observable<any> {

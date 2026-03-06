@@ -1,7 +1,7 @@
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { Component, EventEmitter, Output, OnInit, Injectable } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterModule, ActivatedRoute, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { ToastrService } from 'ngx-toastr';
@@ -23,10 +23,6 @@ interface LocationValidationResponse {
   imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './auth.component.html',
   styleUrl: './auth.component.scss'
-})
-
-@Injectable({
-  providedIn: 'root'
 })
 export class AuthComponent implements OnInit {
   phone: string = '';

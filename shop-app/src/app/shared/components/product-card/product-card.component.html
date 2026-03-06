@@ -1,0 +1,73 @@
+<a class="product-card"
+   [class.out-of-stock]="product?.stock <= 0"
+   [class.compact]="compact">
+
+  <!-- IMAGE -->
+  <div class="image-wrapper">
+    <img [src]="product?.image || 'assets/images/no-image.jpg'" [alt]="product?.name" />
+
+    <!-- OUT OF STOCK BADGE -->
+    <div class="out-stock-label" *ngIf="product?.stock <= 0">
+      Out of Stock
+    </div>
+
+    <!-- ACTION OVERLAY (on image) -->
+    <div class="action-container" [class.expanded]="product?.qty" *ngIf="product?.stock > 0 && product?.shop?.is_accepting_orders !== false">
+
+      <!-- SUBSCRIBE -->
+      <button class="sub-btn" (click)="onSubscribe($event)">SUB</button>
+
+      <!-- ADD -->
+      <button *ngIf="!product?.qty" class="add-btn" (click)="onAddToCart($event)">+</button>
+
+      <!-- QTY -->
+      <div *ngIf="product?.qty" class="qty-box">
+        <button (click)="onDecrease($event)">−</button>
+        <span>{{ product.qty }}</span>
+        <button (click)="onIncrease($event)">+</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRICE ROW -->
+  <div class="price-row">
+    <span class="final-price">₹{{ product?.final_price }}</span>
+    <span class="mrp" *ngIf="product?.discount_value">₹{{ product?.price }}</span>
+  </div>
+
+  <!-- DISCOUNT -->
+  <div class="discount-text" *ngIf="product?.discount_value">
+    ₹{{ product?.price - product?.final_price | number:'1.2-2' }} OFF
+  </div>
+
+  <!-- NAME -->
+  <div class="product-name" *ngIf="product?.stock > 0" [routerLink]="['/product', product?.slug]">
+    {{ product?.name }}
+  </div>
+  <div class="product-name disabled" *ngIf="product?.stock <= 0">
+    {{ product?.name }}
+  </div>
+
+  <!-- UNIT -->
+  <div class="pack-info">{{ product?.unit?.code || '1 pack' }}</div>
+
+  <!-- SHOP -->
+  <div class="tag-chip" *ngIf="showVendor && product?.shop?.name">
+    {{ product.shop.name }}
+  </div>
+
+  <!-- RATING -->
+  <div class="rating-row">
+    <span class="rating">
+      <i class="fas fa-star"></i>
+      {{ product?.rating || 4.9 }}
+    </span>
+    <span class="dot">•</span>
+    <span class="time">7 mins</span>
+  </div>
+
+  <!-- CLOSED OVERLAY -->
+  <div class="closed-overlay" *ngIf="product?.shop?.is_accepting_orders === false">
+    Not accepting orders
+  </div>
+</a>

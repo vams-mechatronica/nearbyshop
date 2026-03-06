@@ -90,7 +90,7 @@
             All Items
           </button>
 
-          <button *ngFor="let category of categories" class="category-btn"
+          <button *ngFor="let category of categories; trackBy: trackById" class="category-btn"
             [class.active]="selectedCategory === category.id" (click)="filterByCategory(category.id)">
             {{ category.name }}
           </button>
@@ -101,7 +101,7 @@
 
       <!-- Product Grid -->
       <div class="product-grid">
-        <div *ngFor="let product of filteredProducts" class="product-card">
+        <div *ngFor="let product of filteredProducts; trackBy: trackById" class="product-card">
           <div class="product-image-container">
             <img [src]="product.image" [alt]="product.name" class="product-image">
             <button class="btn-wishlist" (click)="toggleProductWishlist(product.id)">
@@ -225,7 +225,7 @@
         </div>
 
         <div class="reviews-list">
-          <div *ngFor="let review of reviews" class="review-card">
+          <div *ngFor="let review of reviews; trackBy: trackById" class="review-card">
             <div class="review-header">
               <img [src]="review.userAvatar" class="review-avatar" alt="User">
               <div>

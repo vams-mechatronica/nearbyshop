@@ -3,7 +3,6 @@ import {
   OnInit,
   ViewChild,
   ElementRef,
-  Injectable,
   AfterViewInit,
   OnDestroy,
   PLATFORM_ID,
@@ -19,21 +18,17 @@ import { CategoryService } from '../../services/category.service';
 import { BannerService } from '../../services/banner.service';
 import { StorageService } from '../../services/storage.service';
 import { ProductsService } from '../../services/products.service';
-import { CartService } from '../../services/cart.service';
-import { SubscriptionService } from '../../services/subscribe.service';
-import { AuthService } from '../../services/auth.service';
+import { CartActionsService } from '../../shared/services/cart-actions.service';
 import { LoaderService } from '../../services/loader.service';
-import { ToastrService } from 'ngx-toastr';
-import { HeaderCountService } from '../../services/header.service';
-import { AuthModalService } from '../../services/auth-modal.service';
+
 import { AnalyticsService } from '../../services/analytics.service';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule } from '@angular/forms';
 import { debounceTime, distinctUntilChanged, Subject, Observable, of, Subscription } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
 import { catchError, map } from 'rxjs/operators';
-import { API_ENDPOINTS } from '../../shared/constants/api.constants';
 import { ShopService } from '../../services/shop.service';
+import { SearchService } from '../../services/search.service';
+import { ProductCardComponent } from '../../shared/components/product-card/product-card.component';
 
 interface CategoryShelf {
   categoryId: number;
@@ -106,10 +101,9 @@ interface ShopResult {
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, RouterLink, FormsModule, ProductCardComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-@Injectable({ providedIn: 'root' })
 export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   // Search Properties
   searchQuery: string = '';
@@ -201,9 +195,6 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   loadingCategories = false;
   storesNext: string | null = null;
   loadingStores = false;
-  selectedProduct: any;
-  subscriptionPlan = 'daily';
-  startDate: string = '';
   copied: boolean = false;
 
 
@@ -215,8 +206,6 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   private interval!: ReturnType<typeof setInterval>;
   private observer!: IntersectionObserver;
   private subscriptions = new Subscription();
-  @ViewChild('subscribeModal') subscribeModal!: TemplateRef<any>;
-  private subscribeModalRef!: NgbModalRef;
   radius: number = 1;
 
   constructor(
@@ -226,19 +215,12 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     private storageService: StorageService,
     private productService: ProductsService,
     private cdr: ChangeDetectorRef,
-    private cartService: CartService,
-    private subscribeService: SubscriptionService,
-    private storage: StorageService,
-    private authService: AuthService,
     private loaderService: LoaderService,
-    private toastr: ToastrService,
-    private headerService: HeaderCountService,
-    private authModal: AuthModalService,
     private analytics: AnalyticsService,
     private modal: NgbModal,
-    private http: HttpClient,
+    private searchService: SearchService,
     private shopService: ShopService,
-
+    public cartActions: CartActionsService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) { }
 
@@ -360,9 +342,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     // Try to get suggestions from API
-    this.http.get<any[]>(API_ENDPOINTS.SEARCH_SUGGESTIONS, {
-      params: { q: query, limit: '8' }
-    }).pipe(
+    this.searchService.getSuggestions(query).pipe(
       catchError(() => {
         // Fallback to local search
         return this.generateFallbackSuggestions(query);
@@ -429,7 +409,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   fetchQuickSuggestions(): void {
-    this.http.get<string[]>(API_ENDPOINTS.QUICK_SUGGESTIONS).pipe(
+    this.searchService.getQuickSuggestions().pipe(
       catchError(() => of(this.quickSuggestions))
     ).subscribe({
       next: (response) => {
@@ -554,7 +534,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
       params.category = this.activeFilter;
     }
 
-    this.http.get<any>('/api/search/', { params }).pipe(
+    this.searchService.search(params).pipe(
       catchError(() => this.generateFallbackResults(query))
     ).subscribe({
       next: (response) => {
@@ -1135,143 +1115,19 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
 
   addToCart(product: any): void {
     this.analytics.trackEvent('ADD_TO_CART_CLICKED', 'ECOMMERCE', 1, `PRODUCT_ID: ${product.id}`);
-
-    // 🔐 Force login
-    if (!this.authService.isLoggedIn()) {
-      this.authModal.openLogin();
-
-      // Wait for login success
-      this.authService.isLoggedIn$.subscribe(() => {
-        this.addToCart(product);
-      });
-
-      return;
-    }
-
-    product.qty = (product.qty || 0) + 1;
-
-    const body = {
-      product_id: product.id,
-      quantity: 1
-    };
-
-    this.cartService.addToCart(body).subscribe({
-      next: (res) => {
-        if (!res.success) return;
-
-        if (res.action === 'removed') {
-          product.qty = 0;
-        } else if (res.item) {
-          product.qty = res.item.quantity;
-        }
-
-        this.headerService.updateCartSummary(res.cart);
-        this.cdr.markForCheck();
-      },
-      error: () => {
-        product.qty = Math.max(0, (product.qty || 0) - 1);
-        this.cdr.markForCheck();
-      }
-    });
+    this.cartActions.addToCart(product);
   }
 
   openSubscribeModal(product: any): void {
-    // 🔐 Force login before subscription
-    if (!this.authService.isLoggedIn()) {
-      this.authModal.openLogin();
-
-      // Wait for login success
-      this.authService.isLoggedIn$.subscribe(() => {
-        this.openSubscribeModal(product);
-      });
-      return;
-    }
-
-    // ✅ user is logged in → open subscribe modal
-    this.selectedProduct = { ...product, qty: product.qty || 1 };
-
-    this.subscribeModalRef = this.modal.open(this.subscribeModal, {
-      centered: true,
-      backdrop: 'static',
-    });
-  }
-
-  confirmSubscription() {
-    if (!this.selectedProduct) return;
-
-    this.subscribeService
-      .addSubscription(
-        this.selectedProduct,
-        this.subscriptionPlan,
-        this.startDate,
-        this.selectedProduct.qty
-      )
-      .subscribe({
-        next: (res) => {
-          console.log('Subscription confirmed:', res);
-          this.subscribeModalRef?.close();
-          this.toastr.success('Subscription added successfully!');
-        },
-        error: (err) => {
-          this.toastr.error(err.error.message, 'Subscription Failed');
-        },
-      });
-
-    this.headerService.fetchCounts();
+    this.cartActions.openSubscribeModal(product);
   }
 
   decreaseQty(product: any): void {
-    const currentQty = product.qty || 1;
-    if (currentQty <= 1) {
-      product.qty = 0;
-      this.cartService.deleteCartItem(product.id).subscribe({
-        next: () => {
-          this.headerService.fetchCounts();
-          this.cdr.markForCheck();
-        },
-        error: () => {
-          product.qty += 1;
-          this.cdr.markForCheck();
-        }
-      });
-      return;
-    }
-    const newQty = currentQty - 1;
-    product.qty = newQty;
-    this.cartService.updateCartItem(product.id, newQty).subscribe({
-      next: (res) => {
-        if (!res.success) return;
-        if (res.item) {
-          product.qty = res.item.quantity;
-        }
-        this.headerService.updateCartSummary(res.cart);
-        this.cdr.markForCheck();
-      },
-      error: (err) => {
-        product.qty += 1;
-        this.cdr.markForCheck();
-      }
-    });
+    this.cartActions.decreaseQty(product);
   }
 
   increaseQty(product: any): void {
-    const newQty = (product.qty || 0) + 1;
-    product.qty = newQty;
-
-    this.cartService.updateCartItem(product.id, newQty).subscribe({
-      next: (res) => {
-        if (!res.success) return;
-        if (res.item) {
-          product.qty = res.item.quantity;
-        }
-        this.headerService.updateCartSummary(res.cart);
-        this.cdr.markForCheck();
-      },
-      error: () => {
-        product.qty = Math.max(0, (product.qty || 0) - 1);
-        this.cdr.markForCheck();
-      }
-    });
+    this.cartActions.increaseQty(product);
   }
 
   // Helper method to add search result to cart
@@ -1315,4 +1171,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
       this.showFilters = false;
     }
   }
+
+  trackById(index: number, item: any): number { return item.id; }
+  trackByIndex(index: number): number { return index; }
 }

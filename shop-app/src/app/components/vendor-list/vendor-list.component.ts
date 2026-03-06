@@ -71,4 +71,7 @@ export class VendorListComponent implements OnInit {
     this.analytics.trackEvent('STORE_PAGE_REDIRECT_CLICKED', 'PAGE_VISIT', 1, `STORE: ${store.slug}`);
     if (store?.slug) this.router.navigate(['/stores', store.slug]);
   }
+
+  trackById(index: number, item: any): number { return item.id; }
+  trackByIndex(index: number): number { return index; }
 }

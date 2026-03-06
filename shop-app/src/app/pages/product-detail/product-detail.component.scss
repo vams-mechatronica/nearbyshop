@@ -111,6 +111,12 @@
 
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
+
+  app-product-card {
+    flex: 0 0 165px;
+    min-width: 145px;
+    max-width: 165px;
+  }
 }
 
 /* FIXED CARD SIZE */

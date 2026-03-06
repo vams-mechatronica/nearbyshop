@@ -1,4 +1,4 @@
-import { Component, Injectable, OnInit, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
 import { CartService } from '../../services/cart.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -31,7 +31,6 @@ declare var Razorpay: any;
   styleUrls: ['./cart.component.scss'],
   imports: [CommonModule, FormsModule, RouterLink]
 })
-@Injectable({ providedIn: 'root' })
 export class CartComponent implements OnInit {
   cartItems: any[] = [];
   gTotal: number = 0;
@@ -508,4 +507,7 @@ export class CartComponent implements OnInit {
       rzp.open();
     });
   }
+
+  trackById(index: number, item: any): number { return item.id; }
+  trackByIndex(index: number): number { return index; }
 }

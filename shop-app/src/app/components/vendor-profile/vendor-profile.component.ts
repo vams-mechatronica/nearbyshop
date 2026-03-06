@@ -358,4 +358,7 @@ export class VendorProfileComponent implements OnInit {
   getRoundedRating(): number {
     return Math.round(this.shop?.rating || 4.5);
   }
+
+  trackById(index: number, item: any): number { return item.id; }
+  trackByIndex(index: number): number { return index; }
 }

@@ -198,6 +198,12 @@
   gap: 14px;
   overflow: hidden; // ❌ no scrollbar
   scroll-behavior: smooth;
+
+  app-product-card {
+    min-width: 145px;
+    max-width: 165px;
+    flex-shrink: 0;
+  }
 }
 
 /* PRODUCT CARD */

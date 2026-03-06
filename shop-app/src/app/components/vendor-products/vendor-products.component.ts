@@ -3,31 +3,30 @@ import {
   Component,
   ElementRef,
   OnInit,
-  TemplateRef,
   ViewChild
 } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
-import { ToastrService } from 'ngx-toastr';
 
-import { CartService } from '../../services/cart.service';
+
+
+import { CartActionsService } from '../../shared/services/cart-actions.service';
 import { ProductsService } from '../../services/products.service';
 import { CategoryService } from '../../services/category.service';
-import { SubscriptionService } from '../../services/subscribe.service';
+
 import { StorageService } from '../../services/storage.service';
-import { AuthService } from '../../services/auth.service';
-import { HeaderCountService } from '../../services/header.service';
+
 import { LoaderService } from '../../services/loader.service';
 import { ShopService } from '../../services/shop.service';
 import { HttpErrorResponse } from '@angular/common/http';
-import { AuthModalService } from '../../services/auth-modal.service';
+import { ProductCardComponent } from '../../shared/components/product-card/product-card.component';
+
 
 @Component({
   standalone: true,
   selector: 'app-vendor-products',
-  imports: [CommonModule, FormsModule, RouterLink, RouterModule],
+  imports: [CommonModule, FormsModule, RouterLink, RouterModule, ProductCardComponent],
   templateUrl: './vendor-products.component.html',
   styleUrls: ['./vendor-products.component.scss']
 })
@@ -38,10 +37,6 @@ export class VendorProductsComponent implements OnInit {
   products: any[] = [];
   categories: any[] = [];
   stores: any[] = [];
-
-  selectedProduct: any;
-  subscriptionPlan = 'daily';
-  startDate = '';
 
   storeName = '';
   categoryName = '';
@@ -68,11 +63,6 @@ export class VendorProductsComponent implements OnInit {
   @ViewChild('productScroller', { static: true })
   productScroller!: ElementRef;
 
-  @ViewChild('subscribeModal')
-  subscribeModal!: TemplateRef<any>;
-
-  private subscribeModalRef!: NgbModalRef;
-
   @ViewChild('carousel') carousel!: ElementRef;
 
   /* ---------------- CONSTRUCTOR ---------------- */
@@ -80,20 +70,13 @@ export class VendorProductsComponent implements OnInit {
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private modal: NgbModal,
     private productService: ProductsService,
     private categoryService: CategoryService,
-    private cartService: CartService,
-    private subscribeService: SubscriptionService,
-    private storage: StorageService,
-    private authService: AuthService,
-    private headerService: HeaderCountService,
     private loaderService: LoaderService,
     private shopService: ShopService,
     private storageService: StorageService,
-    private toastr: ToastrService,
     private cdr: ChangeDetectorRef,
-    private authModal: AuthModalService,
+    public cartActions: CartActionsService,
   ) { }
 
   /* ---------------- INIT ---------------- */
@@ -335,37 +318,7 @@ export class VendorProductsComponent implements OnInit {
   /* ---------------- CART ---------------- */
 
   addToCart(product: any): void {
-
-    // 🔐 Force login
-    if (!this.authService.isLoggedIn()) {
-      localStorage.setItem('redirect_url', '/cart');
-      this.authModal.openLogin();
-      return;
-    }
-
-    product.qty += 1;
-
-    const body = {
-      product_id: product.id,
-      quantity: 1
-    };
-
-    this.cartService.addToCart(body).subscribe({
-      next: (res) => {
-        if (!res.success) return;
-
-        if (res.action === 'removed') {
-          product.qty = 0;
-        } else if (res.item) {
-          product.qty = res.item.quantity;
-        }
-
-        this.headerService.updateCartSummary(res.cart);
-      },
-      error: () => {
-        product.qty -= 1;
-      }
-    });
+    this.cartActions.addToCart(product);
   }
 
 
@@ -373,94 +326,15 @@ export class VendorProductsComponent implements OnInit {
   /* ---------------- SUBSCRIPTION ---------------- */
 
   openSubscribeModal(product: any): void {
-
-    // 🔐 Force login before subscription
-    if (!this.authService.isLoggedIn()) {
-      // save intent (optional but recommended)
-      localStorage.setItem('redirect_url', '/subscribe');
-
-      // open login modal
-      this.authModal.openLogin();
-      return;
-    }
-
-    // ✅ user is logged in → open subscribe modal
-    this.selectedProduct = { ...product, qty: product.qty || 1 };
-
-    this.subscribeModalRef = this.modal.open(this.subscribeModal, {
-      centered: true,
-      backdrop: 'static',
-    });
-  }
-
-
-  confirmSubscription(): void {
-    if (!this.selectedProduct) return;
-
-    this.subscribeService
-      .addSubscription(
-        this.selectedProduct,
-        this.subscriptionPlan,
-        this.startDate,
-        this.selectedProduct.qty
-      )
-      .subscribe({
-        next: () => {
-          this.subscribeModalRef?.close();
-          this.headerService.fetchCounts();
-        },
-        error: err =>
-          this.toastr.error(err.error.message, 'Subscription Failed')
-      });
+    this.cartActions.openSubscribeModal(product);
   }
 
   decreaseQty(product: any): void {
-    const currentQty = product.qty || 1;
-    if (currentQty <= 1) {
-      product.qty = 0;
-      this.cartService.deleteCartItem(product.id).subscribe({
-        next: () => {
-          this.headerService.fetchCounts();
-        },
-        error: () => {
-          product.qty += 1;
-        }
-      });
-      return;
-    }
-    const newQty = currentQty - 1;
-    product.qty -= 1;
-    this.cartService.updateCartItem(product.id, newQty).subscribe({
-      next: (res) => {
-        if (!res.success) return;
-        if (res.item) {
-          product.qty = res.item.quantity;
-        }
-        this.headerService.updateCartSummary(res.cart);
-      },
-      error: (err) => {
-        product.qty += 1;
-      }
-    });
+    this.cartActions.decreaseQty(product);
   }
 
   increaseQty(product: any): void {
-
-    const newQty = (product.qty || 0) + 1;
-    product.qty += 1;
-
-    this.cartService.updateCartItem(product.id, newQty).subscribe({
-      next: (res) => {
-        if (!res.success) return;
-        if (res.item) {
-          product.qty = res.item.quantity;
-        }
-        this.headerService.updateCartSummary(res.cart);
-      },
-      error: () => {
-        product.qty -= 1;
-      }
-    });
+    this.cartActions.increaseQty(product);
   }
 
 
@@ -488,4 +362,6 @@ export class VendorProductsComponent implements OnInit {
     // this.fetchProducts();
   }
 
+  trackById(index: number, item: any): number { return item.id; }
+  trackByIndex(index: number): number { return index; }
 }

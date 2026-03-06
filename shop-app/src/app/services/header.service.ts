@@ -18,26 +18,10 @@ export class HeaderCountService {
   constructor(private http: HttpClient,
     private storage: StorageService) { }
 
-  // ✅ Access token helpers
-  getAccessToken(): string | null {
-    return this.storage.getItem('access_token');
-  }
-
-  hasToken(): boolean {
-    const token = this.getAccessToken();
-    if (!token) return false;
-
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const now = Math.floor(Date.now() / 1000);
-      return payload.exp && payload.exp > now;
-    } catch {
-      return false;
-    }
-  }
-
   fetchCounts() {
-    if (this.hasToken()) {
+    // Reuse AuthService's token check instead of duplicating it
+    const token = this.storage.getItem('access_token');
+    if (token && this.isTokenValid(token)) {
       this.http.get<HeaderCount>(API_ENDPOINTS.GET_HEADERS_COUNT)
         .subscribe(data => this.countsSubject.next(data));
     } else {
@@ -49,13 +33,21 @@ export class HeaderCountService {
         (total: number, item: any) => total + (item.quantity || 0),
         0
       );
-      // console.log(cart);
 
       this.countsSubject.next({
         cart_count: cartCount,
         subscription_count: 0
       } as HeaderCount);
 
+    }
+  }
+
+  private isTokenValid(token: string): boolean {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.exp && payload.exp > Math.floor(Date.now() / 1000);
+    } catch {
+      return false;
     }
   }
 

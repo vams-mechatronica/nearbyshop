@@ -1,4 +1,4 @@
-<div class="product-detail-page container my-4">
+<div class="product-detail-page container my-4" *ngIf="product">
 
   <div class="row g-4">
 
@@ -187,132 +187,14 @@
     <h5 class="section-title">Related Products</h5>
 
     <div class="related-scroll">
-      <div *ngFor="let item of relatedProducts" class="product-card related-card">
-
-        <a [routerLink]="['/product', item.slug]">
-
-          <!-- DISCOUNT -->
-          <div *ngIf="item.discount_value" class="discount-badge">
-            {{ item.discount_type === 'percentage'
-            ? (item.discount_value | number:'1.0-0') + '% OFF'
-            : '₹' + (item.discount_value | number:'1.0-0') + ' OFF'
-            }}
-          </div>
-
-          <!-- IMAGE -->
-          <img [src]="item.image || 'assets/images/no-image.jpg'" class="product-img" />
-
-          <!-- INFO -->
-          <div class="product-info">
-            <h6 class="product-title">{{ item.name }}</h6>
-
-            <div class="price-row">
-              <span class="price">₹{{ item.final_price }}</span>
-              <del *ngIf="item.discount_value">₹{{ item.price }}</del>
-              <span class="unit">{{ item.unit.code }}</span>
-            </div>
-          </div>
-        </a>
-
-        <!-- ACTIONS (same contract) -->
-        <div class="product-actions">
-
-          <div class="cart-action">
-            <button class="btn-add" [class.hidden]="item.qty"
-              (click)="addToCart(item); item.qty = 1; $event.stopPropagation()">
-              ADD
-            </button>
-
-            <div class="qty-box" [class.visible]="item.qty">
-              <button (click)="decreaseQty(item)">−</button>
-              <span>{{ item.qty }}</span>
-              <button (click)="increaseQty(item)">+</button>
-            </div>
-          </div>
-
-          <button class="btn-subscribe" (click)="openSubscribeModal(item)">
-            Subscribe
-          </button>
-
-        </div>
-
-      </div>
+      <app-product-card
+        *ngFor="let item of relatedProducts"
+        [product]="item"
+        [showVendor]="false"
+        [compact]="true">
+      </app-product-card>
     </div>
   </div>
 
 
 </div>
-
-
-<ng-template #subscribeModal let-modal>
-  <div class="subscribe-modal">
-
-    <!-- HEADER -->
-    <div class="subscribe-header">
-      <h5>Subscribe to Product</h5>
-      <button class="close-btn" (click)="modal.dismiss()">×</button>
-    </div>
-
-    <!-- PRODUCT INFO -->
-    <div class="subscribe-product">
-      <img [src]="selectedProduct?.image || 'assets/images/no-image.jpg'" alt="Product Image" />
-
-      <div class="product-meta">
-        <div class="product-name">
-          {{ selectedProduct?.name }}
-          <span class="unit">({{ selectedProduct?.unit.code }})</span>
-        </div>
-        <div class="price">₹{{ selectedProduct?.final_price }}</div>
-      </div>
-
-      <!-- QTY -->
-      <div class="quantity-box-sub">
-        <button (click)="decreaseQty(selectedProduct)">−</button>
-        <input class="sub-input" type="number" [(ngModel)]="selectedProduct.qty"
-          (ngModelChange)="selectedProduct.qty = selectedProduct.qty < 1 ? 1 : selectedProduct.qty" min="1" readonly />
-        <button (click)="increaseQty(selectedProduct)">+</button>
-      </div>
-    </div>
-
-    <!-- OPTIONS -->
-    <div class="subscribe-options">
-
-      <div class="form-floating">
-        <select class="form-select" [(ngModel)]="subscriptionPlan" id="subscription-select">
-          <option value="daily">Daily</option>
-          <option value="alternate_day">Alternate Day</option>
-          <option value="every_3_days">Every 3 Days</option>
-          <option value="weekly">Weekly</option>
-          <option value="biweekly">Biweekly</option>
-          <option value="monthly">Monthly</option>
-        </select>
-        <label for="subscription-select">Delivery Schedule</label>
-      </div>
-
-      <div class="form-floating">
-        <input type="date" [(ngModel)]="startDate" class="form-control" id="schedule-date" />
-        <label for="schedule-date">Start Date</label>
-      </div>
-
-    </div>
-
-    <!-- TERMS -->
-    <div class="subscribe-terms">
-      <label>Terms & Conditions</label>
-      <p>
-        • Cancel or reschedule anytime<br />
-        • Minimum 7-day commitment<br />
-        • Delivery paused on public holidays
-      </p>
-    </div>
-
-    <!-- FOOTER -->
-    <div class="subscribe-footer">
-      <button class="btn cancel" (click)="modal.dismiss()">Cancel</button>
-      <button class="btn confirm" (click)="confirmSubscription()">
-        Confirm Subscription
-      </button>
-    </div>
-
-  </div>
-</ng-template>

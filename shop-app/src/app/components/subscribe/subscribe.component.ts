@@ -1,4 +1,4 @@
-import { Component, Injectable, OnInit, TemplateRef } from '@angular/core';
+import { Component, OnInit, TemplateRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
@@ -23,9 +23,6 @@ declare var Razorpay: any;
   templateUrl: './subscribe.component.html',
   styleUrls: ['./subscribe.component.scss'],
   imports: [CommonModule, FormsModule, SubFilterPipe]
-})
-@Injectable({
-  providedIn: 'root'
 })
 export class SubscriptionsComponent implements OnInit {
   subscriptions: Subscription[] = [];

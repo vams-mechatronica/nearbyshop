@@ -1,40 +1,36 @@
 import { Routes } from '@angular/router';
 import { HomeComponent } from './components/home/home.component';
-import { ProductsComponent } from './components/products/products.component';
-import { CartComponent } from './components/cart/cart.component';
-import { SubscriptionsComponent } from './components/subscribe/subscribe.component';
-import { AuthComponent } from './components/auth/auth.component';
-import { UserProfileComponent } from './components/user-info/user-info.component';
-import { PaymentStatusComponent } from './components/payment-status/payment-status.component';
-import { OrderSummaryComponent } from './components/order-summary/order-summary.component';
-import { AboutUsComponent } from './pages/about-us/about-us.component';
-import { PolicyComponent } from './pages/policy/policy.component';
-import { ContactUsComponent } from './pages/contact-us/contact-us.component';
-import { ProductDetailComponent } from './pages/product-detail/product-detail.component';
-import { VendorProductsComponent } from './components/vendor-products/vendor-products.component';
 import { AuthGuard } from './core/gaurds/auth.gaurd';
-import { VendorListComponent } from './components/vendor-list/vendor-list.component';
-import { VendorProfileComponent } from './components/vendor-profile/vendor-profile.component';
 
 export const routes: Routes = [
+  // Home is eagerly loaded for fast initial paint
   { path: '', component: HomeComponent },
-  { path: 'auth', component: AuthComponent },
-  
-  // 🔐 PROTECTED ROUTES
-  { path: 'cart', component: CartComponent, canActivate: [AuthGuard] },
-  { path: 'subscribe', component: SubscriptionsComponent, canActivate: [AuthGuard] },
-  { path: 'profile', component: UserProfileComponent, canActivate: [AuthGuard] },
-  { path: 'payment-status', component: PaymentStatusComponent, canActivate: [AuthGuard] },
-  { path: 'order-summary/:orderId', component: OrderSummaryComponent, canActivate: [AuthGuard] },
 
-  // 🌍 PUBLIC ROUTES
-  { path: 'category/:slug', component: ProductsComponent },
-  { path: 'products/:slug', component: ProductsComponent },
-  { path: 'product/:slug', component: ProductDetailComponent },
-  { path: 'stores/:slug', component: VendorProductsComponent },
-  { path: 'shop/:slug', component: VendorProfileComponent },
-  { path: 'about-us', component: AboutUsComponent },
-  { path: 'policy', component: PolicyComponent },
-  { path: 'contact-us', component: ContactUsComponent },
-  { path: 'stores-view-all', component: VendorListComponent },
+  // Auth
+  { path: 'auth', loadComponent: () => import('./components/auth/auth.component').then(m => m.AuthComponent) },
+
+  // PUBLIC: Cart is accessible without login (login required only at checkout)
+  { path: 'cart', loadComponent: () => import('./components/cart/cart.component').then(m => m.CartComponent) },
+
+  // PROTECTED: Requires authentication
+  { path: 'subscribe', loadComponent: () => import('./components/subscribe/subscribe.component').then(m => m.SubscriptionsComponent), canActivate: [AuthGuard] },
+  { path: 'profile', loadComponent: () => import('./components/user-info/user-info.component').then(m => m.UserProfileComponent), canActivate: [AuthGuard] },
+  { path: 'payment-status', loadComponent: () => import('./components/payment-status/payment-status.component').then(m => m.PaymentStatusComponent), canActivate: [AuthGuard] },
+  { path: 'order-summary/:orderId', loadComponent: () => import('./components/order-summary/order-summary.component').then(m => m.OrderSummaryComponent), canActivate: [AuthGuard] },
+
+  // PUBLIC: Product & shop browsing
+  { path: 'category/:slug', loadComponent: () => import('./components/products/products.component').then(m => m.ProductsComponent) },
+  { path: 'products/:slug', loadComponent: () => import('./components/products/products.component').then(m => m.ProductsComponent) },
+  { path: 'product/:slug', loadComponent: () => import('./pages/product-detail/product-detail.component').then(m => m.ProductDetailComponent) },
+  { path: 'stores/:slug', loadComponent: () => import('./components/vendor-products/vendor-products.component').then(m => m.VendorProductsComponent) },
+  { path: 'shop/:slug', loadComponent: () => import('./components/vendor-profile/vendor-profile.component').then(m => m.VendorProfileComponent) },
+  { path: 'stores-view-all', loadComponent: () => import('./components/vendor-list/vendor-list.component').then(m => m.VendorListComponent) },
+
+  // PUBLIC: Static pages
+  { path: 'about-us', loadComponent: () => import('./pages/about-us/about-us.component').then(m => m.AboutUsComponent) },
+  { path: 'policy', loadComponent: () => import('./pages/policy/policy.component').then(m => m.PolicyComponent) },
+  { path: 'contact-us', loadComponent: () => import('./pages/contact-us/contact-us.component').then(m => m.ContactUsComponent) },
+
+  // Wildcard redirect
+  { path: '**', redirectTo: '' },
 ];

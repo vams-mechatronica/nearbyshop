@@ -21,7 +21,7 @@
         (change)="applyFilters()"
       >
         <option value="">All Categories</option>
-        <option *ngFor="let c of categories" [value]="c.slug">
+        <option *ngFor="let c of categories; trackBy: trackById" [value]="c.slug">
           {{ c.name }}
         </option>
       </select>
@@ -65,7 +65,7 @@
 
   <div
     class="store-card"
-    *ngFor="let store of vendors"
+    *ngFor="let store of vendors; trackBy: trackById"
     (click)="selectStore(store)"
   >
 
