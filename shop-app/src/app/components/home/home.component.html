@@ -603,24 +603,30 @@
 
           <div class="product-row" #carousel>
 
-            <a class="product-card" *ngFor="let product of shelf.products">
+            <a class="product-card" *ngFor="let product of shelf.products" [class.out-of-stock]="product.stock <= 0">
 
               <div class="image-wrapper">
+
                 <img [src]="product.image || 'assets/images/no-image.jpg'" />
 
-                <div class="action-container" [class.expanded]="product.qty">
+                <!-- OUT OF STOCK BADGE -->
+                <div class="out-stock-label" *ngIf="product.stock <= 0">
+                  Out of Stock
+                </div>
 
-                  <!-- SUB (always visible) -->
+                <div class="action-container" [class.expanded]="product.qty" *ngIf="product.stock > 0">
+
+                  <!-- SUB -->
                   <button class="sub-btn" (click)="$event.preventDefault(); openSubscribeModal(product)">
                     SUB
                   </button>
 
-                  <!-- ADD (+) -->
+                  <!-- ADD -->
                   <button *ngIf="!product.qty" class="add-btn" (click)="$event.preventDefault(); addToCart(product)">
                     +
                   </button>
 
-                  <!-- QTY BOX  -->
+                  <!-- QTY -->
                   <div *ngIf="product.qty" class="qty-box">
                     <button (click)="$event.preventDefault(); decreaseQty(product)">−</button>
                     <span>{{ product.qty }}</span>
@@ -628,8 +634,8 @@
                   </div>
 
                 </div>
-              </div>
 
+              </div>
 
 
               <div class="price-row">
@@ -643,7 +649,11 @@
                 ₹{{ product.price - product.final_price | number:'1.2-2'}} OFF
               </div>
 
-              <div class="product-name" [routerLink]="['/product', product.slug]">
+              <div class="product-name" *ngIf="product.stock > 0" [routerLink]="['/product', product.slug]">
+                {{ product.name }}
+              </div>
+
+              <div class="product-name disabled" *ngIf="product.stock <= 0">
                 {{ product.name }}
               </div>
 
