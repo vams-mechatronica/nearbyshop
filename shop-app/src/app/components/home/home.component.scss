@@ -3328,6 +3328,25 @@
     transform: scale(1.05);
   }
 }
+.out-of-stock {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.out-stock-label {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #e53935;
+  color: white;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.product-name.disabled {
+  color: #888;
+}
 
 .product-badge {
   position: absolute;
