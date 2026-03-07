@@ -61,7 +61,7 @@ export class CartActionsService {
         cart_count: result.totalItems,
         subscription_count: 0,
       });
-      this.toastr.success('Added to cart');
+      // this.toastr.success('Added to cart');
       return;
     }
 
@@ -201,7 +201,7 @@ export class CartActionsService {
         next: () => {
           modalRef?.close();
           this.headerService.fetchCounts();
-          this.toastr.success('Subscription added successfully!');
+          // this.toastr.success('Subscription added successfully!');
         },
         error: (err: any) => {
           this.toastr.error(err.error?.message, 'Subscription Failed');

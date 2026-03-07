@@ -167,27 +167,28 @@ export class CartComponent implements OnInit {
 
     navigator.geolocation.getCurrentPosition(
       async (position) => {
+
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
 
         const url = `${API_ENDPOINTS.REVERSE_GEOCODE}?lat=${lat}&lng=${lng}`;
 
         try {
+
           const response = await fetch(url);
           const data = await response.json();
 
-          if (data.status !== 'OK' || !data.results.length) {
+          if (!data || !data.components) {
             throw new Error('No address found');
           }
-
-          const result = data.results[0];
 
           let street = '';
           let city = '';
           let state = '';
           let zip = '';
 
-          result.address_components.forEach((component: any) => {
+          data.components.forEach((component: any) => {
+
             const types = component.types;
 
             if (types.includes('street_number')) {
@@ -196,6 +197,10 @@ export class CartComponent implements OnInit {
 
             if (types.includes('route')) {
               street += component.long_name;
+            }
+
+            if (types.includes('sublocality') || types.includes('sublocality_level_1')) {
+              street = component.long_name;
             }
 
             if (types.includes('locality')) {
@@ -209,38 +214,40 @@ export class CartComponent implements OnInit {
             if (types.includes('postal_code')) {
               zip = component.long_name;
             }
+
           });
 
-          // ✅ Autofill form
-          this.newAddress.address = street || result.formatted_address;
+          // Autofill form
+          this.newAddress.address = street || data.address;
           this.newAddress.city = city;
           this.newAddress.state = state;
           this.newAddress.zip = zip;
 
-          // this.toastrService.success(
-          //   'Location fetched successfully',
-          //   'Address Auto-filled'
-          // );
-
-          // Optional: auto-check delivery
           if (zip) {
             this.checkDelivery();
           }
 
         } catch (err) {
+
           console.error(err);
+
           this.toastrService.error(
             'Unable to fetch address from location',
             'Error'
           );
+
         }
+
       },
       (error) => {
+
         console.error(error);
+
         this.toastrService.error(
           'Location permission denied',
           'Error'
         );
+
       },
       {
         enableHighAccuracy: true,
