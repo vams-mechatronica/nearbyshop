@@ -365,49 +365,52 @@ export class VendorProfileComponent implements OnInit {
   trackByIndex(index: number): number { return index; }
 
   // Service Provider / Booking Methods
-  
+
   /**
    * Check if the shop is a service provider (salon, spa, bike service, etc.)
    */
   get isServiceProvider(): boolean {
     if (!this.shop) return false;
-    
+
     // Check explicit flag
-    if (this.shop.is_service_provider) return true;
-    
+    if (this.shop.is_service_provider) {
+      this.activeTab = 'services';
+      return true;
+    }
+
     // Check shop type
     if (this.shop.shop_type === ShopType.SERVICE || this.shop.shop_type === ShopType.HYBRID) {
       return true;
     }
-    
+
     // Check for service categories (fallback for existing shops)
-    const serviceCategories = ['salon', 'spa', 'beauty', 'bike service', 'car service', 
-                               'boutique', 'fitness', 'healthcare', 'repair', 'service'];
+    const serviceCategories = ['salon', 'spa', 'beauty', 'bike service', 'car service',
+      'boutique', 'fitness', 'healthcare', 'repair', 'service'];
     const shopCategory = this.categories.find(c => c.id === this.shop?.category);
     if (shopCategory) {
       const categoryName = shopCategory.name?.toLowerCase() || '';
       return serviceCategories.some(sc => categoryName.includes(sc));
     }
-    
+
     return false;
   }
-  
+
   /**
    * Check if the shop accepts bookings
    */
   get acceptsBooking(): boolean {
     return this.isServiceProvider && (this.shop?.accepts_booking !== false);
   }
-  
+
   /**
    * Open the service booking modal
    */
   openBookingModal(): void {
     if (!this.shop) return;
-    
+
     if (!this.authService.isLoggedIn()) {
       this.authModal.openLogin();
-      
+
       // Subscribe to login success and then open booking
       const subscription = this.authService.isLoggedIn$.subscribe((isLoggedIn) => {
         if (isLoggedIn) {
@@ -417,13 +420,13 @@ export class VendorProfileComponent implements OnInit {
       });
       return;
     }
-    
+
     this.openBookingModalInternal();
   }
-  
+
   private openBookingModalInternal(): void {
     if (!this.shop) return;
-    
+
     this.bookingModalService.openBooking(this.shop).then(booking => {
       if (booking) {
         // Booking was successful, could show confirmation or navigate

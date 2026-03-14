@@ -332,7 +332,7 @@ export class ServiceBookingComponent implements OnInit {
         price: 200,
         duration_minutes: 30,
         category: 'Hair',
-        image: 'assets/images/services/haircut.jpg',
+        // image: 'assets/images/services/haircut.jpg',
         is_active: true
       },
       {
