@@ -62,4 +62,9 @@ export const API_ENDPOINTS = {
   PLACE_AUTOCOMPLETE: `${API_BASE_URL}/api/v2/location/place-autocomplete/`,
   PLACE_DETAILS: `${API_BASE_URL}/api/v2/location/place-details/`,
 
+  // Booking / Service Endpoints
+  BOOKINGS: `${API_BASE_URL}/api/v1/bookings`,
+  SHOP_SERVICES: `${API_BASE_URL}/api/v1/bookings/shops`,
+  BOOKING_AVAILABILITY: `${API_BASE_URL}/api/v1/bookings/availability`,
+  MY_BOOKINGS: `${API_BASE_URL}/api/v1/bookings/my-bookings`,
 };

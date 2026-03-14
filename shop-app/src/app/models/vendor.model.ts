@@ -1,6 +1,25 @@
 import { Product } from "./product.model";
 import { RatingDistribution, Review } from "./review.model";
 
+// Shop Type Enum for service identification
+export enum ShopType {
+  PRODUCT = 'product',
+  SERVICE = 'service',
+  HYBRID = 'hybrid'  // Shops that sell products and provide services
+}
+
+// Service Provider Types
+export type ServiceProviderCategory = 
+  | 'salon' 
+  | 'spa' 
+  | 'bike_service' 
+  | 'car_service' 
+  | 'boutique' 
+  | 'fitness' 
+  | 'healthcare' 
+  | 'beauty' 
+  | 'other';
+
 // vendor.model.ts
 export interface Shop {
   id: number;
@@ -40,6 +59,14 @@ export interface Shop {
   // Vendor info
   vendor_name: string;
   vendor_is_verified: boolean;
+  
+  // Service Provider Fields
+  is_service_provider?: boolean;
+  shop_type?: ShopType;
+  service_categories?: string[];
+  accepts_booking?: boolean;
+  booking_advance_days?: number;  // How many days in advance booking is allowed
+  slot_duration_minutes?: number; // Default slot duration
 }
 
 export interface Address {

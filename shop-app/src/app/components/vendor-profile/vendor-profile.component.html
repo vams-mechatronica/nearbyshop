@@ -45,6 +45,10 @@
       </div>
 
       <div class="vendor-actions">
+        <!-- Book Service Button for Service Providers -->
+        <button class="btn btn-book-service" *ngIf="acceptsBooking" (click)="openBookingModal()">
+          <i class="fas fa-calendar-check me-2"></i>Book Service
+        </button>
         <button class="btn btn-favorite" [class.active]="isFavorite" (click)="toggleFavorite()">
           <i class="fas" [class.fa-heart]="!isFavorite" [class.fa-heart]="isFavorite"></i>
         </button>
@@ -59,11 +63,18 @@
   <div class="navigation-tabs">
     <nav>
       <div class="nav nav-tabs" id="nav-tab" role="tablist">
-        <button class="nav-link active" id="nav-products-tab" [class.active]="activeTab === 'products'"
+        <button class="nav-link active" *ngIf="!isServiceProvider" id="nav-products-tab" [class.active]="activeTab === 'products'"
           (click)="setActiveTab('products')" data-bs-toggle="tab" data-bs-target="#nav-products" type="button"
           role="tab">
           <i class="fas fa-shopping-basket me-2"></i>Products
           <span class="badge bg-primary ms-2">{{ products.length || 0 }}</span>
+        </button>
+        <!-- Services Tab - Only for Service Providers -->
+        <button class="nav-link" *ngIf="isServiceProvider" id="nav-services-tab" 
+          [class.active]="activeTab === 'services'"
+          (click)="setActiveTab('services')" data-bs-toggle="tab" data-bs-target="#nav-services" type="button"
+          role="tab">
+          <i class="fas fa-concierge-bell me-2"></i>Services
         </button>
         <button class="nav-link" id="nav-about-tab" [class.active]="activeTab === 'about'"
           (click)="setActiveTab('about')" data-bs-toggle="tab" data-bs-target="#nav-about" type="button" role="tab">
@@ -144,6 +155,50 @@
         </div>
         <div class="text-center my-4" *ngIf="!hasNextPage && products.length">
           <small>No more products</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Services Tab - Only for Service Providers -->
+    <div class="tab-pane fade" *ngIf="isServiceProvider" [class.show]="activeTab === 'services'" 
+      [class.active]="activeTab === 'services'" id="nav-services" role="tabpanel">
+      <div class="services-section">
+        <div class="services-header">
+          <h3><i class="fas fa-concierge-bell me-2"></i>Our Services</h3>
+          <p class="text-muted">Book a service with our expert professionals</p>
+        </div>
+        
+        <div class="services-cta">
+          <div class="cta-content">
+            <div class="cta-icon">
+              <i class="fas fa-calendar-check"></i>
+            </div>
+            <div class="cta-text">
+              <h4>Ready to Book?</h4>
+              <p>Choose from our range of services and book an appointment with your preferred specialist</p>
+            </div>
+            <button class="btn btn-book-now" (click)="openBookingModal()">
+              <i class="fas fa-calendar-plus me-2"></i>Book Now
+            </button>
+          </div>
+        </div>
+        
+        <div class="services-features">
+          <div class="feature-card">
+            <i class="fas fa-user-tie"></i>
+            <h5>Expert Specialists</h5>
+            <p>Trained and experienced professionals at your service</p>
+          </div>
+          <div class="feature-card">
+            <i class="fas fa-clock"></i>
+            <h5>Flexible Timing</h5>
+            <p>Choose the time slot that works best for you</p>
+          </div>
+          <div class="feature-card">
+            <i class="fas fa-shield-alt"></i>
+            <h5>Quality Assured</h5>
+            <p>Premium products and hygiene standards maintained</p>
+          </div>
         </div>
       </div>
     </div>
@@ -259,4 +314,10 @@
       </div>
     </div>
   </div>
+
+  <!-- Floating Book Button for Mobile (Service Providers) -->
+  <button class="floating-book-btn" *ngIf="acceptsBooking" (click)="openBookingModal()" 
+          title="Book a Service">
+    <i class="fas fa-calendar-plus"></i>
+  </button>
 </div>
