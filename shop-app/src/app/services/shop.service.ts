@@ -21,6 +21,7 @@ interface Product {
   unit: string;
   inCart: number;
   isWishlisted: boolean;
+  is_in_stock: boolean;
 }
 
 interface LocalShopData {
