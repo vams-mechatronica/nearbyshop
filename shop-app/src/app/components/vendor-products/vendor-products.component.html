@@ -70,11 +70,17 @@
 
                     <!-- PRODUCT GRID -->
                     <div class="product-grid" *ngIf="products.length; else noProducts">
-                        <app-product-card
-                            *ngFor="let product of products; trackBy: trackById"
-                            [product]="product"
-                            [showVendor]="true">
-                        </app-product-card>
+                        <div class="product-item" *ngFor="let product of products; trackBy: trackById"
+                            [class.out-of-stock]="product.is_in_stock === false">
+                            <app-product-card
+                                [product]="product"
+                                [showVendor]="true">
+                            </app-product-card>
+
+                            <div class="stock-overlay" *ngIf="product.is_in_stock === false">
+                                Out of stock
+                            </div>
+                        </div>
                     </div>
 
 

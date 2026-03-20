@@ -101,9 +101,14 @@
 
       <!-- Product Grid -->
       <div class="product-grid">
-        <div *ngFor="let product of filteredProducts; trackBy: trackById" class="product-card">
+        <div *ngFor="let product of filteredProducts; trackBy: trackById" class="product-card"
+          [class.out-of-stock]="!product.is_in_stock">
           <div class="product-image-container">
             <img [src]="product.image" [alt]="product.name" class="product-image">
+            <div class="out-of-stock-overlay" *ngIf="!product.is_in_stock">
+              Out of Stock
+            </div>
+
             <button class="btn-wishlist" (click)="toggleProductWishlist(product.id)">
               <i class="fas fa-heart" [class.active]="product.isWishlisted"></i>
             </button>

@@ -376,34 +376,44 @@
 
     <div class="shops-scroll-container">
       <div class="shops-row">
-        <div *ngIf="stores.length > 0; else noShops">
-        <div class="shop-card-featured" *ngFor="let shop of stores; trackBy: trackById">
-          <div class="shop-badge">Popular</div>
-          <div class="shop-image">
-            <img [src]="shop.shop_image || 'assets/images/no-image.jpg'" [alt]="shop.name">
-            <div class="shop-overlay">
-              <span class="shop-rating">
-                <i class="fas fa-star"></i> {{shop.rating}}
-              </span>
+
+        <ng-container *ngIf="stores.length > 0; else noShops">
+
+          <div class="shop-card-featured" *ngFor="let shop of stores; trackBy: trackById">
+            <div class="shop-badge">Popular</div>
+
+            <div class="shop-image">
+              <img [src]="shop.shop_image || 'assets/images/no-image.jpg'" [alt]="shop.name">
+              <div class="shop-overlay">
+                <span class="shop-rating">
+                  <i class="fas fa-star"></i> {{shop.rating}}
+                </span>
+              </div>
             </div>
-          </div>
-          <div class="shop-info">
-            <h3>{{shop.name}}</h3>
-            <p class="shop-category">{{shop.category}}</p>
-            <div class="shop-stats">
-              <span class="stat">
-                <i class="fas fa-clock"></i> {{shop.deliveryTime || 7}} min
-              </span>
-              <span class="dot">•</span>
-              <span class="stat">
-                <i class="fas fa-rupee-sign"></i> Min. {{shop.minOrder || 50}}
-              </span>
+
+            <div class="shop-info">
+              <h3>{{shop.name}}</h3>
+              <p class="shop-category">{{shop.category}}</p>
+
+              <div class="shop-stats">
+                <span class="stat">
+                  <i class="fas fa-clock"></i> {{shop.deliveryTime || 7}} min
+                </span>
+                <span class="dot">•</span>
+                <span class="stat">
+                  <i class="fas fa-rupee-sign"></i> Min. {{shop.minOrder || 50}}
+                </span>
+              </div>
             </div>
+
+            <button class="shop-visit-btn" (click)="visitStore(shop)">
+              Visit Shop
+            </button>
           </div>
-          <button class="shop-visit-btn" (click)="visitStore(shop)">
-            Visit Shop
-          </button>
-        </div></div>
+
+        </ng-container>
+
+        <!-- EMPTY STATE -->
         <ng-template #noShops>
           <div class="no-products">
             <p>No shops found in your area</p>
@@ -412,7 +422,9 @@
             </button>
           </div>
         </ng-template>
+
       </div>
+
       <button class="scroll-arrow right">›</button>
     </div>
 
@@ -612,11 +624,8 @@
 
           <div class="product-row" #carousel>
 
-            <app-product-card
-              *ngFor="let product of shelf.products; trackBy: trackById"
-              [product]="product"
-              [showVendor]="true"
-              [compact]="true">
+            <app-product-card *ngFor="let product of shelf.products; trackBy: trackById" [product]="product"
+              [showVendor]="true" [compact]="true">
             </app-product-card>
 
             <!-- LOADER -->

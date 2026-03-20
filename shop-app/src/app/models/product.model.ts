@@ -10,6 +10,7 @@ export interface vProduct {
   unit: string;
   inCart: number;
   isWishlisted: boolean;
+  is_in_stock: boolean;
 }
 
 export interface Product {
@@ -30,6 +31,7 @@ export interface Product {
   image: string;
   product_type: string;
   created_at: string;
+  is_in_stock: boolean;
   updated_at: string;
   images: any[];   // could refine if you have image model
   detail: string | null;
