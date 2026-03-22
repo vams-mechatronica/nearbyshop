@@ -48,8 +48,8 @@
           <p><strong>Payment Method:</strong> {{ getPaymentMethodLabel(orderSummary.payment_method) }}</p>
           <p>
             <strong>Status:</strong>
-            <span class="badge bg-success" *ngIf="orderSummary.status === 'Completed'">Paid</span>
-            <span class="badge bg-danger" *ngIf="orderSummary.status !== 'Completed'">Unpaid</span>
+            <span class="badge bg-success" *ngIf="orderSummary.status === 'Completed'">Completed</span>
+            <span class="badge bg-danger" *ngIf="orderSummary.status !== 'Completed'">{{ orderSummary.status }}</span>
           </p>
         </div>
       </div>
