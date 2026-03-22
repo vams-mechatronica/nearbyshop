@@ -18,6 +18,7 @@ import { Order } from '../../models/order.model';
 import { CartService } from '../../services/cart.service';
 import { BankService } from '../../services/bank.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { DomLayoutType } from 'ag-grid-community';
 declare var Razorpay: any;
 
 interface BankForm {
@@ -399,7 +400,7 @@ export class UserProfileComponent implements OnInit {
   gridOptions = {
     pagination: true,
     paginationPageSize: 10,
-    domLayout: 'normal',
+    domLayout: 'normal' as DomLayoutType
   };
 
   // bank = {
