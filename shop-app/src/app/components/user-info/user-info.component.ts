@@ -208,14 +208,18 @@ export class UserProfileComponent implements OnInit {
   getCartItems() {
     this.cartService.getCart().subscribe({
       next: (res: any) => {
-        this.cart = res?.results;
+
+        this.cart = (res?.items || []).map((item: any) => ({
+          ...item,
+          product_name: item.product?.name,
+          created_at: res.created_at,
+          total_discount: res.total_discount,
+          total_price: res.total_price_after_discount
+        }));
+
       },
-      error: (err) => {
-        // const errorMsg =
-        //   err?.error?.message || err?.error?.detail || err?.message || 'Something went wrong';
-        // this.toast.error(errorMsg, 'Failed');
-      }
-    })
+      error: (err) => { }
+    });
   }
 
   getWalletTransactions() {
@@ -389,12 +393,57 @@ export class UserProfileComponent implements OnInit {
   ];
 
 
+  // cartCols: ColDef[] = [
+  //   { headerName: '#', valueGetter: (p) => (p.node?.rowIndex ?? 0) + 1 },
+  //   { headerName: 'Name', field: 'product.name' },
+  //   { headerName: 'Qty', field: 'quantity' },
+  //   { headerName: 'Price (₹)', field: 'price' },
+  // ];
+
   cartCols: ColDef[] = [
-    { headerName: '#', valueGetter: (p) => (p.node?.rowIndex ?? 0) + 1 },
-    { headerName: 'Name', field: 'product.name' },
-    { headerName: 'Qty', field: 'quantity' },
-    { headerName: 'Price (₹)', field: 'price' },
-  ];
+  { 
+    headerName: '#', 
+    valueGetter: (p) => (p.node?.rowIndex ?? 0) + 1,
+    width: 70
+  },
+
+  { 
+    headerName: 'Name', 
+    field: 'product_name',
+    width: 200
+  },
+
+  { 
+    headerName: 'Price /pc (₹)', 
+    field: 'price',
+    width: 120
+  },
+  { 
+    headerName: 'Qty', 
+    field: 'quantity',
+    width: 100
+  },
+
+
+  
+  { 
+    headerName: 'Discount (₹)', 
+    field: 'total_discount',
+    width: 140
+  },
+  
+  { 
+    headerName: 'Total (₹)', 
+    field: 'total_price',
+    width: 140
+  },
+  { 
+    headerName: 'Created At', 
+    field: 'created_at',
+    width: 180,
+    valueFormatter: (p) => new Date(p.value).toLocaleString()
+  }
+];
 
 
   gridOptions = {
