@@ -24,4 +24,6 @@ export interface AddDeliveryAddress {
   state: string | null;
   zip_code: string;
   phone_number: string;
+  latitude: number;
+  longitude: number;
 }

@@ -56,7 +56,9 @@ export class CartComponent implements OnInit {
     city: '',
     state: '',
     zip: '',
-    phone: ''
+    phone: '',
+    lat: 0,
+    lng: 0
   };
 
   showAddressModal: boolean = false;
@@ -222,6 +224,8 @@ export class CartComponent implements OnInit {
           this.newAddress.city = city;
           this.newAddress.state = state;
           this.newAddress.zip = zip;
+          this.newAddress.lat = lat;
+          this.newAddress.lng = lng;
 
           if (zip) {
             this.checkDelivery();
@@ -319,6 +323,8 @@ export class CartComponent implements OnInit {
       state: this.newAddress.state,
       zip_code: this.newAddress.zip,
       phone_number: this.newAddress.phone,
+      latitude: this.newAddress.lat,
+      longitude: this.newAddress.lng
     };
 
     if (!isPlatformBrowser(this.platformId)) return;
@@ -329,7 +335,7 @@ export class CartComponent implements OnInit {
           this.addresses.push(res);
           this.setSelectedAddress(res);
           // this.toastrService.success('Address added successfully', 'Success');
-          this.newAddress = { name: '', address: '', city: '', state: '', zip: '', phone: '' };
+          this.newAddress = { name: '', address: '', city: '', state: '', zip: '', phone: '' ,lat: 0, lng: 0};
           this.loadAddresses();
         },
         error: () => this.toastrService.error('Failed to add address', 'Error')
@@ -339,7 +345,7 @@ export class CartComponent implements OnInit {
       this.storage.setItem('addresses', JSON.stringify(this.addresses));
       this.setSelectedAddress(addressPayload);
       // this.toastrService.info('Address saved locally', 'Guest Mode');
-      this.newAddress = { name: '', address: '', city: '', state: '', zip: '', phone: '' };
+      this.newAddress = { name: '', address: '', city: '', state: '', zip: '', phone: '' ,lat: 0, lng: 0};
       this.loadAddresses();
     }
   }
