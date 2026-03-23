@@ -1,358 +1,480 @@
-<div class="container-fluid py-4">
-  <div class="row">
-    <!-- Sidebar -->
-    <div class="col-md-3">
-      <div class="card shadow-sm border-0 rounded-3">
-        <div class="card-body p-0">
-          <div class="list-group list-group-flush">
-            <button class="list-group-item list-group-item-action" [class.active]="activeTab === 'profile'"
-              (click)="setActiveTab('profile')">
-              <i class="fa-solid fa-user me-2"></i> Profile Details
-            </button>
+<!-- user-info.component.html -->
+<div class="container-fluid py-3 py-md-4">
+  <div class="row g-4">
+    <!-- Sidebar - Responsive: Horizontal on mobile, vertical on desktop -->
+    <div class="col-12 col-md-3">
+      <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-2 p-md-3">
+          <div class="sidebar-nav">
+            <div class="d-flex d-md-flex flex-row flex-md-column gap-1 sidebar-scroll">
+              <button class="sidebar-btn" [class.active]="activeTab === 'profile'"
+                (click)="setActiveTab('profile')">
+                <i class="fa-solid fa-user me-2"></i>
+                <span>Profile</span>
+              </button>
 
-            <button class="list-group-item list-group-item-action" [class.active]="activeTab === 'orders'"
-              (click)="setActiveTab('orders')">
-              <i class="fa-solid fa-box me-2"></i> Order History
-            </button>
+              <button class="sidebar-btn" [class.active]="activeTab === 'orders'"
+                (click)="setActiveTab('orders')">
+                <i class="fa-solid fa-box me-2"></i>
+                <span>Orders</span>
+              </button>
 
-            <button class="list-group-item list-group-item-action" [class.active]="activeTab === 'transactions'"
-              (click)="setActiveTab('transactions')">
-              <i class="fa-solid fa-credit-card me-2"></i> Transactions
-            </button>
+              <button class="sidebar-btn" [class.active]="activeTab === 'transactions'"
+                (click)="setActiveTab('transactions')">
+                <i class="fa-solid fa-credit-card me-2"></i>
+                <span>Transactions</span>
+              </button>
 
-            <button class="list-group-item list-group-item-action" [class.active]="activeTab === 'subscriptions'"
-              (click)="setActiveTab('subscriptions')">
-              <i class="fa-solid fa-file-contract me-2"></i> Subscriptions
-            </button>
+              <button class="sidebar-btn" [class.active]="activeTab === 'subscriptions'"
+                (click)="setActiveTab('subscriptions')">
+                <i class="fa-solid fa-file-contract me-2"></i>
+                <span>Subscriptions</span>
+              </button>
 
-            <!-- <button class="list-group-item list-group-item-action" [class.active]="activeTab === 'cart'"
-              (click)="setActiveTab('cart')">
-              <i class="fa-solid fa-cart-shopping me-2"></i> Cart
-            </button> -->
+              <button class="sidebar-btn" [class.active]="activeTab === 'cart'"
+                (click)="setActiveTab('cart')">
+                <i class="fa-solid fa-cart-shopping me-2"></i>
+                <span>Cart</span>
+              </button>
 
-            <button class="list-group-item list-group-item-action" [class.active]="activeTab === 'wallet'"
-              (click)="setActiveTab('wallet')">
-              <i class="fa-solid fa-wallet me-2"></i> Wallet
-            </button>
+              <button class="sidebar-btn" [class.active]="activeTab === 'wallet'"
+                (click)="setActiveTab('wallet')">
+                <i class="fa-solid fa-wallet me-2"></i>
+                <span>Wallet</span>
+              </button>
 
-            <button class="list-group-item list-group-item-action" [class.active]="activeTab === 'bank'"
-              (click)="setActiveTab('bank')">
-              <i class="fa-solid fa-building-columns me-2"></i> Bank Details
-            </button>
+              <button class="sidebar-btn" [class.active]="activeTab === 'bank'"
+                (click)="setActiveTab('bank')">
+                <i class="fa-solid fa-building-columns me-2"></i>
+                <span>Bank Details</span>
+              </button>
 
-            <!-- <button class="list-group-item list-group-item-action" [class.active]="activeTab === 'refunds'"
-              (click)="setActiveTab('refunds')">
-              <i class="fa-solid fa-rotate-left me-2"></i> Refund History
-            </button> -->
+              <button class="sidebar-btn" [class.active]="activeTab === 'refunds'"
+                (click)="setActiveTab('refunds')">
+                <i class="fa-solid fa-rotate-left me-2"></i>
+                <span>Refunds</span>
+              </button>
 
-            <!-- <button class="list-group-item list-group-item-action" [class.active]="activeTab === 'tracking'"
-              (click)="setActiveTab('tracking')">
-              <i class="fa-solid fa-truck me-2"></i> Order Tracking
-            </button> -->
+              <button class="sidebar-btn" [class.active]="activeTab === 'tracking'"
+                (click)="setActiveTab('tracking')">
+                <i class="fa-solid fa-truck me-2"></i>
+                <span>Tracking</span>
+              </button>
+            </div>
           </div>
-
         </div>
       </div>
     </div>
 
-    <!-- Content -->
-    <div class="col-md-9">
-      <div class="card shadow-sm border-0 rounded-3">
-        <div class="card-body">
-          <!-- Profile -->
-          <div *ngIf="activeTab === 'profile'" class="profile-tab">
-
-            <div class="card shadow-sm border-0 rounded-4">
-              <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 fw-semibold">Profile Details</h5>
+    <!-- Main Content -->
+    <div class="col-12 col-md-9">
+      <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-3 p-md-4">
+          
+          <!-- Profile Tab -->
+          <div *ngIf="activeTab === 'profile'" class="fade-in">
+            <div class="card border-0 shadow-sm rounded-4">
+              <div class="card-header bg-transparent d-flex justify-content-between align-items-center flex-wrap gap-2 border-0 pt-3 pb-2 px-0">
+                <h5 class="mb-0 fw-semibold">
+                  <i class="fa-regular fa-id-card me-2 text-primary"></i>Profile Details
+                </h5>
                 <button class="btn-edit-profile" (click)="openEditProfile()">
-                   Edit
+                  <i class="fa-regular fa-pen-to-square me-1"></i> Edit
                 </button>
               </div>
 
-              <div class="card-body">
-                <div class="row g-3">
-                  <div class="col-md-6">
-                    <label class="text-muted small">Username</label>
-                    <div class="fw-semibold">{{ user.username }}</div>
+              <div class="card-body px-0">
+                <div class="row g-4">
+                  <div class="col-sm-6">
+                    <label class="text-muted small text-uppercase fw-semibold">Username</label>
+                    <div class="fw-semibold fs-5">{{ user.username }}</div>
                   </div>
 
-                  <div class="col-md-6">
-                    <label class="text-muted small">Email</label>
+                  <div class="col-sm-6">
+                    <label class="text-muted small text-uppercase fw-semibold">Email</label>
                     <div class="fw-semibold">{{ user.email }}</div>
                   </div>
 
-                  <div class="col-md-6">
-                    <label class="text-muted small">Phone</label>
+                  <div class="col-sm-6">
+                    <label class="text-muted small text-uppercase fw-semibold">Phone</label>
                     <div class="fw-semibold">{{ user.phone_number || '-' }}</div>
                   </div>
 
-                  <div class="col-md-6">
-                    <label class="text-muted small">Role</label>
+                  <div class="col-sm-6">
+                    <label class="text-muted small text-uppercase fw-semibold">Role</label>
                     <div class="fw-semibold text-capitalize">{{ user.role }}</div>
                   </div>
                 </div>
               </div>
             </div>
-
           </div>
 
+          <!-- Orders Tab -->
+          <div *ngIf="activeTab === 'orders'" class="fade-in">
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+              <h4 class="mb-0 fw-semibold">
+                <i class="fa-solid fa-truck-fast me-2"></i>Order History
+              </h4>
+              <span class="badge bg-primary rounded-pill">{{ orders.length }} Orders</span>
+            </div>
 
-          <!-- Orders -->
-          <div *ngIf="activeTab === 'orders'">
-            <h4 class="mb-3">Order History</h4>
-
-            <div class="row g-3">
-              <div class="col-md-4" *ngFor="let order of orders">
-                <div class="card h-100 shadow-sm" (click)="openOrderItems(order)">
+            <div class="row g-3" *ngIf="orders.length > 0; else noOrders">
+              <div class="col-sm-6 col-lg-4" *ngFor="let order of orders">
+                <div class="order-card card h-100 shadow-sm border-0 rounded-4" (click)="openOrderItems(order)">
                   <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                      <h5 class="card-title mb-0">Order #{{ order.id }}</h5>
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                      <h6 class="card-title fw-bold mb-0">Order #{{ order.id }}</h6>
                       <span class="badge" [ngClass]="getStatusBadgeClass(order.status)">
                         {{ order.status }}
                       </span>
                     </div>
-                    <p class="card-text mb-1">Date: {{ order.created_at | date }}</p>
-                    <p class="card-text mb-1">Total: ₹{{ order.total_price }}</p>
-                    <p class="card-text mb-1">Payment Method: {{ getPaymentMethodLabel(order.payment_method)}}</p>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-          </div>
-
-
-          <!-- Transactions -->
-          <div *ngIf="activeTab === 'transactions'">
-            <h4 class="mb-3">Transaction History</h4>
-            <ag-grid-angular class="ag-theme-alpine w-100" [rowData]="transactions" [columnDefs]="txnCols"
-              style="height: 400px">
-            </ag-grid-angular>
-          </div>
-
-          <!-- Subscriptions -->
-          <div *ngIf="activeTab === 'subscriptions'">
-            <h4 class="mb-3">Subscriptions</h4>
-
-            <div class="row g-3">
-              <div class="col-md-4" *ngFor="let sub of subscriptions">
-                <div class="card h-100 shadow-sm position-relative">
-                  <!-- Badge in top-right corner -->
-                  <span class="badge position-absolute top-0 end-0 m-2"
-                    [ngClass]="getSubscriptionBadgeClass(sub.status)">
-                    {{ sub.status }}
-                  </span>
-
-                  <div class="card-body">
-                    <h5 class="card-title">{{ sub.product.name }}</h5>
-                    <p class="card-text mb-1">Start: {{ sub.start_date | date }}</p>
-                    <p class="card-text mb-1">End: {{ sub.end_date | date }}</p>
-                    <p class="card-text mb-1">Price: ₹{{ sub.price }}</p>
+                    <p class="card-text small text-muted mb-2">
+                      <i class="far fa-calendar-alt me-1"></i>{{ order.created_at | date:'mediumDate' }}
+                    </p>
+                    <p class="card-text fw-semibold mb-1">Total: ₹{{ order.total_price }}</p>
+                    <p class="card-text small text-muted mb-0">
+                      <i class="fa-regular fa-credit-card me-1"></i>{{ getPaymentMethodLabel(order.payment_method) }}
+                    </p>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-
-          <!-- Wallet -->
-          <div *ngIf="activeTab === 'wallet'">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <h4 class="mb-0">Wallet</h4>
-              <button class="btn btn-sm primary" (click)="openAddFundsModal()">
-                Add Funds
-              </button>
-            </div>
-            <p><strong>Balance:</strong> ₹{{ wallet.balance }}</p>
-          </div>
-
-
-          <!-- Bank -->
-          <div *ngIf="activeTab === 'bank'" class="position-relative">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <h4 class="mb-0">Bank Details</h4>
-              <button class="btn btn-sm primary" (click)="openBankModal()">
-                {{ bank?.bank_name ? 'Edit' : 'Add' }} Bank
-              </button>
-            </div>
-            <ng-container *ngIf="bank?.bank_name; else noBank">
-              <p><strong>Bank:</strong> {{bank.bank_name}}</p>
-              <p><strong>Account No:</strong> {{bank.account_number}}</p>
-              <p><strong>IFSC:</strong> {{bank.ifsc_code}}</p>
-            </ng-container>
-            <ng-template #noBank>
-              <p class="text-muted">No bank details added yet.</p>
+            <ng-template #noOrders>
+              <div class="text-center py-5">
+                <i class="fa-solid fa-box-open fa-3x text-muted mb-3"></i>
+                <p class="text-muted">No orders found</p>
+              </div>
             </ng-template>
           </div>
 
-          <!-- Bank Modal -->
-          <div class="modal fade show" tabindex="-1" *ngIf="showBankModal"
-            style="display:block; background: rgba(0,0,0,0.6);" (click)="closeBankModal()">
-            <div class="modal-dialog modal-dialog-centered" (click)="$event.stopPropagation()">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title">{{ bank?.bankName ? 'Edit' : 'Add' }} Bank Details</h5>
-                  <button type="button" class="btn-close" (click)="closeBankModal()"></button>
+          <!-- Transactions Tab -->
+          <div *ngIf="activeTab === 'transactions'" class="fade-in">
+            <h4 class="mb-3 fw-semibold">
+              <i class="fa-solid fa-chart-line me-2"></i>Transaction History
+            </h4>
+            <ag-grid-angular 
+              class="ag-theme-alpine w-100 rounded-3 overflow-hidden"
+              [rowData]="transactions" 
+              [columnDefs]="txnCols"
+              [gridOptions]="gridOptions"
+              style="height: 450px">
+            </ag-grid-angular>
+          </div>
+
+          <!-- Subscriptions Tab -->
+          <div *ngIf="activeTab === 'subscriptions'" class="fade-in">
+            <h4 class="mb-3 fw-semibold">
+              <i class="fa-regular fa-calendar-check me-2"></i>Subscriptions
+            </h4>
+
+            <div class="row g-3" *ngIf="subscriptions.length > 0; else noSubs">
+              <div class="col-sm-6 col-lg-4" *ngFor="let sub of subscriptions">
+                <div class="sub-card card h-100 shadow-sm border-0 rounded-4 position-relative">
+                  <span class="badge position-absolute top-0 end-0 m-3" [ngClass]="getSubscriptionBadgeClass(sub.status)">
+                    {{ sub.status }}
+                  </span>
+                  <div class="card-body">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                      <img [src]="sub.product?.image || 'assets/images/default-product.png'" 
+                           class="rounded-3" 
+                           style="width: 50px; height: 50px; object-fit: cover;"
+                           onerror="this.src='assets/images/default-product.png'">
+                      <h6 class="card-title fw-bold mb-0">{{ sub.product?.name || 'Product' }}</h6>
+                    </div>
+                    <p class="card-text small mb-1">
+                      <i class="far fa-calendar-alt me-1"></i>Start: {{ sub.start_date | date }}
+                    </p>
+                    <p class="card-text small mb-1">
+                      <i class="far fa-calendar-check me-1"></i>End: {{ sub.end_date | date }}
+                    </p>
+                    <p class="card-text fw-bold mt-2 text-primary">₹{{ sub.price }}</p>
+                    <p class="card-text small text-muted mb-0" *ngIf="sub.frequency">
+                      <i class="fa-regular fa-clock me-1"></i>{{ sub.frequency }}
+                    </p>
+                  </div>
                 </div>
-                <div class="modal-body">
-                  <form>
-                    <div class="mb-3">
-                      <label for="bankName" class="form-label">Bank Name</label>
-                      <input id="bankName" type="text" class="form-control" [(ngModel)]="bankForm.bank_name"
-                        name="bankName" placeholder="Enter bank name">
-                    </div>
-                    <div class="mb-3">
-                      <label for="accountHolderName" class="form-label">Account Holder Name</label>
-                      <input id="accountHolderName" type="text" class="form-control"
-                        [(ngModel)]="bankForm.account_holder_name" name="accountHolderName"
-                        placeholder="Enter account holder name">
-                    </div>
-                    <div class="mb-3">
-                      <label for="accountNumber" class="form-label">Account Number</label>
-                      <input id="accountNumber" type="text" class="form-control" [(ngModel)]="bankForm.account_number"
-                        name="accountNumber" placeholder="Enter account number">
-                    </div>
-                    <div class="mb-3">
-                      <label for="ifsc" class="form-label">IFSC Code</label>
-                      <input id="ifsc" type="text" class="form-control" [(ngModel)]="bankForm.ifsc_code" name="ifsc"
-                        placeholder="Enter IFSC code">
-                    </div>
-                  </form>
+              </div>
+            </div>
+            <ng-template #noSubs>
+              <div class="text-center py-5">
+                <i class="fa-regular fa-rectangle-ad fa-3x text-muted mb-3"></i>
+                <p class="text-muted">No active subscriptions</p>
+              </div>
+            </ng-template>
+          </div>
+
+          <!-- Cart Tab -->
+          <div *ngIf="activeTab === 'cart'" class="fade-in">
+            <h4 class="mb-3 fw-semibold">
+              <i class="fa-solid fa-cart-shopping me-2"></i>Shopping Cart
+            </h4>
+            <ag-grid-angular 
+              class="ag-theme-alpine w-100 rounded-3 overflow-hidden"
+              [rowData]="cart" 
+              [columnDefs]="cartCols"
+              [gridOptions]="gridOptions"
+              style="height: 400px">
+            </ag-grid-angular>
+          </div>
+
+          <!-- Wallet Tab -->
+          <div *ngIf="activeTab === 'wallet'" class="fade-in">
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+              <h4 class="mb-0 fw-semibold">
+                <i class="fa-solid fa-wallet me-2"></i>My Wallet
+              </h4>
+              <button class="btn btn-primary-custom" (click)="openAddFundsModal()">
+                <i class="fa-solid fa-plus-circle me-1"></i> Add Funds
+              </button>
+            </div>
+            
+            <div class="wallet-card bg-gradient-primary p-4 rounded-4 text-center">
+              <p class="text-white-50 mb-2 small">Available Balance</p>
+              <h2 class="text-white fw-bold mb-0">₹{{ wallet.balance | number:'1.2-2' }}</h2>
+            </div>
+
+            <div class="mt-4 p-3 bg-light rounded-4">
+              <h6 class="fw-semibold mb-2"><i class="fa-solid fa-clock-rotate-left me-1"></i>Quick Recharge</h6>
+              <div class="d-flex flex-wrap gap-2">
+                <button class="amount-chip" (click)="setRechargeAmount(100)">₹100</button>
+                <button class="amount-chip" (click)="setRechargeAmount(200)">₹200</button>
+                <button class="amount-chip" (click)="setRechargeAmount(500)">₹500</button>
+                <button class="amount-chip" (click)="setRechargeAmount(1000)">₹1000</button>
+                <button class="amount-chip" (click)="setRechargeAmount(2000)">₹2000</button>
+                <button class="amount-chip" (click)="setRechargeAmount(5000)">₹5000</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bank Tab -->
+          <div *ngIf="activeTab === 'bank'" class="fade-in">
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+              <h4 class="mb-0 fw-semibold">
+                <i class="fa-solid fa-building-columns me-2"></i>Bank Details
+              </h4>
+              <button class="btn btn-primary-custom" (click)="openBankModal(bank)">
+                <i class="fa-regular fa-pen-to-square me-1"></i>
+                {{ bank?.bank_name ? 'Edit' : 'Add' }} Bank
+              </button>
+            </div>
+
+            <ng-container *ngIf="bank?.bank_name; else noBank">
+              <div class="bank-details-card p-4 rounded-4 border">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                  <div class="bank-icon bg-primary-light rounded-circle p-3">
+                    <i class="fa-solid fa-building-columns fa-2x text-primary"></i>
+                  </div>
+                  <div>
+                    <h5 class="mb-1">{{ bank.bank_name }}</h5>
+                    <p class="text-muted small mb-0">{{ bank.account_holder_name }}</p>
+                  </div>
                 </div>
-                <div class="modal-footer">
-                  <button class="btn btn-secondary" (click)="closeBankModal()">Cancel</button>
-                  <button class="btn btn-success" (click)="saveBankDetails()">Save</button>
+                <div class="row g-3">
+                  <div class="col-sm-6">
+                    <label class="text-muted small">Account Number</label>
+                    <div class="fw-semibold">••••{{ bank.account_number?.slice(-4) }}</div>
+                  </div>
+                  <div class="col-sm-6">
+                    <label class="text-muted small">IFSC Code</label>
+                    <div class="fw-semibold">{{ bank.ifsc_code }}</div>
+                  </div>
+                </div>
+              </div>
+            </ng-container>
+            <ng-template #noBank>
+              <div class="text-center py-5 bg-light rounded-4">
+                <i class="fa-regular fa-building fa-3x text-muted mb-3"></i>
+                <p class="text-muted">No bank details added yet</p>
+                <button class="btn btn-outline-primary mt-2" (click)="openBankModal()">
+                  Add Bank Details
+                </button>
+              </div>
+            </ng-template>
+          </div>
+
+          <!-- Refunds Tab -->
+          <div *ngIf="activeTab === 'refunds'" class="fade-in">
+            <h4 class="mb-3 fw-semibold">
+              <i class="fa-solid fa-rotate-left me-2"></i>Refund History
+            </h4>
+            <ag-grid-angular 
+              class="ag-theme-alpine w-100 rounded-3 overflow-hidden"
+              [rowData]="[]" 
+              [columnDefs]="refundCols"
+              [gridOptions]="gridOptions"
+              style="height: 400px">
+            </ag-grid-angular>
+          </div>
+
+          <!-- Tracking Tab -->
+          <div *ngIf="activeTab === 'tracking'" class="fade-in">
+            <h4 class="mb-3 fw-semibold">
+              <i class="fa-solid fa-truck me-2"></i>Order Tracking
+            </h4>
+            <div class="row g-3">
+              <div class="col-12" *ngFor="let track of tracking">
+                <div class="tracking-card p-3 border rounded-4">
+                  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div>
+                      <h6 class="mb-1">Order #{{ track.orderId }}</h6>
+                      <p class="text-muted small mb-0">Updated: {{ track.updated | date }}</p>
+                    </div>
+                    <span class="badge bg-info text-dark">{{ track.status }}</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- <div *ngIf="activeTab === 'refunds'">
-            <h4 class="mb-3">Refund History</h4>
-            <ag-grid-angular class="ag-theme-alpine w-100" [rowData]="refunds" [columnDefs]="refundCols"
-              style="height: 400px">
-            </ag-grid-angular>
-          </div> -->
         </div>
-        <!-- <div *ngIf="activeTab === 'bank'">
-          <h4 class="mb-3">Bank Details</h4>
-          <p><strong>Bank:</strong> {{bank.bankName}}</p>
-          <p><strong>Account No:</strong> {{bank.accountNumber}}</p>
-          <p><strong>IFSC:</strong> {{bank.ifsc}}</p>
-        </div> -->
-
-        <!-- Refunds -->
-
-
-        <!-- Tracking -->
-        <!-- <div *ngIf="activeTab === 'tracking'">
-          <h4 class="mb-3">Order Tracking</h4>
-          <div *ngFor="let track of tracking" class="mb-2">
-            <div class="p-2 border rounded">
-              <strong>Order #{{track.orderId}}</strong> - {{track.status}} ({{track.updated}})
-            </div>
-          </div>
-        </div> -->
       </div>
     </div>
   </div>
 </div>
 
 <!-- Add Funds Modal -->
-<div class="modal fade show" tabindex="-1" *ngIf="showAddFundsModal" style="display:block; background: rgba(0,0,0,0.6);"
-  (click)="closeAddFundsModal()">
-  <div class="modal-dialog modal-dialog-centered" (click)="$event.stopPropagation()">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Add Funds</h5>
+<div class="modal fade show" tabindex="-1" *ngIf="showAddFundsModal" 
+     style="display:block; background: rgba(0,0,0,0.6);" (click)="closeAddFundsModal()">
+  <div class="modal-dialog modal-dialog-centered modal-sm modal-md" (click)="$event.stopPropagation()">
+    <div class="modal-content rounded-4">
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-semibold">
+          <i class="fa-solid fa-coins text-warning me-2"></i>Add Funds
+        </h5>
         <button type="button" class="btn-close" (click)="closeAddFundsModal()"></button>
       </div>
       <div class="modal-body">
-        <label for="amount" class="form-label">Enter Amount</label>
-        <input id="amount" type="number" class="form-control" [(ngModel)]="amount" placeholder="Enter amount">
-        <div class="mt-3">
-          <button type="button" class="btn btn-outline-primary me-2 mb-2"
-            *ngFor="let amt of [100,200,500,1000,2000,5000]" (click)="setRechargeAmount(amt)">
+        <label class="form-label fw-semibold">Enter Amount (₹)</label>
+        <input type="number" class="form-control rounded-3 mb-3" 
+               [(ngModel)]="amount" 
+               placeholder="Enter amount"
+               min="100">
+        <div class="d-flex flex-wrap gap-2">
+          <button type="button" class="amount-chip-sm" *ngFor="let amt of [100,200,500,1000,2000,5000]" 
+                  (click)="setRechargeAmount(amt)">
             ₹{{ amt }}
           </button>
         </div>
+        <div class="text-muted small mt-3">
+          <i class="fa-solid fa-circle-info me-1"></i> Minimum recharge: ₹100
+        </div>
       </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" (click)="closeAddFundsModal()">Cancel</button>
-        <button class="btn btn-success" (click)="rechargeNow()" [disabled]="loading">
-          <span *ngIf="loading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+      <div class="modal-footer border-0">
+        <button class="btn btn-light rounded-pill" (click)="closeAddFundsModal()">Cancel</button>
+        <button class="btn btn-success rounded-pill" (click)="rechargeNow()" [disabled]="loading">
+          <span *ngIf="loading" class="spinner-border spinner-border-sm me-2" role="status"></span>
           {{ loading ? 'Processing...' : 'Recharge Now' }}
         </button>
+      </div>
+    </div>
+  </div>
+</div>
 
+<!-- Bank Modal -->
+<div class="modal fade show" tabindex="-1" *ngIf="showBankModal" 
+     style="display:block; background: rgba(0,0,0,0.6);" (click)="closeBankModal()">
+  <div class="modal-dialog modal-dialog-centered" (click)="$event.stopPropagation()">
+    <div class="modal-content rounded-4">
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-semibold">
+          <i class="fa-solid fa-building-columns me-2"></i>
+          {{ bank?.bank_name ? 'Edit' : 'Add' }} Bank Details
+        </h5>
+        <button type="button" class="btn-close" (click)="closeBankModal()"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Account Holder Name</label>
+          <input type="text" class="form-control rounded-3" 
+                 [(ngModel)]="bankForm.account_holder_name" 
+                 placeholder="Enter account holder name">
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Bank Name</label>
+          <input type="text" class="form-control rounded-3" 
+                 [(ngModel)]="bankForm.bank_name" 
+                 placeholder="Enter bank name">
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Account Number</label>
+          <input type="text" class="form-control rounded-3" 
+                 [(ngModel)]="bankForm.account_number" 
+                 placeholder="Enter account number">
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">IFSC Code</label>
+          <input type="text" class="form-control rounded-3" 
+                 [(ngModel)]="bankForm.ifsc_code" 
+                 placeholder="Enter IFSC code">
+        </div>
+      </div>
+      <div class="modal-footer border-0">
+        <button class="btn btn-light rounded-pill" (click)="closeBankModal()">Cancel</button>
+        <button class="btn btn-primary-custom rounded-pill" (click)="saveBankDetails()">Save Details</button>
       </div>
     </div>
   </div>
 </div>
 
 <!-- Edit Profile Modal -->
-<div class="modal fade show"
-     *ngIf="showEditProfile"
-     style="display:block; background:rgba(0,0,0,0.6)">
-
-  <div class="modal-dialog modal-dialog-centered">
+<div class="modal fade show" *ngIf="showEditProfile" 
+     style="display:block; background:rgba(0,0,0,0.6)" (click)="closeEditProfile()">
+  <div class="modal-dialog modal-dialog-centered" (click)="$event.stopPropagation()">
     <div class="modal-content rounded-4">
-
-      <div class="modal-header">
-        <h5 class="modal-title">Update Profile</h5>
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-semibold">
+          <i class="fa-regular fa-user me-2"></i>Update Profile
+        </h5>
         <button type="button" class="btn-close" (click)="closeEditProfile()"></button>
       </div>
-
       <div class="modal-body">
         <div class="mb-3">
-          <label class="form-label">Username</label>
-          <input type="text"
-                 class="form-control"
-                 [(ngModel)]="editProfile.username">
+          <label class="form-label fw-semibold">Username</label>
+          <input type="text" class="form-control rounded-3" [(ngModel)]="editProfile.username">
         </div>
-
         <div class="mb-3">
-          <label class="form-label">Email</label>
-          <input type="email"
-                 class="form-control"
-                 [(ngModel)]="editProfile.email">
+          <label class="form-label fw-semibold">Email</label>
+          <input type="email" class="form-control rounded-3" [(ngModel)]="editProfile.email">
         </div>
       </div>
-
-      <div class="modal-footer">
-        <button class="btn btn-light" (click)="closeEditProfile()">Cancel</button>
-        <button class="btn btn-primary" (click)="saveProfile()">Save Changes</button>
+      <div class="modal-footer border-0">
+        <button class="btn btn-light rounded-pill" (click)="closeEditProfile()">Cancel</button>
+        <button class="btn btn-primary-custom rounded-pill" (click)="saveProfile()">Save Changes</button>
       </div>
-
     </div>
   </div>
 </div>
 
-
+<!-- Order Items Modal Template -->
 <ng-template #orderItemsModal let-modal>
-  <div class="modal-header">
-    <h5 class="modal-title">Order #{{ selectedOrder?.id }} Items</h5>
-    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  <div class="modal-header border-0">
+    <h5 class="modal-title fw-semibold">Order #{{ selectedOrder?.id }} Items</h5>
+    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
   </div>
   <div class="modal-body">
-    <ul class="list-group">
-      <li class="list-group-item" *ngFor="let item of selectedOrder?.items">
+    <div class="list-group" *ngIf="selectedOrder?.items?.length > 0">
+      <div class="list-group-item border-0 px-0 py-3" *ngFor="let item of selectedOrder?.items">
         <div class="d-flex justify-content-between align-items-center">
-          <div class="d-flex align-items-center">
-            <!-- Product image -->
-            <img [src]="item.product_image || 'assets/images/no-image.jpg'" alt="{{ item.product }}" width="30" height="30" class="me-2 rounded">
-
-            <!-- Product name and quantity -->
+          <div class="d-flex align-items-center gap-3">
+            <img [src]="item.product_image || 'assets/images/no-image.jpg'" 
+                 alt="{{ item.product }}" 
+                 class="rounded-3"
+                 style="width: 50px; height: 50px; object-fit: cover;"
+                 onerror="this.src='assets/images/no-image.jpg'">
             <div>
-              <strong>{{ item.product }}</strong>
-              <div class="text-muted small">Qty: {{ item.quantity }}</div>
+              <h6 class="mb-1 fw-semibold">{{ item.product }}</h6>
+              <span class="text-muted small">Qty: {{ item.quantity }}</span>
             </div>
           </div>
-
-          <!-- Price -->
-          <span>₹{{ item.price }}</span>
+          <span class="fw-bold text-primary">₹{{ item.price }}</span>
         </div>
-
-      </li>
-    </ul>
+      </div>
+    </div>
+    <div class="text-center py-3" *ngIf="!selectedOrder?.items?.length">
+      <p class="text-muted">No items found</p>
+    </div>
+  </div>
+  <div class="modal-footer border-0">
+    <button class="btn btn-light rounded-pill" (click)="modal.dismiss()">Close</button>
   </div>
 </ng-template>

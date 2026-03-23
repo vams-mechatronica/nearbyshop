@@ -289,7 +289,7 @@ export class VendorProfileComponent implements OnInit {
     }
     const product = this.products.find(p => p.id === productId);
     if (product) {
-      product.inCart += 1;
+      product.inCart += change;
       // this.calculateCartTotal()
 
       this.cartService.updateCartItem(productId, product.inCart).subscribe({
