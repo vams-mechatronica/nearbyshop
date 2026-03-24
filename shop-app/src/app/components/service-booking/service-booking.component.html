@@ -64,12 +64,12 @@
           </div>
           <div class="service-info">
             <h6 class="service-name">{{ service.name }}</h6>
-            <p class="service-description">{{ service.description }}</p>
+            <p class="service-description">{{ service.short_description }}</p>
             <div class="service-meta">
               <span class="duration">
-                <i class="fas fa-clock"></i> {{ service.duration_minutes }} mins
+                <i class="fas fa-clock"></i> {{ service.estimated_duration_minutes }} mins
               </span>
-              <span class="price">₹{{ service.price }}</span>
+              <span class="price">₹{{ service.base_price }}</span>
             </div>
           </div>
           <div class="select-indicator">
@@ -107,7 +107,7 @@
              [class.unavailable]="!provider.is_available"
              (click)="provider.is_available && selectProvider(provider)">
           <div class="provider-avatar">
-            <img [src]="provider.avatar" [alt]="provider.name">
+            <img [src]="provider.profile_image" [alt]="provider.name">
             <span class="availability-dot" [class.available]="provider.is_available"></span>
           </div>
           <div class="provider-info">
@@ -215,7 +215,7 @@
           </div>
           <div class="summary-row">
             <span class="label">Duration</span>
-            <span class="value">{{ selectedService?.duration_minutes }} minutes</span>
+            <span class="value">{{ selectedService?.estimated_duration_minutes }} minutes</span>
           </div>
         </div>
         
@@ -274,7 +274,7 @@
       <div class="price-summary">
         <div class="price-row">
           <span>Service Charge</span>
-          <span>₹{{ selectedService?.price }}</span>
+          <span>₹{{ selectedService?.base_price }}</span>
         </div>
         <div class="price-row total">
           <span>Total</span>

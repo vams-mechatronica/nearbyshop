@@ -12,7 +12,8 @@ import {
   ServiceProvider,
   TimeSlot,
   DayAvailability,
-  BookingRequest
+  BookingRequest,
+  ServiceListResponse
 } from '../../models/booking.model';
 import { Shop } from '../../models/vendor.model';
 
@@ -33,13 +34,13 @@ export class ServiceBookingComponent implements OnInit {
   steps: BookingStep[] = ['service', 'provider', 'datetime', 'confirm'];
   
   // Data
-  services: Service[] = [];
+  services: ServiceListResponse[] = [];
   providers: ServiceProvider[] = [];
   availability: DayAvailability[] = [];
   timeSlots: TimeSlot[] = [];
   
   // Selections
-  selectedService: Service | null = null;
+  selectedService: ServiceListResponse | null = null;
   selectedProvider: ServiceProvider | null = null;
   selectedDate: NgbDateStruct | null = null;
   selectedTimeSlot: TimeSlot | null = null;
@@ -59,7 +60,7 @@ export class ServiceBookingComponent implements OnInit {
   // Category filter for services
   serviceCategories: string[] = [];
   selectedCategory: string = 'all';
-  filteredServices: Service[] = [];
+  filteredServices: ServiceListResponse[] = [];
   
   constructor(
     public activeModal: NgbActiveModal,
@@ -110,13 +111,17 @@ export class ServiceBookingComponent implements OnInit {
   
   loadServices(): void {
     this.isLoading = true;
-    
-    // For development, use mock data
-    // In production, use: this.bookingService.getShopServices(this.shop.slug)
-    this.services = this.getMockServices();
-    this.serviceCategories = [...new Set(this.services.map(s => s.category))];
-    this.filteredServices = [...this.services];
-    this.isLoading = false;
+    this.bookingService.getShopServices(this.shop.slug).subscribe({
+      next: (response) => {
+        this.services = response.results;
+        this.serviceCategories = [...new Set(this.services.map(s => s.category_name))];
+        this.filteredServices = [...this.services];
+        this.isLoading = false;
+      },
+      error: () => {
+        this.isLoading = false;
+      }
+    });
   }
   
   filterServices(category: string): void {
@@ -124,11 +129,11 @@ export class ServiceBookingComponent implements OnInit {
     if (category === 'all') {
       this.filteredServices = [...this.services];
     } else {
-      this.filteredServices = this.services.filter(s => s.category === category);
+      this.filteredServices = this.services.filter(s => s.category_name === category);
     }
   }
   
-  selectService(service: Service): void {
+  selectService(service: ServiceListResponse): void {
     this.selectedService = service;
     this.loadProviders();
     this.goToStep('provider');
@@ -138,9 +143,16 @@ export class ServiceBookingComponent implements OnInit {
     this.isLoading = true;
     
     // For development, use mock data
-    // In production: this.bookingService.getProvidersForService(this.shop.slug, this.selectedService.id)
-    this.providers = this.getMockProviders();
-    this.isLoading = false;
+    // In production: 
+    this.bookingService.getProvidersForService(this.shop.slug, this.selectedService?.id).subscribe({
+      next: (response) => {
+        this.providers = response?.results || [];
+        this.isLoading = false;
+      },
+      error: () => {
+        this.isLoading = false;
+      }
+    });
   }
   
   selectProvider(provider: ServiceProvider | null): void {
@@ -227,8 +239,8 @@ export class ServiceBookingComponent implements OnInit {
     this.isSubmitting = true;
     
     const bookingRequest: BookingRequest = {
-      shop_id: this.shop.id,
-      service_id: this.selectedService!.id,
+      shop: this.shop.id,
+      service: this.selectedService!.id,
       provider_id: this.selectedProvider?.id,
       booking_date: this.formatDate(this.selectedDate!),
       time_slot: this.selectedTimeSlot!.start_time,
@@ -319,134 +331,134 @@ export class ServiceBookingComponent implements OnInit {
   }
   
   getSubtotal(): number {
-    return this.selectedService?.price || 0;
+    return this.selectedService?.base_price || 0;
   }
   
   // Mock Data Methods for Development
-  private getMockServices(): Service[] {
-    return [
-      {
-        id: 1,
-        name: 'Haircut - Men',
-        description: 'Professional haircut with styling',
-        price: 200,
-        duration_minutes: 30,
-        category: 'Hair',
-        // image: 'assets/images/services/haircut.jpg',
-        is_active: true
-      },
-      {
-        id: 2,
-        name: 'Haircut - Women',
-        description: 'Haircut with wash and blow dry',
-        price: 500,
-        duration_minutes: 60,
-        category: 'Hair',
-        is_active: true
-      },
-      {
-        id: 3,
-        name: 'Hair Color',
-        description: 'Full hair coloring with premium products',
-        price: 1500,
-        duration_minutes: 120,
-        category: 'Hair',
-        is_active: true
-      },
-      {
-        id: 4,
-        name: 'Facial - Basic',
-        description: 'Basic cleanup facial for glowing skin',
-        price: 600,
-        duration_minutes: 45,
-        category: 'Skin',
-        is_active: true
-      },
-      {
-        id: 5,
-        name: 'Facial - Premium',
-        description: 'Premium facial with gold mask treatment',
-        price: 1200,
-        duration_minutes: 60,
-        category: 'Skin',
-        is_active: true
-      },
-      {
-        id: 6,
-        name: 'Manicure',
-        description: 'Complete manicure with nail art',
-        price: 400,
-        duration_minutes: 45,
-        category: 'Nails',
-        is_active: true
-      },
-      {
-        id: 7,
-        name: 'Pedicure',
-        description: 'Relaxing pedicure with foot massage',
-        price: 500,
-        duration_minutes: 45,
-        category: 'Nails',
-        is_active: true
-      },
-      {
-        id: 8,
-        name: 'Full Body Massage',
-        description: 'Relaxing full body massage (60 mins)',
-        price: 1500,
-        duration_minutes: 60,
-        category: 'Spa',
-        is_active: true
-      }
-    ];
-  }
+  // private getMockServices(): Service[] {
+  //   return [
+  //     {
+  //       id: 1,
+  //       name: 'Haircut - Men',
+  //       description: 'Professional haircut with styling',
+  //       price: 200,
+  //       duration_minutes: 30,
+  //       category: 'Hair',
+  //       // image: 'assets/images/services/haircut.jpg',
+  //       is_active: true
+  //     },
+  //     {
+  //       id: 2,
+  //       name: 'Haircut - Women',
+  //       description: 'Haircut with wash and blow dry',
+  //       price: 500,
+  //       duration_minutes: 60,
+  //       category: 'Hair',
+  //       is_active: true
+  //     },
+  //     {
+  //       id: 3,
+  //       name: 'Hair Color',
+  //       description: 'Full hair coloring with premium products',
+  //       price: 1500,
+  //       duration_minutes: 120,
+  //       category: 'Hair',
+  //       is_active: true
+  //     },
+  //     {
+  //       id: 4,
+  //       name: 'Facial - Basic',
+  //       description: 'Basic cleanup facial for glowing skin',
+  //       price: 600,
+  //       duration_minutes: 45,
+  //       category: 'Skin',
+  //       is_active: true
+  //     },
+  //     {
+  //       id: 5,
+  //       name: 'Facial - Premium',
+  //       description: 'Premium facial with gold mask treatment',
+  //       price: 1200,
+  //       duration_minutes: 60,
+  //       category: 'Skin',
+  //       is_active: true
+  //     },
+  //     {
+  //       id: 6,
+  //       name: 'Manicure',
+  //       description: 'Complete manicure with nail art',
+  //       price: 400,
+  //       duration_minutes: 45,
+  //       category: 'Nails',
+  //       is_active: true
+  //     },
+  //     {
+  //       id: 7,
+  //       name: 'Pedicure',
+  //       description: 'Relaxing pedicure with foot massage',
+  //       price: 500,
+  //       duration_minutes: 45,
+  //       category: 'Nails',
+  //       is_active: true
+  //     },
+  //     {
+  //       id: 8,
+  //       name: 'Full Body Massage',
+  //       description: 'Relaxing full body massage (60 mins)',
+  //       price: 1500,
+  //       duration_minutes: 60,
+  //       category: 'Spa',
+  //       is_active: true
+  //     }
+  //   ];
+  // }
   
-  private getMockProviders(): ServiceProvider[] {
-    return [
-      {
-        id: 1,
-        name: 'Priya Sharma',
-        avatar: 'https://i.pravatar.cc/150?img=5',
-        role: 'Senior Stylist',
-        specializations: ['Hair Color', 'Bridal Styling'],
-        rating: 4.8,
-        review_count: 124,
-        experience_years: 8,
-        is_available: true
-      },
-      {
-        id: 2,
-        name: 'Rahul Kumar',
-        avatar: 'https://i.pravatar.cc/150?img=8',
-        role: 'Hair Stylist',
-        specializations: ['Men\'s Haircut', 'Beard Styling'],
-        rating: 4.6,
-        review_count: 89,
-        experience_years: 5,
-        is_available: true
-      },
-      {
-        id: 3,
-        name: 'Anjali Patel',
-        avatar: 'https://i.pravatar.cc/150?img=9',
-        role: 'Beautician',
-        specializations: ['Facial', 'Skin Care', 'Makeup'],
-        rating: 4.9,
-        review_count: 156,
-        experience_years: 10,
-        is_available: true
-      },
-      {
-        id: 4,
-        name: 'Vikram Singh',
-        avatar: 'https://i.pravatar.cc/150?img=12',
-        role: 'Spa Therapist',
-        specializations: ['Massage', 'Aromatherapy'],
-        rating: 4.7,
-        review_count: 98,
-        experience_years: 6,
-        is_available: false
-      }
-    ];
-  }
+  // private getMockProviders(): ServiceProvider[] {
+  //   return [
+  //     {
+  //       id: 1,
+  //       name: 'Priya Sharma',
+  //       avatar: 'https://i.pravatar.cc/150?img=5',
+  //       role: 'Senior Stylist',
+  //       specializations: ['Hair Color', 'Bridal Styling'],
+  //       rating: 4.8,
+  //       review_count: 124,
+  //       experience_years: 8,
+  //       is_available: true
+  //     },
+  //     {
+  //       id: 2,
+  //       name: 'Rahul Kumar',
+  //       avatar: 'https://i.pravatar.cc/150?img=8',
+  //       role: 'Hair Stylist',
+  //       specializations: ['Men\'s Haircut', 'Beard Styling'],
+  //       rating: 4.6,
+  //       review_count: 89,
+  //       experience_years: 5,
+  //       is_available: true
+  //     },
+  //     {
+  //       id: 3,
+  //       name: 'Anjali Patel',
+  //       avatar: 'https://i.pravatar.cc/150?img=9',
+  //       role: 'Beautician',
+  //       specializations: ['Facial', 'Skin Care', 'Makeup'],
+  //       rating: 4.9,
+  //       review_count: 156,
+  //       experience_years: 10,
+  //       is_available: true
+  //     },
+  //     {
+  //       id: 4,
+  //       name: 'Vikram Singh',
+  //       avatar: 'https://i.pravatar.cc/150?img=12',
+  //       role: 'Spa Therapist',
+  //       specializations: ['Massage', 'Aromatherapy'],
+  //       rating: 4.7,
+  //       review_count: 98,
+  //       experience_years: 6,
+  //       is_available: false
+  //     }
+  //   ];
+  // }
 }

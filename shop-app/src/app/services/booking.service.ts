@@ -16,6 +16,8 @@ import {
   ServiceProviderListResponse,
   BookingStatus
 } from '../models/booking.model';
+import { PaginatedResponse } from '../models/common.model';
+import { API_ENDPOINTS } from '../shared/constants/api.constants';
 
 @Injectable({ providedIn: 'root' })
 export class BookingService {
@@ -26,8 +28,8 @@ export class BookingService {
   /**
    * Get all services offered by a shop
    */
-  getShopServices(shopSlug: string): Observable<ServiceListResponse> {
-    return this.http.get<ServiceListResponse>(`${this.apiUrl}/shops/${shopSlug}/services/`);
+  getShopServices(shopSlug: string): Observable<PaginatedResponse<ServiceListResponse>> {
+    return this.http.get<PaginatedResponse<ServiceListResponse>>(`${API_ENDPOINTS.SHOP_SERVICES}/${shopSlug}/services/`);
   }
 
   /**
@@ -97,7 +99,7 @@ export class BookingService {
    * Create a new booking
    */
   createBooking(bookingData: BookingRequest): Observable<BookingResponse> {
-    return this.http.post<BookingResponse>(`${this.apiUrl}/create/`, bookingData);
+    return this.http.post<BookingResponse>(`${API_ENDPOINTS.SHOP_SERVICES}/booking/create/`, bookingData);
   }
 
   /**
@@ -143,10 +145,10 @@ export class BookingService {
   /**
    * Get providers available for a specific service
    */
-  getProvidersForService(shopSlug: string, serviceId: number): Observable<ServiceProvider[]> {
-    return this.http.get<{ providers: ServiceProvider[] }>(
-      `${this.apiUrl}/shops/${shopSlug}/services/${serviceId}/providers/`
-    ).pipe(map(response => response.providers));
+  getProvidersForService(shopSlug: string, serviceId: string=''): Observable<PaginatedResponse<ServiceProvider>> {
+    return this.http.get<PaginatedResponse<ServiceProvider>>(
+      `${API_ENDPOINTS.SHOP_SERVICES}/${shopSlug}/services/${serviceId}/providers/`
+    );
   }
 
   /**

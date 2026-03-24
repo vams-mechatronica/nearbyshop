@@ -1,9 +1,11 @@
 // booking.model.ts
 
+import { UUID } from "node:crypto";
+
 export interface ServiceProvider {
   id: number;
   name: string;
-  avatar: string;
+  profile_image: string;
   role: string;
   specializations: string[];
   rating: number;
@@ -16,8 +18,8 @@ export interface Service {
   id: number;
   name: string;
   description: string;
-  price: number;
-  duration_minutes: number;
+  base_price: number;
+  estimated_duration_minutes: number;
   category: string;
   image?: string;
   is_active: boolean;
@@ -46,8 +48,8 @@ export interface AvailabilityResponse {
 }
 
 export interface BookingRequest {
-  shop_id: number;
-  service_id: number;
+  shop: number;
+  service: string;
   provider_id?: number;
   booking_date: string;  // "2026-03-10"
   time_slot: string;     // "09:00"
@@ -107,8 +109,15 @@ export interface ServiceProviderListResponse {
 }
 
 export interface ServiceListResponse {
-  shop_id: number;
-  services: Service[];
-  total: number;
-  categories: string[];
+  id: UUID;
+  vendor: number;
+  name: string;
+  slug: string;
+  short_description: string;
+  base_price: number;
+  estimated_duration_minutes: number;
+  category: number;
+  category_name: string;
+  image?: string;
+  is_active: boolean;
 }
